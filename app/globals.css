@@ -1,0 +1,25 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+:root {
+  /* A Thyme to Heal - Color Scheme inspired by Anna's Apothecary */
+  --forest-green: #023020;
+  --cream: #f0e9d2;
+  --warm-taupe: #d5cec1;
+  --warm-gold: #d9a066;
+  --dark-brown: #2a2319;
+  --accent-blue: #1878b9;
+  --accent-orange: #e57828;
+  --sage-green: #c1cf95;
+  --background: #ffffff;
+  --foreground: #2a2319;
+  --font-sans: ui-sans-serif, system-ui, sans-serif;
+  --font-serif: ui-serif, Georgia, serif;
+}
+
+body {
+  background: var(--background);
+  color: var(--foreground);
+  font-family: var(--font-sans);
+}
