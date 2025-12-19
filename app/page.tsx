@@ -1,6 +1,7 @@
 import Link from 'next/link';
 import Booking from './components/Booking';
 import NewsletterSignup from './components/NewsletterSignup';
+import TestimonialsCarousel from './components/TestimonialsCarousel';
 
 interface Testimonial {
   name: string;
@@ -170,26 +171,7 @@ export default async function Home() {
           <h2 className="text-3xl md:text-4xl font-serif font-bold text-center mb-12 text-primary">
             What Our Clients Say
           </h2>
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
-            {testimonials.map((testimonial, index) => (
-              <div
-                key={index}
-                className="bg-white p-6 rounded-lg shadow-md border border-taupe"
-              >
-                {testimonial.rating && testimonial.rating > 0 && (
-                  <div className="flex mb-4">
-                    {[...Array(testimonial.rating)].map((_, i) => (
-                      <span key={i} className="text-orange text-xl">
-                        ★
-                      </span>
-                    ))}
-                  </div>
-                )}
-                <p className="text-brown mb-4 italic">&ldquo;{testimonial.text}&rdquo;</p>
-                <p className="font-semibold text-primary">- {testimonial.name}</p>
-              </div>
-            ))}
-          </div>
+          <TestimonialsCarousel testimonials={testimonials} />
         </div>
       </section>
 
