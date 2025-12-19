@@ -7,10 +7,13 @@
     "build": "next build",
     "start": "next start",
     "lint": "eslint",
-    "migrate-faqs": "tsx scripts/migrate-faqs.ts"
+    "setup-tables": "node scripts/setup-airtable-tables.mjs",
+    "migrate-faqs": "node scripts/migrate-faqs.mjs",
+    "add-testimonials": "node scripts/add-sample-testimonials.mjs"
   },
   "dependencies": {
     "airtable": "^0.12.2",
+    "dotenv": "^17.2.3",
     "next": "16.0.10",
     "react": "19.2.1",
     "react-dom": "19.2.1"
