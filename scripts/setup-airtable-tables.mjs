@@ -59,7 +59,7 @@ const tables = [
       { name: 'CurrentMedications', type: 'multilineText' },
       { name: 'HealthConditions', type: 'multilineText' },
       { name: 'PreferredContactMethod', type: 'singleSelect', options: { choices: [{ name: 'Email' }, { name: 'Phone' }, { name: 'Text' }] } },
-      { name: 'Consent', type: 'checkbox' },
+      { name: 'Consent', type: 'checkbox', options: { icon: 'check', color: 'greenBright' } },
       { name: 'DateCreated', type: 'dateTime', options: { dateFormat: { name: 'us' }, timeFormat: { name: '12hour' }, timeZone: 'America/Denver' } },
     ],
   },
