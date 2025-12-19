@@ -146,16 +146,16 @@ export async function createNewsletterSignup(email: string, name?: string, sourc
 // ============================================================================
 
 /**
- * Convert EST time to UTC ISO string
+ * Convert MST time to UTC ISO string
  */
-function estToUtcIso(date: string, time: string): string {
-  const dateTimeString = `${date}T${time}:00-05:00`; // EST is UTC-5
+function mstToUtcIso(date: string, time: string): string {
+  const dateTimeString = `${date}T${time}:00-07:00`; // MST is UTC-7
   return new Date(dateTimeString).toISOString();
 }
 
 export async function createConsultation(consultation: Consultation) {
   try {
-    const utcDateTime = estToUtcIso(consultation.dateBooked, consultation.timeSlotStart);
+    const utcDateTime = mstToUtcIso(consultation.dateBooked, consultation.timeSlotStart);
 
     const record = await base(TABLES.BOOKED).create([
       {
@@ -220,8 +220,8 @@ export async function createClient(data: ClientFormData) {
  */
 export async function getBookingsForDate(date: string): Promise<string[]> {
   try {
-    const startOfDay = estToUtcIso(date, '00:00');
-    const endOfDay = estToUtcIso(date, '23:59');
+    const startOfDay = mstToUtcIso(date, '00:00');
+    const endOfDay = mstToUtcIso(date, '23:59');
 
     const records = await base(TABLES.BOOKED)
       .select({
@@ -236,7 +236,7 @@ export async function getBookingsForDate(date: string): Promise<string[]> {
     return records.map((record) => {
       const dateTime = record.get('dateAndTime') as string;
       const date = new Date(dateTime);
-      const hours = date.getUTCHours() - 5; // Convert UTC to EST (UTC-5)
+      const hours = date.getUTCHours() - 7; // Convert UTC to MST (UTC-7)
       const minutes = date.getUTCMinutes();
       return `${hours.toString().padStart(2, '0')}:${minutes.toString().padStart(2, '0')}`;
     });

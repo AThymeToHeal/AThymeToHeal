@@ -1,6 +1,6 @@
 /**
  * Timezone utilities for booking system
- * All slots are stored in EST and converted to user's local timezone for display
+ * All slots are stored in MST (Mountain Time) and converted to user's local timezone for display
  */
 
 export type SupportedTimezone =
@@ -25,7 +25,7 @@ export function detectUserTimezone(): string {
     return normalizedTz;
   } catch (error) {
     console.error('Error detecting timezone:', error);
-    return 'America/New_York'; // Default to EST
+    return 'America/Denver'; // Default to MST
   }
 }
 
@@ -84,21 +84,21 @@ export function getTimezoneAbbreviation(timezone: string): string {
 }
 
 /**
- * Convert time from EST to target timezone
+ * Convert time from MST to target timezone
  * @param date - Date in YYYY-MM-DD format
- * @param time - Time in HH:MM format (24-hour, EST)
+ * @param time - Time in HH:MM format (24-hour, MST)
  * @param targetTimezone - Target IANA timezone
  * @returns Time in HH:MM format in target timezone
  */
-export function convertFromEST(
+export function convertFromMST(
   date: string,
   time: string,
   targetTimezone: string
 ): string {
   try {
-    // Create date in EST
+    // Create date in MST
     const [hours, minutes] = time.split(':').map(Number);
-    const estDate = new Date(`${date}T${time}:00-05:00`); // EST is UTC-5
+    const mstDate = new Date(`${date}T${time}:00-07:00`); // MST is UTC-7
 
     // Format in target timezone
     const formatter = new Intl.DateTimeFormat('en-US', {
@@ -108,7 +108,7 @@ export function convertFromEST(
       hour12: false,
     });
 
-    const parts = formatter.formatToParts(estDate);
+    const parts = formatter.formatToParts(mstDate);
     const hour = parts.find((p) => p.type === 'hour')?.value || '00';
     const minute = parts.find((p) => p.type === 'minute')?.value || '00';
 
@@ -120,13 +120,13 @@ export function convertFromEST(
 }
 
 /**
- * Convert time from target timezone to EST
+ * Convert time from target timezone to MST
  * @param date - Date in YYYY-MM-DD format
  * @param time - Time in HH:MM format (24-hour) in target timezone
  * @param sourceTimezone - Source IANA timezone
- * @returns Time in HH:MM format in EST
+ * @returns Time in HH:MM format in MST
  */
-export function convertToEST(
+export function convertToMST(
   date: string,
   time: string,
   sourceTimezone: string
@@ -135,9 +135,9 @@ export function convertToEST(
     // Parse the time in the source timezone
     const localDate = new Date(`${date}T${time}:00`);
 
-    // Convert to EST
+    // Convert to MST
     const formatter = new Intl.DateTimeFormat('en-US', {
-      timeZone: 'America/New_York',
+      timeZone: 'America/Denver',
       hour: '2-digit',
       minute: '2-digit',
       hour12: false,
@@ -149,7 +149,7 @@ export function convertToEST(
 
     return `${hour}:${minute}`;
   } catch (error) {
-    console.error('Error converting to EST:', error);
+    console.error('Error converting to MST:', error);
     return time;
   }
 }
@@ -188,7 +188,7 @@ export function getSupportedTimezones(): Array<{ value: string; label: string }>
 }
 
 /**
- * Generate available time slots for a day (9 AM - 5 PM EST, hourly)
+ * Generate available time slots for a day (9 AM - 5 PM MST, hourly)
  */
 export function generateTimeSlots(): Array<{ start: string; end: string }> {
   const slots = [];

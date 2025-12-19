@@ -4,7 +4,7 @@ import { useEffect, useState, useCallback } from 'react';
 import {
   detectUserTimezone,
   getTimezoneFriendlyName,
-  convertFromEST,
+  convertFromMST,
   formatTimeForDisplay,
   getSupportedTimezones,
   isWeekend,
@@ -337,9 +337,9 @@ export default function BookingModal({ isOpen, onClose }: BookingModalProps) {
         timeSlotEnd: selectedTimeSlot.end,
         userTimezone,
         userLocalTime: `${formatTimeForDisplay(
-          convertFromEST(getDateString(selectedDate), selectedTimeSlot.start, userTimezone)
+          convertFromMST(getDateString(selectedDate), selectedTimeSlot.start, userTimezone)
         )} - ${formatTimeForDisplay(
-          convertFromEST(getDateString(selectedDate), selectedTimeSlot.end, userTimezone)
+          convertFromMST(getDateString(selectedDate), selectedTimeSlot.end, userTimezone)
         )}`,
       };
 
@@ -670,14 +670,14 @@ export default function BookingModal({ isOpen, onClose }: BookingModalProps) {
                       if (!slot.available) return null;
 
                       const displayStart = formatTimeForDisplay(
-                        convertFromEST(
+                        convertFromMST(
                           selectedDate ? getDateString(selectedDate) : '',
                           slot.start,
                           userTimezone
                         )
                       );
                       const displayEnd = formatTimeForDisplay(
-                        convertFromEST(
+                        convertFromMST(
                           selectedDate ? getDateString(selectedDate) : '',
                           slot.end,
                           userTimezone
@@ -711,13 +711,13 @@ export default function BookingModal({ isOpen, onClose }: BookingModalProps) {
                 <p className="text-brown">
                   {selectedTimeSlot &&
                     `${formatTimeForDisplay(
-                      convertFromEST(
+                      convertFromMST(
                         getDateString(selectedDate!),
                         selectedTimeSlot.start,
                         userTimezone
                       )
                     )} - ${formatTimeForDisplay(
-                      convertFromEST(
+                      convertFromMST(
                         getDateString(selectedDate!),
                         selectedTimeSlot.end,
                         userTimezone
@@ -945,13 +945,13 @@ export default function BookingModal({ isOpen, onClose }: BookingModalProps) {
                 <p className="text-brown">
                   {selectedTimeSlot &&
                     `${formatTimeForDisplay(
-                      convertFromEST(
+                      convertFromMST(
                         getDateString(selectedDate!),
                         selectedTimeSlot.start,
                         userTimezone
                       )
                     )} - ${formatTimeForDisplay(
-                      convertFromEST(
+                      convertFromMST(
                         getDateString(selectedDate!),
                         selectedTimeSlot.end,
                         userTimezone
