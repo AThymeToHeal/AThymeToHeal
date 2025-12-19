@@ -41,7 +41,6 @@ export async function POST(request: Request) {
       currentMedications: body.currentMedications,
       healthConditions: body.healthConditions,
       preferredContactMethod: body.preferredContactMethod,
-      bestTimeToContact: body.bestTimeToContact,
       consent: body.consent,
       bookedRecordId: body.bookedRecordId,
     };
