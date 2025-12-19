@@ -5,7 +5,7 @@ import NewsletterSignup from './components/NewsletterSignup';
 interface Testimonial {
   name: string;
   text: string;
-  rating: number;
+  rating?: number;
 }
 
 async function getTestimonials(): Promise<Testimonial[]> {
@@ -31,17 +31,14 @@ const fallbackTestimonials: Testimonial[] = [
   {
     name: 'Sarah M.',
     text: 'A Thyme to Heal transformed my approach to wellness. The custom blends have made such a difference in my daily life!',
-    rating: 5,
   },
   {
     name: 'Michael R.',
     text: 'The herbal consultation was incredibly insightful. I finally found natural solutions that work for me.',
-    rating: 5,
   },
   {
     name: 'Jennifer L.',
     text: 'Professional, knowledgeable, and genuinely caring. I highly recommend A Thyme to Heal to anyone seeking natural wellness.',
-    rating: 5,
   },
 ];
 
@@ -179,13 +176,15 @@ export default async function Home() {
                 key={index}
                 className="bg-white p-6 rounded-lg shadow-md border border-taupe"
               >
-                <div className="flex mb-4">
-                  {[...Array(testimonial.rating)].map((_, i) => (
-                    <span key={i} className="text-orange text-xl">
-                      ★
-                    </span>
-                  ))}
-                </div>
+                {testimonial.rating && testimonial.rating > 0 && (
+                  <div className="flex mb-4">
+                    {[...Array(testimonial.rating)].map((_, i) => (
+                      <span key={i} className="text-orange text-xl">
+                        ★
+                      </span>
+                    ))}
+                  </div>
+                )}
                 <p className="text-brown mb-4 italic">&ldquo;{testimonial.text}&rdquo;</p>
                 <p className="font-semibold text-primary">- {testimonial.name}</p>
               </div>

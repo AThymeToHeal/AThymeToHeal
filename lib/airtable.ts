@@ -63,7 +63,7 @@ export interface ClientFormData {
 export interface Testimonial {
   name: string;
   text: string;
-  rating: number;
+  rating?: number;
   approved?: boolean;
 }
 
@@ -296,7 +296,7 @@ export async function getTestimonials(): Promise<Testimonial[]> {
     return records.map((record) => ({
       name: record.get('Name') as string,
       text: record.get('Text') as string,
-      rating: (record.get('Rating') as number) || 5,
+      rating: record.get('Rating') as number | undefined,
       approved: record.get('Approved') as boolean,
     }));
   } catch (error) {
