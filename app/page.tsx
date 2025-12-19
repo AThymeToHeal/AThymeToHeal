@@ -2,7 +2,13 @@ import Link from 'next/link';
 import Booking from './components/Booking';
 import NewsletterSignup from './components/NewsletterSignup';
 
-async function getTestimonials() {
+interface Testimonial {
+  name: string;
+  text: string;
+  rating: number;
+}
+
+async function getTestimonials(): Promise<Testimonial[]> {
   try {
     const res = await fetch(`${process.env.NEXT_PUBLIC_SITE_URL || 'http://localhost:3000'}/api/testimonials`, {
       cache: 'no-store', // Always fetch fresh data
@@ -21,7 +27,7 @@ async function getTestimonials() {
 }
 
 // Fallback testimonials (in case Airtable is not set up yet)
-const fallbackTestimonials = [
+const fallbackTestimonials: Testimonial[] = [
   {
     name: 'Sarah M.',
     text: 'A Thyme to Heal transformed my approach to wellness. The custom blends have made such a difference in my daily life!',
