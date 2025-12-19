@@ -12,12 +12,24 @@ export default function ComingSoonPage() {
     setStatus('submitting');
 
     try {
-      // TODO: Integrate with Airtable for newsletter signups
-      await new Promise(resolve => setTimeout(resolve, 1000));
+      const response = await fetch('/api/newsletter', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          email,
+          source: 'Coming Soon Page',
+        }),
+      });
+
+      if (!response.ok) {
+        throw new Error('Failed to subscribe');
+      }
+
       setStatus('success');
       setEmail('');
       setTimeout(() => setStatus('idle'), 5000);
     } catch (error) {
+      console.error('Newsletter signup error:', error);
       setStatus('error');
     }
   };

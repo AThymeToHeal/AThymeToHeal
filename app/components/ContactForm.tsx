@@ -4,7 +4,8 @@ import { useState } from 'react';
 
 export default function ContactForm() {
   const [formData, setFormData] = useState({
-    name: '',
+    firstName: '',
+    lastName: '',
     email: '',
     phone: '',
     subject: '',
@@ -34,16 +35,42 @@ export default function ContactForm() {
     setErrorMessage('');
 
     try {
-      // TODO: Integrate with Airtable API
-      // For now, we'll simulate a successful submission
-      await new Promise(resolve => setTimeout(resolve, 1000));
+      // Submit contact form to Airtable
+      const contactResponse = await fetch('/api/contact', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          firstName: formData.firstName,
+          lastName: formData.lastName,
+          email: formData.email,
+          phone: formData.phone,
+          message: `Subject: ${formData.subject}\n\n${formData.message}`,
+          source: 'Contact Page',
+        }),
+      });
 
-      // Log the form data (in production, this would send to Airtable)
-      console.log('Form submitted:', formData);
+      if (!contactResponse.ok) {
+        const error = await contactResponse.json();
+        throw new Error(error.error || 'Failed to submit form');
+      }
+
+      // If newsletter is checked, submit to newsletter API
+      if (formData.newsletter) {
+        await fetch('/api/newsletter', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            email: formData.email,
+            name: `${formData.firstName} ${formData.lastName}`,
+            source: 'Contact Page',
+          }),
+        });
+      }
 
       setStatus('success');
       setFormData({
-        name: '',
+        firstName: '',
+        lastName: '',
         email: '',
         phone: '',
         subject: '',
@@ -55,26 +82,44 @@ export default function ContactForm() {
       setTimeout(() => setStatus('idle'), 5000);
     } catch (error) {
       setStatus('error');
-      setErrorMessage('Something went wrong. Please try again.');
+      setErrorMessage(
+        error instanceof Error ? error.message : 'Something went wrong. Please try again.'
+      );
     }
   };
 
   return (
     <form onSubmit={handleSubmit} className="space-y-6">
-      {/* Name Field */}
-      <div>
-        <label htmlFor="name" className="block text-sm font-medium text-primary mb-2">
-          Name <span className="text-orange">*</span>
-        </label>
-        <input
-          type="text"
-          id="name"
-          name="name"
-          value={formData.name}
-          onChange={handleChange}
-          required
-          className="w-full px-4 py-3 rounded-md border border-taupe bg-white text-brown focus:outline-none focus:ring-2 focus:ring-accent"
-        />
+      {/* Name Fields */}
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+        <div>
+          <label htmlFor="firstName" className="block text-sm font-medium text-primary mb-2">
+            First Name <span className="text-orange">*</span>
+          </label>
+          <input
+            type="text"
+            id="firstName"
+            name="firstName"
+            value={formData.firstName}
+            onChange={handleChange}
+            required
+            className="w-full px-4 py-3 rounded-md border border-taupe bg-white text-brown focus:outline-none focus:ring-2 focus:ring-accent"
+          />
+        </div>
+        <div>
+          <label htmlFor="lastName" className="block text-sm font-medium text-primary mb-2">
+            Last Name <span className="text-orange">*</span>
+          </label>
+          <input
+            type="text"
+            id="lastName"
+            name="lastName"
+            value={formData.lastName}
+            onChange={handleChange}
+            required
+            className="w-full px-4 py-3 rounded-md border border-taupe bg-white text-brown focus:outline-none focus:ring-2 focus:ring-accent"
+          />
+        </div>
       </div>
 
       {/* Email Field */}

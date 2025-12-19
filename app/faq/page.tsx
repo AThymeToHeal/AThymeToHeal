@@ -7,8 +7,26 @@ export const metadata: Metadata = {
   description: 'Find answers to common questions about our herbal remedies, consultations, products, and services.',
 };
 
-export default function FAQPage() {
-  const faqs = [
+async function getFAQs() {
+  try {
+    const res = await fetch(`${process.env.NEXT_PUBLIC_SITE_URL || 'http://localhost:3000'}/api/faqs`, {
+      cache: 'no-store', // Always fetch fresh data
+    });
+
+    if (!res.ok) {
+      throw new Error('Failed to fetch FAQs');
+    }
+
+    return await res.json();
+  } catch (error) {
+    console.error('Error fetching FAQs:', error);
+    // Return fallback FAQs if Airtable fetch fails
+    return fallbackFAQs;
+  }
+}
+
+// Fallback FAQs (in case Airtable is not set up yet)
+const fallbackFAQs = [
     // Products & Remedies
     {
       question: 'What types of herbal products do you offer?',
@@ -126,6 +144,9 @@ export default function FAQPage() {
       category: 'Workshops',
     },
   ];
+
+export default async function FAQPage() {
+  const faqs = await getFAQs();
 
   return (
     <div className="bg-background min-h-screen">

@@ -3,9 +3,11 @@
 import { useState } from 'react';
 
 interface FAQ {
+  id?: string;
   question: string;
   answer: string;
   category: string;
+  clickCount?: number;
 }
 
 interface FAQAccordionProps {
@@ -17,16 +19,32 @@ export default function FAQAccordion({ faqs }: FAQAccordionProps) {
   const [searchTerm, setSearchTerm] = useState('');
   const [selectedCategory, setSelectedCategory] = useState('All');
 
-  const categories = ['All', ...Array.from(new Set(faqs.map(faq => faq.category)))];
+  const categories = ['All', ...Array.from(new Set(faqs.map(faq => faq.category || 'General')))];
 
   const filteredFAQs = faqs.filter(faq => {
     const matchesSearch = faq.question.toLowerCase().includes(searchTerm.toLowerCase()) ||
                          faq.answer.toLowerCase().includes(searchTerm.toLowerCase());
-    const matchesCategory = selectedCategory === 'All' || faq.category === selectedCategory;
+    const matchesCategory = selectedCategory === 'All' || (faq.category || 'General') === selectedCategory;
     return matchesSearch && matchesCategory;
   });
 
-  const toggleAccordion = (index: number) => {
+  const toggleAccordion = async (index: number) => {
+    const faq = filteredFAQs[index];
+
+    // Track click if FAQ has an ID (from Airtable)
+    if (faq.id && openIndex !== index) {
+      try {
+        await fetch('/api/faq-clicks', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ faqId: faq.id }),
+        });
+      } catch (error) {
+        console.error('Failed to track FAQ click:', error);
+        // Don't block the UI if tracking fails
+      }
+    }
+
     setOpenIndex(openIndex === index ? null : index);
   };
 

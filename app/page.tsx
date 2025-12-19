@@ -1,6 +1,46 @@
 import Link from 'next/link';
+import Booking from './components/Booking';
+import NewsletterSignup from './components/NewsletterSignup';
 
-export default function Home() {
+async function getTestimonials() {
+  try {
+    const res = await fetch(`${process.env.NEXT_PUBLIC_SITE_URL || 'http://localhost:3000'}/api/testimonials`, {
+      cache: 'no-store', // Always fetch fresh data
+    });
+
+    if (!res.ok) {
+      throw new Error('Failed to fetch testimonials');
+    }
+
+    return await res.json();
+  } catch (error) {
+    console.error('Error fetching testimonials:', error);
+    // Return fallback testimonials if Airtable fetch fails
+    return fallbackTestimonials;
+  }
+}
+
+// Fallback testimonials (in case Airtable is not set up yet)
+const fallbackTestimonials = [
+  {
+    name: 'Sarah M.',
+    text: 'A Thyme to Heal transformed my approach to wellness. The custom blends have made such a difference in my daily life!',
+    rating: 5,
+  },
+  {
+    name: 'Michael R.',
+    text: 'The herbal consultation was incredibly insightful. I finally found natural solutions that work for me.',
+    rating: 5,
+  },
+  {
+    name: 'Jennifer L.',
+    text: 'Professional, knowledgeable, and genuinely caring. I highly recommend A Thyme to Heal to anyone seeking natural wellness.',
+    rating: 5,
+  },
+];
+
+export default async function Home() {
+  const testimonials = await getTestimonials();
   const services = [
     {
       icon: '🌿',
@@ -21,24 +61,6 @@ export default function Home() {
       icon: '📚',
       title: 'Educational Workshops',
       description: 'Learn about the healing power of herbs through our engaging and informative workshops.',
-    },
-  ];
-
-  const testimonials = [
-    {
-      name: 'Sarah M.',
-      text: 'A Thyme to Heal transformed my approach to wellness. The custom blends have made such a difference in my daily life!',
-      rating: 5,
-    },
-    {
-      name: 'Michael R.',
-      text: 'The herbal consultation was incredibly insightful. I finally found natural solutions that work for me.',
-      rating: 5,
-    },
-    {
-      name: 'Jennifer L.',
-      text: 'Professional, knowledgeable, and genuinely caring. I highly recommend A Thyme to Heal to anyone seeking natural wellness.',
-      rating: 5,
     },
   ];
 
@@ -66,10 +88,10 @@ export default function Home() {
       <section className="bg-primary text-secondary py-20 px-4">
         <div className="mx-auto max-w-7xl text-center">
           <h1 className="text-4xl md:text-6xl font-serif font-bold mb-6 text-accent">
-            Welcome to A Thyme to Heal
+            A Thyme To Heal
           </h1>
           <p className="text-xl md:text-2xl mb-8 max-w-3xl mx-auto">
-            Discover the healing power of nature with our expertly crafted herbal remedies and personalized wellness solutions.
+            Combining holistic practices with science-based guidance, to help you restore balance and long-term well-being
           </p>
           <div className="flex flex-col sm:flex-row gap-4 justify-center">
             <Link
@@ -175,38 +197,20 @@ export default function Home() {
           <p className="text-lg mb-8">
             Join our community and receive wellness tips, herbal remedies, and exclusive offers delivered to your inbox.
           </p>
-          <form className="flex flex-col sm:flex-row gap-4 max-w-md mx-auto">
-            <input
-              type="email"
-              placeholder="Enter your email address"
-              className="flex-1 px-4 py-3 rounded-md text-brown bg-secondary border border-taupe focus:outline-none focus:ring-2 focus:ring-accent"
-              required
-            />
-            <button
-              type="submit"
-              className="px-8 py-3 bg-accent text-primary font-semibold rounded-md hover:bg-accent/90 transition-colors whitespace-nowrap"
-            >
-              Subscribe
-            </button>
-          </form>
+          <NewsletterSignup source="Homepage" />
         </div>
       </section>
 
-      {/* Call to Action */}
+      {/* Call to Action - Book Free Consultation */}
       <section className="py-16 px-4 bg-secondary">
         <div className="mx-auto max-w-4xl text-center">
           <h2 className="text-3xl md:text-4xl font-serif font-bold mb-6 text-primary">
             Ready to Begin Your Wellness Journey?
           </h2>
           <p className="text-lg mb-8 text-brown">
-            Let us help you discover natural solutions for your health and wellness needs.
+            Schedule a free consultation to discover personalized natural solutions for your health and wellness needs.
           </p>
-          <Link
-            href="/contact"
-            className="inline-block px-8 py-3 bg-primary text-secondary font-semibold rounded-md hover:bg-primary/90 transition-colors text-lg"
-          >
-            Get in Touch
-          </Link>
+          <Booking />
         </div>
       </section>
     </div>
