@@ -18,6 +18,7 @@
   --foreground: #2a2319;
   --font-sans: ui-sans-serif, system-ui, sans-serif;
   --font-serif: ui-serif, Georgia, serif;
+  --font-script: "Great Vibes", cursive;
 }
 
 body {
