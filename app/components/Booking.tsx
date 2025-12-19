@@ -3,7 +3,11 @@
 import { useState, useEffect } from 'react';
 import BookingModal from './BookingModal';
 
-export default function Booking() {
+interface BookingProps {
+  buttonText?: string;
+}
+
+export default function Booking({ buttonText = 'Book Your Free Consultation' }: BookingProps) {
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [hasSavedProgress, setHasSavedProgress] = useState(false);
 
@@ -19,7 +23,7 @@ export default function Booking() {
         onClick={() => setIsModalOpen(true)}
         className="inline-block px-8 py-3 bg-primary text-secondary font-semibold rounded-md hover:bg-primary/90 transition-colors text-lg"
       >
-        {hasSavedProgress ? '📝 Resume Your Booking' : 'Book Your Free Consultation'}
+        {hasSavedProgress ? '📝 Resume Your Booking' : buttonText}
       </button>
       {hasSavedProgress && (
         <p className="text-sm text-brown mt-2">
