@@ -100,7 +100,7 @@ export async function createContact(data: ContactSubmission) {
           Source: data.source || 'Contact Page',
           DateCreated: new Date().toISOString(),
         },
-      },
+      } as any,
     ]);
 
     return {
@@ -128,7 +128,7 @@ export async function createNewsletterSignup(email: string, name?: string, sourc
           'Subscribed Date': new Date().toISOString(),
           Status: 'Active',
         },
-      },
+      } as any,
     ]);
 
     return {
@@ -168,7 +168,7 @@ export async function createConsultation(consultation: Consultation) {
           UserTimezone: consultation.userTimezone,
           UserLocalTime: consultation.userLocalTime,
         },
-      },
+      } as any,
     ]);
 
     return {
@@ -203,7 +203,7 @@ export async function createClient(data: ClientFormData) {
       fields.BookedRecord = [data.bookedRecordId];
     }
 
-    const record = await base(TABLES.CLIENTS).create([{ fields }]);
+    const record = await base(TABLES.CLIENTS).create([{ fields } as any]);
 
     return {
       id: record[0].id,
@@ -318,7 +318,7 @@ export async function createTestimonial(data: Testimonial) {
           Approved: false, // Requires manual approval
           DateCreated: new Date().toISOString(),
         },
-      },
+      } as any,
     ]);
 
     return {
@@ -366,7 +366,7 @@ export async function trackFAQClick(faqId: string) {
           FAQId: [faqId], // Linked record
           ClickedAt: new Date().toISOString(),
         },
-      },
+      } as any,
     ]);
 
     // Also increment the click count on the FAQ record itself
@@ -379,7 +379,7 @@ export async function trackFAQClick(faqId: string) {
         fields: {
           ClickCount: currentCount + 1,
         },
-      },
+      } as any,
     ]);
 
     return { success: true };
