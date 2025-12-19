@@ -393,10 +393,8 @@ export default function BookingModal({ isOpen, onClose }: BookingModalProps) {
       }
 
       setStep('success');
-      // Clear saved data after successful booking
-      setTimeout(() => {
-        clearSavedData();
-      }, 100);
+      // Clear saved data from localStorage after successful booking
+      localStorage.removeItem('bookingProgress');
     } catch (error) {
       console.error('Error submitting booking:', error);
       setFormError(
@@ -433,6 +431,12 @@ export default function BookingModal({ isOpen, onClose }: BookingModalProps) {
       );
       if (!confirmed) return;
     }
+
+    // If closing from success step, reset the form
+    if (step === 'success') {
+      clearSavedData();
+    }
+
     onClose();
   };
 
