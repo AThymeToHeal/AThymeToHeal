@@ -22,11 +22,27 @@ export async function GET(request: Request) {
     // Get booked slots for this date
     const bookedTimes = await getBookingsForDate(date);
 
+    // Calculate minimum booking time (8 hours from now in EST)
+    const nowEST = new Date(new Date().toLocaleString('en-US', { timeZone: 'America/New_York' }));
+    const minimumBookingTime = new Date(nowEST);
+    minimumBookingTime.setHours(minimumBookingTime.getHours() + 8);
+
     // Mark slots as available or not
-    const availableSlots: TimeSlot[] = allSlots.map((slot) => ({
-      ...slot,
-      available: !bookedTimes.includes(slot.start),
-    }));
+    const availableSlots: TimeSlot[] = allSlots.map((slot) => {
+      // Check if slot is already booked
+      const isBooked = bookedTimes.includes(slot.start);
+
+      // Check if slot is too soon (within next 8 hours)
+      const slotDateTime = new Date(`${date}T${slot.start}:00`);
+      // Convert slot time to EST for comparison
+      const slotDateTimeEST = new Date(slotDateTime.toLocaleString('en-US', { timeZone: 'America/New_York' }));
+      const isTooSoon = slotDateTimeEST <= minimumBookingTime;
+
+      return {
+        ...slot,
+        available: !isBooked && !isTooSoon,
+      };
+    });
 
     return NextResponse.json(availableSlots, { status: 200 });
   } catch (error) {
