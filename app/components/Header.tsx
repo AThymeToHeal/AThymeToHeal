@@ -21,7 +21,7 @@ export default function Header() {
           {/* Logo */}
           <div className="flex-shrink-0">
             <Link href="/" className="flex items-center">
-              <span className="text-2xl font-serif font-bold text-secondary">
+              <span className="text-3xl font-script text-secondary">
                 A Thyme to Heal
               </span>
             </Link>

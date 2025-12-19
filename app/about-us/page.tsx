@@ -13,7 +13,7 @@ export default function AboutPage() {
       <section className="bg-primary text-secondary py-16 px-4">
         <div className="mx-auto max-w-7xl text-center">
           <h1 className="text-4xl md:text-5xl font-serif font-bold mb-4 text-accent">
-            Who is A Thyme To Heal?
+            Who is <span className="font-script">A Thyme To Heal</span>?
           </h1>
         </div>
       </section>

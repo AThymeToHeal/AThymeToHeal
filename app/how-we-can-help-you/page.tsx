@@ -35,7 +35,7 @@ export default function ServicesPage() {
       <section className="bg-primary text-secondary py-16 px-4">
         <div className="mx-auto max-w-7xl text-center">
           <h1 className="text-4xl md:text-5xl font-serif font-bold mb-4 text-accent">
-            Services & Pricing
+            <span className="font-script">A Thyme to Heal</span>: Services & Pricing
           </h1>
           <p className="text-lg md:text-xl max-w-3xl mx-auto">
             We offer personalized holistic consults tailored to your needs. Explore our services and choose the option that works best for you

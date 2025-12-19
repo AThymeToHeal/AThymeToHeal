@@ -91,7 +91,7 @@ export default async function Home() {
       {/* Hero Section */}
       <section className="bg-primary text-secondary py-20 px-4">
         <div className="mx-auto max-w-7xl text-center">
-          <h1 className="text-4xl md:text-6xl font-serif font-bold mb-6 text-accent">
+          <h1 className="text-5xl md:text-7xl font-script mb-6 text-accent">
             A Thyme To Heal
           </h1>
           <p className="text-xl md:text-2xl mb-8 max-w-3xl mx-auto">
