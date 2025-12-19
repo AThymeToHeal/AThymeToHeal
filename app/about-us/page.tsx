@@ -43,7 +43,7 @@ export default function AboutPage() {
                   alt="Heidi Lynn - A Thyme to Heal Coach"
                   width={320}
                   height={320}
-                  className="w-full h-full object-cover"
+                  className="w-full h-full object-cover object-top"
                   priority
                 />
               </div>
@@ -138,7 +138,7 @@ export default function AboutPage() {
                   alt="Illiana - A Thyme to Heal Coach"
                   width={320}
                   height={320}
-                  className="w-full h-full object-cover"
+                  className="w-full h-full object-cover object-top"
                   priority
                 />
               </div>
