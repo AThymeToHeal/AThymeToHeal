@@ -35,11 +35,13 @@ const tables = [
     name: 'Booked',
     description: 'Consultation booking records',
     fields: [
+      { name: 'dateAndTime', type: 'dateTime', options: { dateFormat: { name: 'us' }, timeFormat: { name: '12hour' }, timeZone: 'utc' } },
+      { name: 'FirstName', type: 'singleLineText' },
+      { name: 'LastName', type: 'singleLineText' },
       { name: 'Email', type: 'email' },
-      { name: 'Date', type: 'date', options: { dateFormat: { name: 'us' } } },
-      { name: 'Time', type: 'singleLineText' },
-      { name: 'Timezone', type: 'singleLineText' },
-      { name: 'DateCreated', type: 'dateTime', options: { dateFormat: { name: 'us' }, timeFormat: { name: '12hour' }, timeZone: 'America/New_York' } },
+      { name: 'BookingType', type: 'singleSelect', options: { choices: [{ name: 'Initial Consultation' }, { name: 'Follow-up' }, { name: 'Package Session' }] } },
+      { name: 'UserTimezone', type: 'singleLineText' },
+      { name: 'UserLocalTime', type: 'singleLineText' },
     ],
   },
 
@@ -57,8 +59,8 @@ const tables = [
       { name: 'CurrentMedications', type: 'multilineText' },
       { name: 'HealthConditions', type: 'multilineText' },
       { name: 'PreferredContactMethod', type: 'singleSelect', options: { choices: [{ name: 'Email' }, { name: 'Phone' }, { name: 'Text' }] } },
-      { name: 'BestTimeToContact', type: 'singleSelect', options: { choices: [{ name: 'Morning' }, { name: 'Afternoon' }, { name: 'Evening' }] } },
-      { name: 'DateCreated', type: 'dateTime', options: { dateFormat: { name: 'us' }, timeFormat: { name: '12hour' }, timeZone: 'America/New_York' } },
+      { name: 'Consent', type: 'checkbox' },
+      { name: 'DateCreated', type: 'dateTime', options: { dateFormat: { name: 'us' }, timeFormat: { name: '12hour' }, timeZone: 'America/Denver' } },
     ],
   },
 
@@ -70,7 +72,8 @@ const tables = [
       { name: 'Email', type: 'email' },
       { name: 'Name', type: 'singleLineText' },
       { name: 'Source', type: 'singleSelect', options: { choices: [{ name: 'Homepage' }, { name: 'Contact Page' }, { name: 'Coming Soon Page' }] } },
-      { name: 'DateCreated', type: 'dateTime', options: { dateFormat: { name: 'us' }, timeFormat: { name: '12hour' }, timeZone: 'America/New_York' } },
+      { name: 'Subscribed Date', type: 'dateTime', options: { dateFormat: { name: 'us' }, timeFormat: { name: '12hour' }, timeZone: 'America/Denver' } },
+      { name: 'Status', type: 'singleSelect', options: { choices: [{ name: 'Active' }, { name: 'Unsubscribed' }] } },
     ],
   },
 
@@ -83,7 +86,7 @@ const tables = [
       { name: 'Text', type: 'multilineText' },
       { name: 'Rating', type: 'number', options: { precision: 0 } },
       { name: 'Approved', type: 'checkbox', options: { icon: 'check', color: 'greenBright' } },
-      { name: 'DateCreated', type: 'dateTime', options: { dateFormat: { name: 'us' }, timeFormat: { name: '12hour' }, timeZone: 'America/New_York' } },
+      { name: 'DateCreated', type: 'dateTime', options: { dateFormat: { name: 'us' }, timeFormat: { name: '12hour' }, timeZone: 'America/Denver' } },
     ],
   },
 
@@ -105,7 +108,7 @@ const tables = [
     name: 'FAQ Clicks',
     description: 'FAQ click tracking for analytics',
     fields: [
-      { name: 'ClickedAt', type: 'dateTime', options: { dateFormat: { name: 'us' }, timeFormat: { name: '12hour' }, timeZone: 'America/New_York' } },
+      { name: 'ClickedAt', type: 'dateTime', options: { dateFormat: { name: 'us' }, timeFormat: { name: '12hour' }, timeZone: 'America/Denver' } },
     ],
   },
 ];
@@ -241,7 +244,7 @@ async function setupTables() {
   if (tableIds['FAQs'] && tableIds['FAQ Clicks']) {
     await addLinkedRecordField(
       tableIds['FAQ Clicks'],
-      'FAQRecord',
+      'FAQId',
       tableIds['FAQs'],
       'Link to FAQ that was clicked'
     );
