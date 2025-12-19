@@ -31,8 +31,8 @@ export default function BookingModal({ isOpen, onClose }: BookingModalProps) {
   const [selectedDate, setSelectedDate] = useState<Date | null>(null);
 
   // Timezone state
-  const [userTimezone, setUserTimezone] = useState<string>('America/New_York');
-  const [detectedTimezone, setDetectedTimezone] = useState<string>('America/New_York');
+  const [userTimezone, setUserTimezone] = useState<string>('America/Denver');
+  const [detectedTimezone, setDetectedTimezone] = useState<string>('America/Denver');
   const [manualTimezoneSelection, setManualTimezoneSelection] = useState(false);
 
   // Time slot state
@@ -55,7 +55,6 @@ export default function BookingModal({ isOpen, onClose }: BookingModalProps) {
   const [currentMedications, setCurrentMedications] = useState('');
   const [healthConditions, setHealthConditions] = useState('');
   const [preferredContactMethod, setPreferredContactMethod] = useState<string>('Email');
-  const [bestTimeToContact, setBestTimeToContact] = useState('');
   const [consent, setConsent] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [formError, setFormError] = useState<string | null>(null);
@@ -87,7 +86,6 @@ export default function BookingModal({ isOpen, onClose }: BookingModalProps) {
         if (parsed.currentMedications) setCurrentMedications(parsed.currentMedications);
         if (parsed.healthConditions) setHealthConditions(parsed.healthConditions);
         if (parsed.preferredContactMethod) setPreferredContactMethod(parsed.preferredContactMethod);
-        if (parsed.bestTimeToContact) setBestTimeToContact(parsed.bestTimeToContact);
         if (parsed.consent !== undefined) setConsent(parsed.consent);
         if (parsed.userTimezone) setUserTimezone(parsed.userTimezone);
       } catch (error) {
@@ -159,7 +157,6 @@ export default function BookingModal({ isOpen, onClose }: BookingModalProps) {
         currentMedications,
         healthConditions,
         preferredContactMethod,
-        bestTimeToContact,
         consent,
         userTimezone,
       };
@@ -178,7 +175,6 @@ export default function BookingModal({ isOpen, onClose }: BookingModalProps) {
     currentMedications,
     healthConditions,
     preferredContactMethod,
-    bestTimeToContact,
     consent,
     userTimezone,
     isOpen,
@@ -313,11 +309,26 @@ export default function BookingModal({ isOpen, onClose }: BookingModalProps) {
       return;
     }
 
+    // Validate required fields
     if (!firstName.trim() || !lastName.trim() || !email.trim()) {
-      setFormError('Please fill in all required fields');
+      setFormError('Please fill in all required fields (marked with *)');
       return;
     }
 
+    // Validate email format
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    if (!emailRegex.test(email)) {
+      setFormError('Please enter a valid email address');
+      return;
+    }
+
+    // Validate phone if contact method requires it
+    if ((preferredContactMethod === 'Phone' || preferredContactMethod === 'Text') && !phone.trim()) {
+      setFormError('Please provide a phone number for your preferred contact method');
+      return;
+    }
+
+    // Validate consent
     if (!consent) {
       setFormError('Please agree to the privacy policy to continue');
       return;
@@ -367,7 +378,6 @@ export default function BookingModal({ isOpen, onClose }: BookingModalProps) {
         currentMedications: currentMedications.trim(),
         healthConditions: healthConditions.trim(),
         preferredContactMethod,
-        bestTimeToContact: bestTimeToContact.trim(),
         consent: true,
         bookedRecordId: bookingResult.id,
       };
@@ -411,8 +421,7 @@ export default function BookingModal({ isOpen, onClose }: BookingModalProps) {
       healthGoals.trim() !== '' ||
       dietaryRestrictions.trim() !== '' ||
       currentMedications.trim() !== '' ||
-      healthConditions.trim() !== '' ||
-      bestTimeToContact.trim() !== ''
+      healthConditions.trim() !== ''
     );
   };
 
@@ -442,7 +451,6 @@ export default function BookingModal({ isOpen, onClose }: BookingModalProps) {
     setCurrentMedications('');
     setHealthConditions('');
     setPreferredContactMethod('Email');
-    setBestTimeToContact('');
     setConsent(false);
     setFormError(null);
   };
@@ -774,7 +782,7 @@ export default function BookingModal({ isOpen, onClose }: BookingModalProps) {
                   </div>
                   <div>
                     <label className="block text-sm font-medium text-brown mb-1">
-                      Phone Number
+                      Phone Number (Optional)
                     </label>
                     <input
                       type="tel"
@@ -792,7 +800,7 @@ export default function BookingModal({ isOpen, onClose }: BookingModalProps) {
                 <div className="space-y-4">
                   <div>
                     <label className="block text-sm font-medium text-brown mb-1">
-                      Health Goals
+                      Health Goals (Optional)
                     </label>
                     <textarea
                       value={healthGoals}
@@ -804,7 +812,7 @@ export default function BookingModal({ isOpen, onClose }: BookingModalProps) {
                   </div>
                   <div>
                     <label className="block text-sm font-medium text-brown mb-1">
-                      Dietary Restrictions / Allergies
+                      Dietary Restrictions / Allergies (Optional)
                     </label>
                     <textarea
                       value={dietaryRestrictions}
@@ -816,7 +824,7 @@ export default function BookingModal({ isOpen, onClose }: BookingModalProps) {
                   </div>
                   <div>
                     <label className="block text-sm font-medium text-brown mb-1">
-                      Current Medications / Supplements
+                      Current Medications / Supplements (Optional)
                     </label>
                     <textarea
                       value={currentMedications}
@@ -828,7 +836,7 @@ export default function BookingModal({ isOpen, onClose }: BookingModalProps) {
                   </div>
                   <div>
                     <label className="block text-sm font-medium text-brown mb-1">
-                      Health Conditions
+                      Health Conditions (Optional)
                     </label>
                     <textarea
                       value={healthConditions}
@@ -849,7 +857,7 @@ export default function BookingModal({ isOpen, onClose }: BookingModalProps) {
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                   <div>
                     <label className="block text-sm font-medium text-brown mb-1">
-                      Preferred Contact Method
+                      Preferred Contact Method *
                     </label>
                     <select
                       value={preferredContactMethod}
@@ -860,18 +868,6 @@ export default function BookingModal({ isOpen, onClose }: BookingModalProps) {
                       <option value="Phone">Phone</option>
                       <option value="Text">Text Message</option>
                     </select>
-                  </div>
-                  <div>
-                    <label className="block text-sm font-medium text-brown mb-1">
-                      Best Time to Contact
-                    </label>
-                    <input
-                      type="text"
-                      value={bestTimeToContact}
-                      onChange={(e) => setBestTimeToContact(e.target.value)}
-                      placeholder="e.g., Mornings, Afternoons, Evenings"
-                      className="w-full px-4 py-2 border border-taupe rounded-md text-brown focus:outline-none focus:ring-2 focus:ring-accent"
-                    />
                   </div>
                 </div>
               </div>

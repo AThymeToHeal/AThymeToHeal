@@ -56,7 +56,6 @@ export interface ClientFormData {
   currentMedications?: string;
   healthConditions?: string;
   preferredContactMethod?: string;
-  bestTimeToContact?: string;
   consent: boolean;
   bookedRecordId?: string;
 }
@@ -194,7 +193,6 @@ export async function createClient(data: ClientFormData) {
       CurrentMedications: data.currentMedications || '',
       HealthConditions: data.healthConditions || '',
       PreferredContactMethod: data.preferredContactMethod || '',
-      BestTimeToContact: data.bestTimeToContact || '',
       Consent: data.consent,
     };
 
