@@ -1,4 +1,5 @@
 import type { Metadata } from 'next';
+import Image from 'next/image';
 import Booking from '../components/Booking';
 
 export const metadata: Metadata = {
@@ -34,13 +35,17 @@ export default function AboutPage() {
       <section className="py-16 px-4 bg-secondary">
         <div className="mx-auto max-w-6xl">
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 items-start">
-            {/* Photo Placeholder */}
+            {/* Photo */}
             <div className="flex justify-center">
-              <div className="w-80 h-80 bg-sage/20 rounded-lg flex items-center justify-center border-4 border-primary">
-                <div className="text-center">
-                  <div className="text-6xl mb-4">👤</div>
-                  <p className="text-primary font-semibold text-lg">Heidi Lynn</p>
-                </div>
+              <div className="w-80 h-80 rounded-lg overflow-hidden border-4 border-primary shadow-lg">
+                <Image
+                  src="/images/Heidi-Oval.avif"
+                  alt="Heidi Lynn - A Thyme to Heal Coach"
+                  width={320}
+                  height={320}
+                  className="w-full h-full object-cover"
+                  priority
+                />
               </div>
             </div>
 
@@ -125,13 +130,17 @@ export default function AboutPage() {
               </div>
             </div>
 
-            {/* Photo Placeholder */}
+            {/* Photo */}
             <div className="flex justify-center order-1 lg:order-2">
-              <div className="w-80 h-80 bg-sage/20 rounded-lg flex items-center justify-center border-4 border-primary">
-                <div className="text-center">
-                  <div className="text-6xl mb-4">👤</div>
-                  <p className="text-primary font-semibold text-lg">Illiana</p>
-                </div>
+              <div className="w-80 h-80 rounded-lg overflow-hidden border-4 border-primary shadow-lg">
+                <Image
+                  src="/images/Illiana-Oval.avif"
+                  alt="Illiana - A Thyme to Heal Coach"
+                  width={320}
+                  height={320}
+                  className="w-full h-full object-cover"
+                  priority
+                />
               </div>
             </div>
           </div>
