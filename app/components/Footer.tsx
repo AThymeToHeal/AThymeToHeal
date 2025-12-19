@@ -16,11 +16,6 @@ export default function Footer() {
       { name: 'Refund Policy', href: '/refund-policy' },
       { name: 'Accessibility', href: '/accessibility' },
     ],
-    social: [
-      { name: 'Facebook', href: '#', icon: 'facebook' },
-      { name: 'Instagram', href: '#', icon: 'instagram' },
-      { name: 'Twitter', href: '#', icon: 'twitter' },
-    ],
   };
 
   return (
@@ -114,30 +109,19 @@ export default function Footer() {
           </div>
         </div>
 
-        {/* Social Links & Copyright */}
+        {/* WLA Badge & Copyright */}
         <div className="border-t border-secondary/20 pt-8">
           <div className="flex flex-col md:flex-row justify-between items-center">
-            {/* Social Media */}
-            <div className="flex space-x-6 mb-4 md:mb-0">
-              {footerLinks.social.map((social) => (
-                <a
-                  key={social.name}
-                  href={social.href}
-                  className="text-secondary hover:text-accent transition-colors"
-                  aria-label={social.name}
-                >
-                  <span className="sr-only">{social.name}</span>
-                  {/* Placeholder for social icons */}
-                  <svg
-                    className="h-6 w-6"
-                    fill="currentColor"
-                    viewBox="0 0 24 24"
-                    aria-hidden="true"
-                  >
-                    <circle cx="12" cy="12" r="10" />
-                  </svg>
-                </a>
-              ))}
+            {/* Web Launch Academy Badge */}
+            <div className="mb-4 md:mb-0">
+              <a
+                href="https://www.weblaunchacademy.com"
+                target="_blank"
+                rel="noopener noreferrer"
+                className="text-sm text-secondary/90 hover:text-accent transition-colors underline"
+              >
+                Built with Web Launch Academy
+              </a>
             </div>
 
             {/* Copyright */}
