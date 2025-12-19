@@ -342,7 +342,7 @@ export default function BookingModal({ isOpen, onClose }: BookingModalProps) {
         firstName: firstName.trim(),
         lastName: lastName.trim(),
         email: email.trim(),
-        bookingType: 'Free Consultation',
+        bookingType: 'Initial Consultation',
         dateBooked: getDateString(selectedDate),
         timeSlotStart: selectedTimeSlot.start,
         timeSlotEnd: selectedTimeSlot.end,
