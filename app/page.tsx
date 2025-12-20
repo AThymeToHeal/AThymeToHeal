@@ -68,23 +68,6 @@ export default async function Home() {
     },
   ];
 
-  const features = [
-    {
-      title: 'Natural & Organic',
-      description: 'We use only the highest quality, sustainably sourced herbs and ingredients.',
-      icon: '🌱',
-    },
-    {
-      title: 'Expert Knowledge',
-      description: 'Years of experience in herbal medicine and holistic wellness practices.',
-      icon: '🎓',
-    },
-    {
-      title: 'Personalized Care',
-      description: 'Every remedy and consultation is tailored to your individual needs.',
-      icon: '✨',
-    },
-  ];
 
   return (
     <div className="bg-background">
@@ -155,33 +138,41 @@ export default async function Home() {
         </div>
       </section>
 
-      {/* What Makes Us Different */}
-      <section className="py-16 px-4">
-        <div className="mx-auto max-w-7xl">
-          <h2 className="text-3xl md:text-4xl font-serif font-bold text-center mb-12 text-primary">
-            Why Choose A Thyme to Heal
-          </h2>
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
-            {features.map((feature, index) => (
-              <div key={index} className="text-center">
-                <div className="text-5xl mb-4">{feature.icon}</div>
-                <h3 className="text-xl font-semibold mb-3 text-primary">
-                  {feature.title}
-                </h3>
-                <p className="text-brown">{feature.description}</p>
-              </div>
-            ))}
-          </div>
-        </div>
-      </section>
+      {/* About Us & Testimonials Section with Background */}
+      <section
+        className="relative py-16 px-4"
+        style={{
+          backgroundImage: 'url(/images/Background1.avif)',
+          backgroundSize: 'cover',
+          backgroundPosition: 'center',
+          backgroundAttachment: 'fixed',
+        }}
+      >
+        {/* Dark overlay for text readability */}
+        <div className="absolute inset-0 bg-black/60"></div>
 
-      {/* Testimonials */}
-      <section className="py-16 px-4 bg-sage/20">
-        <div className="mx-auto max-w-7xl">
-          <h2 className="text-3xl md:text-4xl font-serif font-bold text-center mb-12 text-primary">
-            What Our Clients Say
-          </h2>
-          <TestimonialsCarousel testimonials={testimonials} />
+        {/* Content */}
+        <div className="relative z-10">
+          {/* About Us Introduction */}
+          <div className="mx-auto max-w-4xl text-center mb-16">
+            <h2 className="text-3xl md:text-4xl font-serif font-bold text-center mb-8 text-white">
+              Who is <span className="font-script text-accent">A Thyme To Heal</span>?
+            </h2>
+            <p className="text-lg md:text-xl leading-relaxed text-white/95 mb-6">
+              We are a mom daughter team who have both experienced severe health issues and in the midst, found a world of healing and hope. Now our passion is helping others heal in body, mind, and spirit.
+            </p>
+            <p className="text-lg md:text-xl leading-relaxed text-white/95">
+              Whether dealing with pain born of generational trauma, or deep rooted illness, we are here to offer a variety of natural solutions, health protocols and support. We work individually and as a team depending on the needs of the client. We offer in person and virtual.
+            </p>
+          </div>
+
+          {/* Testimonials */}
+          <div className="mx-auto max-w-7xl">
+            <h2 className="text-3xl md:text-4xl font-serif font-bold text-center mb-12 text-white">
+              What Our Clients Say
+            </h2>
+            <TestimonialsCarousel testimonials={testimonials} />
+          </div>
         </div>
       </section>
 
