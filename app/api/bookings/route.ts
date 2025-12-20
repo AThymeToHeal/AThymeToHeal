@@ -39,6 +39,7 @@ export async function POST(request: Request) {
       firstName: body.firstName,
       lastName: body.lastName,
       email: body.email,
+      phone: body.phone,
       bookingType: body.bookingType,
       serviceType: body.serviceType,
       consultant: body.consultant,

@@ -438,17 +438,7 @@ export async function getFAQs(): Promise<FAQ[]> {
 
 export async function trackFAQClick(faqId: string) {
   try {
-    // Create a click record
-    await getBase()(TABLES.FAQ_CLICKS).create([
-      {
-        fields: {
-          FAQId: [faqId], // Linked record
-          ClickedAt: new Date().toISOString(),
-        },
-      } as any,
-    ]);
-
-    // Also increment the click count on the FAQ record itself
+    // Increment the click count on the FAQ record
     const record = await getBase()(TABLES.FAQS).find(faqId);
     const currentCount = (record.get('ClickCount') as number) || 0;
 
