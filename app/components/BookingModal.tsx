@@ -94,9 +94,7 @@ export default function BookingModal({
     if (savedData) {
       try {
         const parsed = JSON.parse(savedData);
-        // Restore step
-        if (parsed.step) setStep(parsed.step);
-        // Restore selection
+        // Restore selection first
         if (parsed.selectedConsultant) setSelectedConsultant(parsed.selectedConsultant);
         if (parsed.selectedServiceType) setSelectedServiceType(parsed.selectedServiceType);
         // Restore selected date
@@ -115,6 +113,20 @@ export default function BookingModal({
         if (parsed.preferredContactMethod) setPreferredContactMethod(parsed.preferredContactMethod);
         if (parsed.consent !== undefined) setConsent(parsed.consent);
         if (parsed.userTimezone) setUserTimezone(parsed.userTimezone);
+
+        // Restore step only if valid - check if required selections are made
+        if (parsed.step) {
+          // If step requires consultant/service but they're not selected, reset to selection
+          if (['calendar', 'timeSlots', 'contactInfo'].includes(parsed.step)) {
+            if (!parsed.selectedConsultant || !parsed.selectedServiceType) {
+              setStep('selection');
+            } else {
+              setStep(parsed.step);
+            }
+          } else {
+            setStep(parsed.step);
+          }
+        }
       } catch (error) {
         console.error('Failed to restore booking data:', error);
       }
@@ -290,6 +302,13 @@ export default function BookingModal({
     const dateStr = getDateString(date);
     if (isWeekend(date) || isPast(date) || fullyBookedDates.has(dateStr)) return;
 
+    // Validate that consultant and service are selected before proceeding
+    if (!selectedConsultant || !selectedServiceType) {
+      setFormError('Please select a consultant and service type first');
+      setStep('selection');
+      return;
+    }
+
     setSelectedDate(date);
     setStep('timeSlots');
     await loadAvailableSlots(date);
@@ -369,6 +388,15 @@ export default function BookingModal({
       return;
     }
 
+    // Validate phone format if provided
+    if ((preferredContactMethod === 'Phone' || preferredContactMethod === 'Text') && phone.trim()) {
+      const phoneDigits = phone.replace(/\D/g, '');
+      if (phoneDigits.length < 10) {
+        setFormError('Please enter a valid phone number with at least 10 digits');
+        return;
+      }
+    }
+
     // Validate consent
     if (!consent) {
       setFormError('Please agree to the privacy policy to continue');
@@ -383,6 +411,7 @@ export default function BookingModal({
         firstName: firstName.trim(),
         lastName: lastName.trim(),
         email: email.trim(),
+        phone: phone.trim() || undefined,
         bookingType: 'Initial Consultation',
         serviceType: selectedServiceType,
         consultant: selectedConsultant,

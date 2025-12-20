@@ -28,6 +28,7 @@ export async function POST(request: Request) {
       lastName: body.lastName,
       email: body.email,
       phone: body.phone,
+      subject: body.subject,
       message: body.message,
       source: body.source || 'Contact Page',
     };

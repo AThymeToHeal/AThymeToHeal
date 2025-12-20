@@ -44,7 +44,8 @@ export default function ContactForm() {
           lastName: formData.lastName,
           email: formData.email,
           phone: formData.phone,
-          message: `Subject: ${formData.subject}\n\n${formData.message}`,
+          subject: formData.subject,
+          message: formData.message,
           source: 'Contact Page',
         }),
       });

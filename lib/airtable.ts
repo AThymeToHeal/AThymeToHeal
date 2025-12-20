@@ -46,6 +46,7 @@ export interface Consultation {
   firstName: string;
   lastName: string;
   email: string;
+  phone?: string;
   bookingType: string; // Keep for backwards compatibility
   serviceType: ServiceType;
   consultant: ConsultantType;
@@ -208,6 +209,7 @@ export async function createConsultation(consultation: Consultation) {
           FirstName: consultation.firstName,
           LastName: consultation.lastName,
           Email: consultation.email,
+          Phone: consultation.phone || '',
           BookingType: consultation.bookingType,
           ServiceType: consultation.serviceType,
           Consultant: consultation.consultant,
