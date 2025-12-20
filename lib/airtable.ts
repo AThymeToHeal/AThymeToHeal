@@ -1,14 +1,21 @@
 import Airtable from 'airtable';
 
-// Initialize Airtable
-const AIRTABLE_API_KEY = process.env.AIRTABLE_API_KEY!;
-const AIRTABLE_BASE_ID = process.env.AIRTABLE_BASE_ID!;
+// Lazy initialization of Airtable - only runs when actually needed
+let _base: ReturnType<Airtable['base']> | null = null;
 
-if (!AIRTABLE_API_KEY || !AIRTABLE_BASE_ID) {
-  throw new Error('Missing Airtable configuration. Check .env.local file.');
+function getBase() {
+  if (_base) return _base;
+
+  const AIRTABLE_API_KEY = process.env.AIRTABLE_API_KEY;
+  const AIRTABLE_BASE_ID = process.env.AIRTABLE_BASE_ID;
+
+  if (!AIRTABLE_API_KEY || !AIRTABLE_BASE_ID) {
+    throw new Error('Missing Airtable configuration. Check .env.local file.');
+  }
+
+  _base = new Airtable({ apiKey: AIRTABLE_API_KEY }).base(AIRTABLE_BASE_ID);
+  return _base;
 }
-
-const base = new Airtable({ apiKey: AIRTABLE_API_KEY }).base(AIRTABLE_BASE_ID);
 
 // Table names
 export const TABLES = {
@@ -124,7 +131,7 @@ export const SERVICES: Record<ServiceType, ServiceConfig> = {
 
 export async function createContact(data: ContactSubmission) {
   try {
-    const record = await base(TABLES.CONTACT).create([
+    const record = await getBase()(TABLES.CONTACT).create([
       {
         fields: {
           FirstName: data.firstName,
@@ -155,7 +162,7 @@ export async function createContact(data: ContactSubmission) {
 
 export async function createNewsletterSignup(email: string, name?: string, source?: string) {
   try {
-    const record = await base(TABLES.NEWSLETTER).create([
+    const record = await getBase()(TABLES.NEWSLETTER).create([
       {
         fields: {
           Email: email,
@@ -194,7 +201,7 @@ export async function createConsultation(consultation: Consultation) {
     const utcDateTime = mstToUtcIso(consultation.dateBooked, consultation.timeSlotStart);
     const serviceConfig = SERVICES[consultation.serviceType];
 
-    const record = await base(TABLES.BOOKED).create([
+    const record = await getBase()(TABLES.BOOKED).create([
       {
         fields: {
           dateAndTime: utcDateTime,
@@ -243,7 +250,7 @@ export async function createClient(data: ClientFormData) {
       fields.BookedRecord = [data.bookedRecordId];
     }
 
-    const record = await base(TABLES.CLIENTS).create([{ fields } as any]);
+    const record = await getBase()(TABLES.CLIENTS).create([{ fields } as any]);
 
     return {
       id: record[0].id,
@@ -280,7 +287,7 @@ export async function getBookingsForDate(
       )`;
     }
 
-    const records = await base(TABLES.BOOKED)
+    const records = await getBase()(TABLES.BOOKED)
       .select({
         filterByFormula: filterFormula,
         fields: ['dateAndTime'],
@@ -327,7 +334,7 @@ export async function getFullyBookedDates(
       )`;
     }
 
-    const records = await base(TABLES.BOOKED)
+    const records = await getBase()(TABLES.BOOKED)
       .select({
         filterByFormula: filterFormula,
         fields: ['dateAndTime'],
@@ -358,7 +365,7 @@ export async function getFullyBookedDates(
 
 export async function getTestimonials(): Promise<Testimonial[]> {
   try {
-    const records = await base(TABLES.TESTIMONIALS)
+    const records = await getBase()(TABLES.TESTIMONIALS)
       .select({
         filterByFormula: '{Approved} = TRUE()',
         sort: [{ field: 'DateCreated', direction: 'desc' }],
@@ -379,7 +386,7 @@ export async function getTestimonials(): Promise<Testimonial[]> {
 
 export async function createTestimonial(data: Testimonial) {
   try {
-    const record = await base(TABLES.TESTIMONIALS).create([
+    const record = await getBase()(TABLES.TESTIMONIALS).create([
       {
         fields: {
           Name: data.name,
@@ -407,7 +414,7 @@ export async function createTestimonial(data: Testimonial) {
 
 export async function getFAQs(): Promise<FAQ[]> {
   try {
-    const records = await base(TABLES.FAQS)
+    const records = await getBase()(TABLES.FAQS)
       .select({
         sort: [{ field: 'Order', direction: 'asc' }],
       })
@@ -430,7 +437,7 @@ export async function getFAQs(): Promise<FAQ[]> {
 export async function trackFAQClick(faqId: string) {
   try {
     // Create a click record
-    await base(TABLES.FAQ_CLICKS).create([
+    await getBase()(TABLES.FAQ_CLICKS).create([
       {
         fields: {
           FAQId: [faqId], // Linked record
@@ -440,10 +447,10 @@ export async function trackFAQClick(faqId: string) {
     ]);
 
     // Also increment the click count on the FAQ record itself
-    const record = await base(TABLES.FAQS).find(faqId);
+    const record = await getBase()(TABLES.FAQS).find(faqId);
     const currentCount = (record.get('ClickCount') as number) || 0;
 
-    await base(TABLES.FAQS).update([
+    await getBase()(TABLES.FAQS).update([
       {
         id: faqId,
         fields: {
