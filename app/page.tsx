@@ -47,24 +47,24 @@ export default async function Home() {
   const testimonials = await getTestimonials();
   const services = [
     {
-      icon: '🌿',
       title: 'Herbal Consultations',
       description: 'Personalized consultations to find the perfect herbal remedies for your unique wellness needs.',
+      backgroundImage: '/images/oil-in-hand-image.avif',
     },
     {
-      icon: '🍵',
       title: 'Custom Blends',
       description: 'Expertly crafted herbal blends tailored to support your health and wellness goals.',
+      backgroundImage: '/images/Bowl-of-greens-image.jpg',
     },
     {
-      icon: '💚',
       title: 'Wellness Coaching',
       description: 'Holistic guidance to help you achieve optimal health through natural remedies and lifestyle changes.',
+      backgroundImage: '/images/Background2.avif',
     },
     {
-      icon: '📚',
       title: 'Educational Workshops',
       description: 'Learn about the healing power of herbs through our engaging and informative workshops.',
+      backgroundImage: '/images/Tablets-image.jpg',
     },
   ];
 
@@ -124,13 +124,23 @@ export default async function Home() {
             {services.map((service, index) => (
               <div
                 key={index}
-                className="bg-white p-6 rounded-lg shadow-md hover:shadow-lg transition-shadow border border-taupe"
+                className="relative rounded-lg shadow-md hover:shadow-lg transition-shadow border border-taupe overflow-hidden h-80"
+                style={{
+                  backgroundImage: `url(${service.backgroundImage})`,
+                  backgroundSize: 'cover',
+                  backgroundPosition: 'center',
+                }}
               >
-                <div className="text-4xl mb-4">{service.icon}</div>
-                <h3 className="text-xl font-semibold mb-3 text-primary">
-                  {service.title}
-                </h3>
-                <p className="text-brown">{service.description}</p>
+                {/* Dark overlay for text readability */}
+                <div className="absolute inset-0 bg-black/50"></div>
+
+                {/* Content */}
+                <div className="relative z-10 p-6 h-full flex flex-col justify-end">
+                  <h3 className="text-xl font-semibold mb-3 text-white">
+                    {service.title}
+                  </h3>
+                  <p className="text-white/90">{service.description}</p>
+                </div>
               </div>
             ))}
           </div>
