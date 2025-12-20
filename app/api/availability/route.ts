@@ -1,14 +1,26 @@
 import { NextResponse } from 'next/server';
-import { getBookingsForDate, type TimeSlot } from '@/lib/airtable';
+import {
+  getBookingsForDate,
+  type TimeSlot,
+  SERVICES,
+  type ServiceType,
+  type ConsultantType,
+} from '@/lib/airtable';
 import { generateTimeSlots } from '@/lib/timezone';
 
 export async function GET(request: Request) {
   try {
     const { searchParams } = new URL(request.url);
     const date = searchParams.get('date');
+    const serviceType = searchParams.get('serviceType') as ServiceType | null;
+    const consultant = searchParams.get('consultant') as ConsultantType | null;
 
     if (!date) {
       return NextResponse.json({ error: 'Missing date parameter' }, { status: 400 });
+    }
+
+    if (!serviceType) {
+      return NextResponse.json({ error: 'Missing serviceType parameter' }, { status: 400 });
     }
 
     // Validate date format (YYYY-MM-DD)
@@ -16,11 +28,17 @@ export async function GET(request: Request) {
       return NextResponse.json({ error: 'Invalid date format. Use YYYY-MM-DD' }, { status: 400 });
     }
 
-    // Generate all possible slots (9 AM - 5 PM EST, hourly)
-    const allSlots = generateTimeSlots();
+    // Get service configuration
+    const serviceConfig = SERVICES[serviceType];
+    if (!serviceConfig) {
+      return NextResponse.json({ error: 'Invalid service type' }, { status: 400 });
+    }
 
-    // Get booked slots for this date
-    const bookedTimes = await getBookingsForDate(date);
+    // Generate all possible slots based on service duration
+    const allSlots = generateTimeSlots(serviceConfig.duration);
+
+    // Get booked slots for this date (optionally filtered by consultant)
+    const bookedTimes = await getBookingsForDate(date, consultant || undefined);
 
     // Calculate minimum booking time (8 hours from now in MST)
     const nowMST = new Date(new Date().toLocaleString('en-US', { timeZone: 'America/Denver' }));

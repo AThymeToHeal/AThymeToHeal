@@ -1,11 +1,12 @@
 import { NextResponse } from 'next/server';
-import { getFullyBookedDates } from '@/lib/airtable';
+import { getFullyBookedDates, type ConsultantType } from '@/lib/airtable';
 
 export async function GET(request: Request) {
   try {
     const { searchParams } = new URL(request.url);
     const year = searchParams.get('year');
     const month = searchParams.get('month');
+    const consultant = searchParams.get('consultant') as ConsultantType | null;
 
     if (!year || !month) {
       return NextResponse.json(
@@ -21,7 +22,7 @@ export async function GET(request: Request) {
       return NextResponse.json({ error: 'Invalid year or month' }, { status: 400 });
     }
 
-    const fullyBookedDates = await getFullyBookedDates(yearNum, monthNum);
+    const fullyBookedDates = await getFullyBookedDates(yearNum, monthNum, consultant || undefined);
 
     return NextResponse.json(fullyBookedDates, { status: 200 });
   } catch (error) {

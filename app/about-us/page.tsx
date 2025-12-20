@@ -91,7 +91,7 @@ export default function AboutPage() {
                     athyme4healing@gmail.com
                   </a>
                 </p>
-                <Booking buttonText="Book with Heidi Lynn" />
+                <Booking buttonText="Book with Heidi Lynn" defaultConsultant="Heidi Lynn" />
               </div>
             </div>
           </div>
@@ -126,7 +126,7 @@ export default function AboutPage() {
                     illianasmithco@gmail.com
                   </a>
                 </p>
-                <Booking buttonText="Book with Illiana" />
+                <Booking buttonText="Book with Illiana" defaultConsultant="Illiana" />
               </div>
             </div>
 

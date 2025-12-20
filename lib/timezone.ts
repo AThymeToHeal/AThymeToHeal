@@ -188,15 +188,39 @@ export function getSupportedTimezones(): Array<{ value: string; label: string }>
 }
 
 /**
- * Generate available time slots for a day (9 AM - 5 PM MST, hourly)
+ * Generate available time slots for a day (9 AM - 5 PM MST)
+ * @param duration - Duration of each slot in minutes (default: 60)
+ * @param startHour - Start hour in 24-hour format (default: 9)
+ * @param endHour - End hour in 24-hour format (default: 17)
  */
-export function generateTimeSlots(): Array<{ start: string; end: string }> {
+export function generateTimeSlots(
+  duration: number = 60,
+  startHour: number = 9,
+  endHour: number = 17
+): Array<{ start: string; end: string }> {
   const slots = [];
-  for (let hour = 9; hour < 17; hour++) {
-    const start = `${hour.toString().padStart(2, '0')}:00`;
-    const end = `${(hour + 1).toString().padStart(2, '0')}:00`;
+  let currentMinutes = startHour * 60;
+  const endMinutes = endHour * 60;
+
+  while (currentMinutes + duration <= endMinutes) {
+    const startHours = Math.floor(currentMinutes / 60);
+    const startMins = currentMinutes % 60;
+    const endTimeMinutes = currentMinutes + duration;
+    const endHours = Math.floor(endTimeMinutes / 60);
+    const endMins = endTimeMinutes % 60;
+
+    const start = `${startHours.toString().padStart(2, '0')}:${startMins
+      .toString()
+      .padStart(2, '0')}`;
+    const end = `${endHours.toString().padStart(2, '0')}:${endMins
+      .toString()
+      .padStart(2, '0')}`;
+
     slots.push({ start, end });
+
+    currentMinutes += duration;
   }
+
   return slots;
 }
 

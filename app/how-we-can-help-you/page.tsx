@@ -1,5 +1,6 @@
 import type { Metadata } from 'next';
 import Booking from '../components/Booking';
+import type { ServiceType } from '@/lib/airtable';
 
 export const metadata: Metadata = {
   title: 'Services & Pricing - A Thyme To Heal',
@@ -86,7 +87,7 @@ export default function ServicesPage() {
 
                   {/* Book Button */}
                   <div className="text-center">
-                    <Booking buttonText="Book now" />
+                    <Booking buttonText="Book now" defaultServiceType={service.title as ServiceType} />
                   </div>
                 </div>
               </div>

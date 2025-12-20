@@ -2,12 +2,19 @@
 
 import { useState, useEffect } from 'react';
 import BookingModal from './BookingModal';
+import type { ServiceType, ConsultantType } from '@/lib/airtable';
 
 interface BookingProps {
   buttonText?: string;
+  defaultConsultant?: ConsultantType;
+  defaultServiceType?: ServiceType;
 }
 
-export default function Booking({ buttonText = 'Book Your Free Consultation' }: BookingProps) {
+export default function Booking({
+  buttonText = 'Book Your Free Consultation',
+  defaultConsultant,
+  defaultServiceType,
+}: BookingProps) {
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [hasSavedProgress, setHasSavedProgress] = useState(false);
 
@@ -30,7 +37,12 @@ export default function Booking({ buttonText = 'Book Your Free Consultation' }: 
           You have a booking in progress. Click to continue where you left off.
         </p>
       )}
-      <BookingModal isOpen={isModalOpen} onClose={() => setIsModalOpen(false)} />
+      <BookingModal
+        isOpen={isModalOpen}
+        onClose={() => setIsModalOpen(false)}
+        defaultConsultant={defaultConsultant}
+        defaultServiceType={defaultServiceType}
+      />
     </>
   );
 }

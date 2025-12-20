@@ -31,6 +31,7 @@ export interface ContactSubmission {
   email: string;
   phone?: string;
   message: string;
+  subject?: string;
   source?: string;
 }
 
@@ -38,7 +39,9 @@ export interface Consultation {
   firstName: string;
   lastName: string;
   email: string;
-  bookingType: string;
+  bookingType: string; // Keep for backwards compatibility
+  serviceType: ServiceType;
+  consultant: ConsultantType;
   dateBooked: string; // YYYY-MM-DD
   timeSlotStart: string; // HH:MM
   timeSlotEnd: string; // HH:MM
@@ -82,6 +85,39 @@ export interface TimeSlot {
   available: boolean;
 }
 
+// Service Types
+export type ServiceType = 'Free Consult' | 'Essential Emotions' | 'Symphony of Cells';
+export type ConsultantType = 'Heidi Lynn' | 'Illiana';
+
+export interface ServiceConfig {
+  name: ServiceType;
+  duration: number; // in minutes
+  price: number;
+  description: string;
+}
+
+// Service configuration constant
+export const SERVICES: Record<ServiceType, ServiceConfig> = {
+  'Free Consult': {
+    name: 'Free Consult',
+    duration: 40,
+    price: 0,
+    description: 'A consultation to start you on your health journey',
+  },
+  'Essential Emotions': {
+    name: 'Essential Emotions',
+    duration: 60,
+    price: 60,
+    description: 'Identify emotions and create new neuropathways',
+  },
+  'Symphony of Cells': {
+    name: 'Symphony of Cells',
+    duration: 30,
+    price: 45,
+    description: 'Essential oils and therapeutic massage for detox and healing',
+  },
+};
+
 // ============================================================================
 // CONTACT FORM
 // ============================================================================
@@ -95,6 +131,7 @@ export async function createContact(data: ContactSubmission) {
           LastName: data.lastName,
           Email: data.email,
           Phone: data.phone || '',
+          Subject: data.subject || '',
           Message: data.message,
           Source: data.source || 'Contact Page',
           DateCreated: new Date().toISOString(),
@@ -155,6 +192,7 @@ function mstToUtcIso(date: string, time: string): string {
 export async function createConsultation(consultation: Consultation) {
   try {
     const utcDateTime = mstToUtcIso(consultation.dateBooked, consultation.timeSlotStart);
+    const serviceConfig = SERVICES[consultation.serviceType];
 
     const record = await base(TABLES.BOOKED).create([
       {
@@ -164,6 +202,10 @@ export async function createConsultation(consultation: Consultation) {
           LastName: consultation.lastName,
           Email: consultation.email,
           BookingType: consultation.bookingType,
+          ServiceType: consultation.serviceType,
+          Consultant: consultation.consultant,
+          Duration: serviceConfig.duration,
+          Price: serviceConfig.price,
           UserTimezone: consultation.userTimezone,
           UserLocalTime: consultation.userLocalTime,
         },
@@ -214,19 +256,33 @@ export async function createClient(data: ClientFormData) {
 }
 
 /**
- * Get all bookings for a specific date
+ * Get all bookings for a specific date, optionally filtered by consultant
  */
-export async function getBookingsForDate(date: string): Promise<string[]> {
+export async function getBookingsForDate(
+  date: string,
+  consultant?: ConsultantType
+): Promise<string[]> {
   try {
     const startOfDay = mstToUtcIso(date, '00:00');
     const endOfDay = mstToUtcIso(date, '23:59');
 
+    let filterFormula = `AND(
+      IS_AFTER({dateAndTime}, '${startOfDay}'),
+      IS_BEFORE({dateAndTime}, '${endOfDay}')
+    )`;
+
+    // Add consultant filter if specified
+    if (consultant) {
+      filterFormula = `AND(
+        IS_AFTER({dateAndTime}, '${startOfDay}'),
+        IS_BEFORE({dateAndTime}, '${endOfDay}'),
+        {Consultant} = '${consultant}'
+      )`;
+    }
+
     const records = await base(TABLES.BOOKED)
       .select({
-        filterByFormula: `AND(
-          IS_AFTER({dateAndTime}, '${startOfDay}'),
-          IS_BEFORE({dateAndTime}, '${endOfDay}')
-        )`,
+        filterByFormula: filterFormula,
         fields: ['dateAndTime'],
       })
       .all();
@@ -246,18 +302,34 @@ export async function getBookingsForDate(date: string): Promise<string[]> {
 
 /**
  * Get fully booked dates for a month (all slots taken)
+ * Optionally filter by consultant to show their specific availability
  */
-export async function getFullyBookedDates(year: number, month: number): Promise<string[]> {
+export async function getFullyBookedDates(
+  year: number,
+  month: number,
+  consultant?: ConsultantType
+): Promise<string[]> {
   try {
     const startDate = new Date(year, month - 1, 1);
     const endDate = new Date(year, month, 0);
 
+    let filterFormula = `AND(
+      IS_AFTER({dateAndTime}, '${startDate.toISOString()}'),
+      IS_BEFORE({dateAndTime}, '${endDate.toISOString()}')
+    )`;
+
+    // Add consultant filter if specified
+    if (consultant) {
+      filterFormula = `AND(
+        IS_AFTER({dateAndTime}, '${startDate.toISOString()}'),
+        IS_BEFORE({dateAndTime}, '${endDate.toISOString()}'),
+        {Consultant} = '${consultant}'
+      )`;
+    }
+
     const records = await base(TABLES.BOOKED)
       .select({
-        filterByFormula: `AND(
-          IS_AFTER({dateAndTime}, '${startDate.toISOString()}'),
-          IS_BEFORE({dateAndTime}, '${endDate.toISOString()}')
-        )`,
+        filterByFormula: filterFormula,
         fields: ['dateAndTime'],
       })
       .all();

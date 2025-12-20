@@ -12,19 +12,43 @@ import {
   getDateString,
   formatDateForDisplay,
 } from '@/lib/timezone';
-import type { TimeSlot, Consultation, ClientFormData } from '@/lib/airtable';
+import type {
+  TimeSlot,
+  Consultation,
+  ClientFormData,
+  ServiceType,
+  ConsultantType,
+} from '@/lib/airtable';
+import { SERVICES } from '@/lib/airtable';
 
 interface BookingModalProps {
   isOpen: boolean;
   onClose: () => void;
+  defaultConsultant?: ConsultantType;
+  defaultServiceType?: ServiceType;
 }
 
-type BookingStep = 'calendar' | 'timeSlots' | 'contactInfo' | 'success';
+type BookingStep = 'selection' | 'calendar' | 'timeSlots' | 'contactInfo' | 'success';
 
-export default function BookingModal({ isOpen, onClose }: BookingModalProps) {
+export default function BookingModal({
+  isOpen,
+  onClose,
+  defaultConsultant,
+  defaultServiceType,
+}: BookingModalProps) {
   // Modal state
   const [isAnimating, setIsAnimating] = useState(false);
-  const [step, setStep] = useState<BookingStep>('calendar');
+  const [step, setStep] = useState<BookingStep>(
+    defaultConsultant && defaultServiceType ? 'calendar' : 'selection'
+  );
+
+  // Selection state
+  const [selectedConsultant, setSelectedConsultant] = useState<ConsultantType | null>(
+    defaultConsultant || null
+  );
+  const [selectedServiceType, setSelectedServiceType] = useState<ServiceType | null>(
+    defaultServiceType || null
+  );
 
   // Calendar state
   const [currentMonth, setCurrentMonth] = useState(new Date());
@@ -72,6 +96,9 @@ export default function BookingModal({ isOpen, onClose }: BookingModalProps) {
         const parsed = JSON.parse(savedData);
         // Restore step
         if (parsed.step) setStep(parsed.step);
+        // Restore selection
+        if (parsed.selectedConsultant) setSelectedConsultant(parsed.selectedConsultant);
+        if (parsed.selectedServiceType) setSelectedServiceType(parsed.selectedServiceType);
         // Restore selected date
         if (parsed.selectedDate) setSelectedDate(new Date(parsed.selectedDate));
         // Restore selected time slot
@@ -99,7 +126,7 @@ export default function BookingModal({ isOpen, onClose }: BookingModalProps) {
     async (date: Date, retryCount = 0) => {
       const year = date.getFullYear();
       const month = date.getMonth() + 1;
-      const cacheKey = `${year}-${month}`;
+      const cacheKey = `${year}-${month}-${selectedConsultant || 'all'}`;
 
       // Check cache first
       if (cachedMonths.has(cacheKey)) {
@@ -111,7 +138,10 @@ export default function BookingModal({ isOpen, onClose }: BookingModalProps) {
       setIsLoadingBookedDates(true);
 
       try {
-        const response = await fetch(`/api/booked-dates?year=${year}&month=${month}`);
+        const consultantParam = selectedConsultant
+          ? `&consultant=${encodeURIComponent(selectedConsultant)}`
+          : '';
+        const response = await fetch(`/api/booked-dates?year=${year}&month=${month}${consultantParam}`);
         if (!response.ok) {
           if (retryCount < 2) {
             setIsLoadingBookedDates(false);
@@ -138,7 +168,7 @@ export default function BookingModal({ isOpen, onClose }: BookingModalProps) {
         setIsLoadingBookedDates(false);
       }
     },
-    [cachedMonths]
+    [cachedMonths, selectedConsultant]
   );
 
   // Auto-save booking progress to localStorage
@@ -146,6 +176,8 @@ export default function BookingModal({ isOpen, onClose }: BookingModalProps) {
     if (isOpen) {
       const bookingProgress = {
         step,
+        selectedConsultant,
+        selectedServiceType,
         selectedDate: selectedDate?.toISOString(),
         selectedTimeSlot,
         firstName,
@@ -164,6 +196,8 @@ export default function BookingModal({ isOpen, onClose }: BookingModalProps) {
     }
   }, [
     step,
+    selectedConsultant,
+    selectedServiceType,
     selectedDate,
     selectedTimeSlot,
     firstName,
@@ -263,11 +297,18 @@ export default function BookingModal({ isOpen, onClose }: BookingModalProps) {
 
   // Load available time slots
   const loadAvailableSlots = async (date: Date, retryCount = 0) => {
+    if (!selectedServiceType || !selectedConsultant) {
+      console.error('Service type and consultant must be selected');
+      return;
+    }
+
     setIsLoadingSlots(true);
 
     try {
       const dateString = getDateString(date);
-      const response = await fetch(`/api/availability?date=${dateString}`);
+      const response = await fetch(
+        `/api/availability?date=${dateString}&serviceType=${encodeURIComponent(selectedServiceType)}&consultant=${encodeURIComponent(selectedConsultant)}`
+      );
       if (!response.ok) {
         if (retryCount < 2) {
           setIsLoadingSlots(false);
@@ -304,8 +345,8 @@ export default function BookingModal({ isOpen, onClose }: BookingModalProps) {
     e.preventDefault();
     setFormError(null);
 
-    if (!selectedDate || !selectedTimeSlot || !userTimezone) {
-      setFormError('Please select a date and time slot');
+    if (!selectedDate || !selectedTimeSlot || !userTimezone || !selectedConsultant || !selectedServiceType) {
+      setFormError('Please complete all booking selections');
       return;
     }
 
@@ -343,6 +384,8 @@ export default function BookingModal({ isOpen, onClose }: BookingModalProps) {
         lastName: lastName.trim(),
         email: email.trim(),
         bookingType: 'Initial Consultation',
+        serviceType: selectedServiceType,
+        consultant: selectedConsultant,
         dateBooked: getDateString(selectedDate),
         timeSlotStart: selectedTimeSlot.start,
         timeSlotEnd: selectedTimeSlot.end,
@@ -443,7 +486,9 @@ export default function BookingModal({ isOpen, onClose }: BookingModalProps) {
   // Clear saved data (only call after successful submission)
   const clearSavedData = () => {
     localStorage.removeItem('bookingProgress');
-    setStep('calendar');
+    setStep(defaultConsultant && defaultServiceType ? 'calendar' : 'selection');
+    setSelectedConsultant(defaultConsultant || null);
+    setSelectedServiceType(defaultServiceType || null);
     setSelectedDate(null);
     setSelectedTimeSlot(null);
     setFirstName('');
@@ -461,7 +506,9 @@ export default function BookingModal({ isOpen, onClose }: BookingModalProps) {
 
   // Handle back navigation
   const handleBack = () => {
-    if (step === 'timeSlots') {
+    if (step === 'calendar') {
+      setStep('selection');
+    } else if (step === 'timeSlots') {
       setStep('calendar');
       setSelectedTimeSlot(null);
     } else if (step === 'contactInfo') {
@@ -487,7 +534,7 @@ export default function BookingModal({ isOpen, onClose }: BookingModalProps) {
         {/* Header */}
         <div className="sticky top-0 bg-white border-b border-taupe px-6 py-4 flex items-center justify-between">
           <div className="flex items-center gap-4">
-            {step !== 'calendar' && step !== 'success' && (
+            {step !== 'selection' && step !== 'success' && (
               <button
                 onClick={handleBack}
                 className="text-brown hover:text-primary transition-colors"
@@ -509,6 +556,7 @@ export default function BookingModal({ isOpen, onClose }: BookingModalProps) {
               </button>
             )}
             <h2 className="text-2xl font-serif font-bold text-primary">
+              {step === 'selection' && 'Book Your Appointment'}
               {step === 'calendar' && 'Select a Date'}
               {step === 'timeSlots' && 'Choose Your Time'}
               {step === 'contactInfo' && 'Your Information'}
@@ -533,6 +581,86 @@ export default function BookingModal({ isOpen, onClose }: BookingModalProps) {
 
         {/* Content */}
         <div className="p-6">
+          {/* Selection Step */}
+          {step === 'selection' && (
+            <div className="space-y-8">
+              {/* Consultant Selection */}
+              <div className="space-y-4">
+                <h3 className="text-xl font-semibold text-primary">Select Your Consultant</h3>
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                  <button
+                    onClick={() => setSelectedConsultant('Heidi Lynn')}
+                    className={`p-6 border-2 rounded-lg transition-all text-left ${
+                      selectedConsultant === 'Heidi Lynn'
+                        ? 'border-primary bg-primary/10'
+                        : 'border-taupe hover:border-primary/50'
+                    }`}
+                  >
+                    <h4 className="text-lg font-semibold text-primary mb-2">Heidi Lynn</h4>
+                    <p className="text-sm text-brown">
+                      Experienced holistic health coach specializing in natural healing and autoimmune recovery
+                    </p>
+                  </button>
+                  <button
+                    onClick={() => setSelectedConsultant('Illiana')}
+                    className={`p-6 border-2 rounded-lg transition-all text-left ${
+                      selectedConsultant === 'Illiana'
+                        ? 'border-primary bg-primary/10'
+                        : 'border-taupe hover:border-primary/50'
+                    }`}
+                  >
+                    <h4 className="text-lg font-semibold text-primary mb-2">Illiana</h4>
+                    <p className="text-sm text-brown">
+                      Specializing in emotional healing, trauma release, and holistic wellness
+                    </p>
+                  </button>
+                </div>
+              </div>
+
+              {/* Service Type Selection */}
+              <div className="space-y-4">
+                <h3 className="text-xl font-semibold text-primary">Select Your Service</h3>
+                <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                  {Object.values(SERVICES).map((service) => (
+                    <button
+                      key={service.name}
+                      onClick={() => setSelectedServiceType(service.name)}
+                      className={`p-6 border-2 rounded-lg transition-all text-left ${
+                        selectedServiceType === service.name
+                          ? 'border-primary bg-primary/10'
+                          : 'border-taupe hover:border-primary/50'
+                      }`}
+                    >
+                      <h4 className="text-lg font-semibold text-primary mb-2">{service.name}</h4>
+                      <p className="text-sm text-brown mb-4">{service.description}</p>
+                      <div className="text-sm text-brown space-y-1">
+                        <p className="font-medium">{service.duration} minutes</p>
+                        <p className="text-2xl font-bold text-primary">
+                          {service.price === 0 ? 'FREE' : `$${service.price}`}
+                        </p>
+                      </div>
+                    </button>
+                  ))}
+                </div>
+              </div>
+
+              {/* Continue Button */}
+              <div className="flex justify-end">
+                <button
+                  onClick={() => {
+                    if (selectedConsultant && selectedServiceType) {
+                      setStep('calendar');
+                    }
+                  }}
+                  disabled={!selectedConsultant || !selectedServiceType}
+                  className="px-8 py-3 bg-primary text-secondary font-semibold rounded-md hover:bg-primary/90 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+                >
+                  Continue to Calendar
+                </button>
+              </div>
+            </div>
+          )}
+
           {/* Calendar Step */}
           {step === 'calendar' && (
             <div className="space-y-6">
