@@ -15,59 +15,50 @@ interface FAQAccordionProps {
   faqs: FAQ[];
 }
 
-type SortOrder = 'alphabetical' | 'mostClicked' | 'byCategory';
-
 export default function FAQAccordion({ faqs }: FAQAccordionProps) {
   const [openIndex, setOpenIndex] = useState<number | null>(null);
   const [searchTerm, setSearchTerm] = useState('');
-  const [selectedCategory, setSelectedCategory] = useState('All');
-  const [sortOrder, setSortOrder] = useState<SortOrder>('alphabetical');
+  const [selectedCategory, setSelectedCategory] = useState('Alphabetical');
 
-  const categories = ['All', ...Array.from(new Set(faqs.map(faq => faq.category || 'General')))];
+  // Build categories: Alphabetical, actual categories, Most Clicked
+  const actualCategories = Array.from(new Set(faqs.map(faq => faq.category || 'General')));
+  const categories = ['Alphabetical', ...actualCategories, 'Most Clicked'];
 
-  // Sorting function
-  const sortFAQs = (faqs: FAQ[], sortType: SortOrder): FAQ[] => {
-    const sorted = [...faqs]; // Create copy to avoid mutation
+  // Filter and sort FAQs based on selected category
+  const filteredAndSortedFAQs = (() => {
+    // First filter by search
+    const searchFiltered = faqs.filter(faq => {
+      const matchesSearch = faq.question.toLowerCase().includes(searchTerm.toLowerCase()) ||
+                           faq.answer.toLowerCase().includes(searchTerm.toLowerCase());
+      return matchesSearch;
+    });
 
-    switch (sortType) {
-      case 'alphabetical':
-        return sorted.sort((a, b) =>
-          a.question.toLowerCase().localeCompare(b.question.toLowerCase())
-        );
-
-      case 'mostClicked':
-        return sorted.sort((a, b) =>
-          (b.clickCount || 0) - (a.clickCount || 0)
-        );
-
-      case 'byCategory':
-        return sorted.sort((a, b) =>
-          (a.order || 999) - (b.order || 999)
-        );
-
-      default:
-        return sorted;
+    // Then filter and sort by category
+    if (selectedCategory === 'Alphabetical') {
+      // Show all FAQs, sorted alphabetically
+      return [...searchFiltered].sort((a, b) =>
+        a.question.toLowerCase().localeCompare(b.question.toLowerCase())
+      );
+    } else if (selectedCategory === 'Most Clicked') {
+      // Show all FAQs, sorted by click count
+      return [...searchFiltered].sort((a, b) =>
+        (b.clickCount || 0) - (a.clickCount || 0)
+      );
+    } else {
+      // Show FAQs from selected category, sorted alphabetically
+      return searchFiltered
+        .filter(faq => (faq.category || 'General') === selectedCategory)
+        .sort((a, b) => a.question.toLowerCase().localeCompare(b.question.toLowerCase()));
     }
-  };
+  })();
 
-  // First filter by search and category
-  const filteredFAQs = faqs.filter(faq => {
-    const matchesSearch = faq.question.toLowerCase().includes(searchTerm.toLowerCase()) ||
-                         faq.answer.toLowerCase().includes(searchTerm.toLowerCase());
-    const matchesCategory = selectedCategory === 'All' || (faq.category || 'General') === selectedCategory;
-    return matchesSearch && matchesCategory;
-  });
-
-  // Then apply sorting
-  const sortedAndFilteredFAQs = sortFAQs(filteredFAQs, sortOrder);
-
-  // Close accordion when sort order changes
+  // Close accordion when category changes
   useEffect(() => {
     setOpenIndex(null);
-  }, [sortOrder]);
+  }, [selectedCategory]);
 
   const toggleAccordion = async (index: number) => {
-    const faq = sortedAndFilteredFAQs[index];
+    const faq = filteredAndSortedFAQs[index];
 
     // Track click if FAQ has an ID (from Airtable)
     if (faq.id && openIndex !== index) {
@@ -114,24 +105,6 @@ export default function FAQAccordion({ faqs }: FAQAccordionProps) {
           </svg>
         </div>
 
-        {/* Sort Dropdown */}
-        <div className="flex items-center gap-3">
-          <label htmlFor="faq-sort" className="text-brown font-medium whitespace-nowrap">
-            Sort by:
-          </label>
-          <select
-            id="faq-sort"
-            value={sortOrder}
-            onChange={(e) => setSortOrder(e.target.value as SortOrder)}
-            className="px-4 py-2 rounded-md border border-taupe bg-white text-brown focus:outline-none focus:ring-2 focus:ring-accent"
-            aria-label="Sort FAQs by"
-          >
-            <option value="alphabetical">Alphabetical (A-Z)</option>
-            <option value="mostClicked">Most Clicked</option>
-            <option value="byCategory">By Category</option>
-          </select>
-        </div>
-
         {/* Category Filter */}
         <div className="flex flex-wrap gap-2">
           {categories.map((category) => (
@@ -152,8 +125,8 @@ export default function FAQAccordion({ faqs }: FAQAccordionProps) {
 
       {/* FAQ Accordion */}
       <div className="space-y-4">
-        {sortedAndFilteredFAQs.length > 0 ? (
-          sortedAndFilteredFAQs.map((faq, index) => (
+        {filteredAndSortedFAQs.length > 0 ? (
+          filteredAndSortedFAQs.map((faq, index) => (
             <div
               key={index}
               className="bg-white rounded-lg shadow-md border border-taupe overflow-hidden"
