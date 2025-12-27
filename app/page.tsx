@@ -3,48 +3,7 @@ import Booking from './components/Booking';
 import NewsletterSignup from './components/NewsletterSignup';
 import TestimonialsCarousel from './components/TestimonialsCarousel';
 
-interface Testimonial {
-  name: string;
-  text: string;
-  rating?: number;
-}
-
-async function getTestimonials(): Promise<Testimonial[]> {
-  try {
-    const res = await fetch(`${process.env.NEXT_PUBLIC_SITE_URL || 'http://localhost:3000'}/api/testimonials`, {
-      cache: 'no-store', // Always fetch fresh data
-    });
-
-    if (!res.ok) {
-      throw new Error('Failed to fetch testimonials');
-    }
-
-    return await res.json();
-  } catch (error) {
-    console.error('Error fetching testimonials:', error);
-    // Return fallback testimonials if Airtable fetch fails
-    return fallbackTestimonials;
-  }
-}
-
-// Fallback testimonials (in case Airtable is not set up yet)
-const fallbackTestimonials: Testimonial[] = [
-  {
-    name: 'Sarah M.',
-    text: 'A Thyme to Heal transformed my approach to wellness. The custom blends have made such a difference in my daily life!',
-  },
-  {
-    name: 'Michael R.',
-    text: 'The herbal consultation was incredibly insightful. I finally found natural solutions that work for me.',
-  },
-  {
-    name: 'Jennifer L.',
-    text: 'Professional, knowledgeable, and genuinely caring. I highly recommend A Thyme to Heal to anyone seeking natural wellness.',
-  },
-];
-
-export default async function Home() {
-  const testimonials = await getTestimonials();
+export default function Home() {
   const services = [
     {
       title: 'Herbal Consultations',
@@ -171,7 +130,7 @@ export default async function Home() {
             <h2 className="text-3xl md:text-4xl font-serif font-bold text-center mb-12 text-white">
               What Our Clients Say
             </h2>
-            <TestimonialsCarousel testimonials={testimonials} />
+            <TestimonialsCarousel />
           </div>
         </div>
       </section>
