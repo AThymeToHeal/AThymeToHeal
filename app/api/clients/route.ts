@@ -1,5 +1,5 @@
 import { NextResponse } from 'next/server';
-import { createClient, type ClientFormData } from '@/lib/airtable';
+import { createOrUpdateClient, type ClientFormData } from '@/lib/airtable';
 
 export async function POST(request: Request) {
   try {
@@ -45,7 +45,7 @@ export async function POST(request: Request) {
       bookedRecordId: body.bookedRecordId,
     };
 
-    const result = await createClient(clientData);
+    const result = await createOrUpdateClient(clientData);
 
     return NextResponse.json(result, { status: 200 });
   } catch (error) {

@@ -19,10 +19,34 @@ export default function Booking({
   const [hasSavedProgress, setHasSavedProgress] = useState(false);
 
   useEffect(() => {
-    // Check if there's saved booking progress
-    const savedData = localStorage.getItem('bookingProgress');
-    setHasSavedProgress(!!savedData);
-  }, [isModalOpen]); // Re-check when modal closes
+    // Check if there's saved booking progress for THIS specific service type
+    // Use service-type-specific key to avoid cross-contamination between different services
+    const getCacheKey = () => {
+      if (defaultServiceType) {
+        // For specific service types, use dedicated cache key
+        return `bookingProgress_${defaultServiceType.replace(/\s+/g, '')}`;
+      }
+      // For generic booking buttons (no pre-selected service), use general key
+      return 'bookingProgress_General';
+    };
+
+    const cacheKey = getCacheKey();
+    const savedData = localStorage.getItem(cacheKey);
+
+    if (savedData) {
+      try {
+        const parsed = JSON.parse(savedData);
+        // Only show "Resume" if it's an incomplete booking (not completed/success)
+        const isIncomplete = parsed.step && parsed.step !== 'success';
+        setHasSavedProgress(isIncomplete);
+      } catch {
+        // Invalid cache data, ignore
+        setHasSavedProgress(false);
+      }
+    } else {
+      setHasSavedProgress(false);
+    }
+  }, [isModalOpen, defaultServiceType]); // Re-check when modal closes or service type changes
 
   return (
     <>

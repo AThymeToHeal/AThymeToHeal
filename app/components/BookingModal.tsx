@@ -83,14 +83,28 @@ export default function BookingModal({
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [formError, setFormError] = useState<string | null>(null);
 
+  // Helper function to get service-type-specific cache key
+  const getCacheKey = useCallback(() => {
+    // Determine the service type to use for cache key
+    const serviceType = selectedServiceType || defaultServiceType;
+
+    if (serviceType) {
+      // For specific service types, use dedicated cache key (remove spaces)
+      return `bookingProgress_${serviceType.replace(/\s+/g, '')}`;
+    }
+    // For generic booking (no pre-selected service), use general key
+    return 'bookingProgress_General';
+  }, [selectedServiceType, defaultServiceType]);
+
   // Initialize timezone detection and load saved data
   useEffect(() => {
     const detected = detectUserTimezone();
     setDetectedTimezone(detected);
     setUserTimezone(detected);
 
-    // Load saved booking data from localStorage
-    const savedData = localStorage.getItem('bookingProgress');
+    // Load saved booking data from localStorage (service-type-specific)
+    const cacheKey = getCacheKey();
+    const savedData = localStorage.getItem(cacheKey);
     if (savedData) {
       try {
         const parsed = JSON.parse(savedData);
@@ -131,7 +145,7 @@ export default function BookingModal({
         console.error('Failed to restore booking data:', error);
       }
     }
-  }, []);
+  }, [getCacheKey]);
 
   // Fetch fully booked dates for a month (with caching and retry)
   const loadBookedDatesForMonth = useCallback(
@@ -183,9 +197,10 @@ export default function BookingModal({
     [cachedMonths, selectedConsultant]
   );
 
-  // Auto-save booking progress to localStorage
+  // Auto-save booking progress to localStorage (service-type-specific)
+  // Don't save when booking is complete (success step)
   useEffect(() => {
-    if (isOpen) {
+    if (isOpen && step !== 'success') {
       const bookingProgress = {
         step,
         selectedConsultant,
@@ -204,7 +219,8 @@ export default function BookingModal({
         consent,
         userTimezone,
       };
-      localStorage.setItem('bookingProgress', JSON.stringify(bookingProgress));
+      const cacheKey = getCacheKey();
+      localStorage.setItem(cacheKey, JSON.stringify(bookingProgress));
     }
   }, [
     step,
@@ -224,6 +240,7 @@ export default function BookingModal({
     consent,
     userTimezone,
     isOpen,
+    getCacheKey,
   ]);
 
   // Handle modal open/close animations
@@ -465,8 +482,9 @@ export default function BookingModal({
       }
 
       setStep('success');
-      // Clear saved data from localStorage after successful booking
-      localStorage.removeItem('bookingProgress');
+      // Clear saved data from localStorage after successful booking (service-type-specific)
+      const cacheKey = getCacheKey();
+      localStorage.removeItem(cacheKey);
     } catch (error) {
       console.error('Error submitting booking:', error);
       setFormError(
@@ -514,7 +532,8 @@ export default function BookingModal({
 
   // Clear saved data (only call after successful submission)
   const clearSavedData = () => {
-    localStorage.removeItem('bookingProgress');
+    const cacheKey = getCacheKey();
+    localStorage.removeItem(cacheKey);
     setStep(defaultConsultant && defaultServiceType ? 'calendar' : 'selection');
     setSelectedConsultant(defaultConsultant || null);
     setSelectedServiceType(defaultServiceType || null);

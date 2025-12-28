@@ -85,6 +85,7 @@ export function getTimezoneAbbreviation(timezone: string): string {
 
 /**
  * Convert time from MST to target timezone
+ * Properly handles both MST (UTC-7) and MDT (UTC-6) via timezone identifier
  * @param date - Date in YYYY-MM-DD format
  * @param time - Time in HH:MM format (24-hour, MST)
  * @param targetTimezone - Target IANA timezone
@@ -96,9 +97,21 @@ export function convertFromMST(
   targetTimezone: string
 ): string {
   try {
-    // Create date in MST
-    const [hours, minutes] = time.split(':').map(Number);
-    const mstDate = new Date(`${date}T${time}:00-07:00`); // MST is UTC-7
+    // Determine if DST is in effect for the given date in America/Denver
+    const dateTimeString = `${date}T${time}:00`;
+    const testDate = new Date(dateTimeString);
+    const testFormatter = new Intl.DateTimeFormat('en-US', {
+      timeZone: 'America/Denver',
+      timeZoneName: 'short',
+    });
+    const testStr = testFormatter.format(testDate);
+
+    // Check if it contains MDT (daylight) or MST (standard)
+    const isDST = testStr.includes('MDT');
+    const offset = isDST ? '-06:00' : '-07:00';
+
+    // Create date with proper Mountain Time offset
+    const mstDate = new Date(`${date}T${time}:00${offset}`);
 
     // Format in target timezone
     const formatter = new Intl.DateTimeFormat('en-US', {
