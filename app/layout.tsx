@@ -9,14 +9,6 @@ export const metadata: Metadata = {
   title: "A Thyme to Heal LLC - Natural Herbal Remedies & Wellness",
   description: "Your trusted source for natural herbal remedies and wellness solutions. Discover the healing power of nature with A Thyme to Heal.",
   keywords: "herbal remedies, natural wellness, holistic health, herbal medicine, wellness solutions",
-  icons: {
-    icon: [
-      { url: '/images/favicon.jpg', type: 'image/jpeg' },
-    ],
-    apple: [
-      { url: '/images/favicon.jpg', type: 'image/jpeg' },
-    ],
-  },
   openGraph: {
     title: "A Thyme to Heal LLC",
     description: "Natural herbal remedies and wellness solutions",
