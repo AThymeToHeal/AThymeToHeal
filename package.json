@@ -9,9 +9,15 @@
     "lint": "eslint",
     "setup-tables": "node scripts/setup-airtable-tables.mjs",
     "migrate-faqs": "node scripts/migrate-faqs.mjs",
-    "add-testimonials": "node scripts/add-sample-testimonials.mjs"
+    "add-testimonials": "node scripts/add-sample-testimonials.mjs",
+    "add-coming-soon-table": "node scripts/add-coming-soon-table.mjs",
+    "add-coming-soon-features": "node scripts/add-coming-soon-features.mjs",
+    "create-advisor-tables": "node scripts/create-advisor-availability-tables.mjs",
+    "populate-advisor-availability": "node scripts/populate-advisor-availability.mjs",
+    "verify-availability": "node scripts/verify-advisor-availability.mjs"
   },
   "dependencies": {
+    "@vercel/analytics": "^1.6.1",
     "@vercel/speed-insights": "^1.3.1",
     "airtable": "^0.12.2",
     "dotenv": "^17.2.3",

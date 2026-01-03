@@ -17,16 +17,16 @@ export default function ServicesPage() {
       note: 'Services offered by both our coaches',
     },
     {
-      title: 'Essential Emotions',
-      description: 'Often our physical pain is manifestation of emotional roots. Begin the journey of identifying emotions and creating new neuropathways in your brain with an Essential Emotions session.',
-      duration: '1 hr',
-      price: '60',
-    },
-    {
       title: 'Symphony of Cells',
       description: 'A technique using essential oils and therapeutic massage that helps bodies detox and heal. Experience relief and freedom from pain in our cozy, relaxing healing clinic.',
       duration: '30 minutes',
       price: '45',
+    },
+    {
+      title: 'Essential Emotions',
+      description: 'Often our physical pain is manifestation of emotional roots. Begin the journey of identifying emotions and creating new neuropathways in your brain with an Essential Emotions session.',
+      duration: '1 hr',
+      price: '60',
     },
   ];
 

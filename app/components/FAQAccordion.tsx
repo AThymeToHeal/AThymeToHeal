@@ -19,6 +19,7 @@ export default function FAQAccordion({ faqs }: FAQAccordionProps) {
   const [openIndex, setOpenIndex] = useState<number | null>(null);
   const [searchTerm, setSearchTerm] = useState('');
   const [selectedCategory, setSelectedCategory] = useState('Alphabetical');
+  const [displayCount, setDisplayCount] = useState(5); // Show 5 FAQs initially
 
   // Build categories: Alphabetical, actual categories, Most Clicked
   const actualCategories = Array.from(new Set(faqs.map(faq => faq.category || 'General')));
@@ -52,10 +53,11 @@ export default function FAQAccordion({ faqs }: FAQAccordionProps) {
     }
   })();
 
-  // Close accordion when category changes
+  // Close accordion and reset display count when category or search changes
   useEffect(() => {
     setOpenIndex(null);
-  }, [selectedCategory]);
+    setDisplayCount(5); // Reset to showing 5 FAQs
+  }, [selectedCategory, searchTerm]);
 
   const toggleAccordion = async (index: number) => {
     const faq = filteredAndSortedFAQs[index];
@@ -126,44 +128,67 @@ export default function FAQAccordion({ faqs }: FAQAccordionProps) {
       {/* FAQ Accordion */}
       <div className="space-y-4">
         {filteredAndSortedFAQs.length > 0 ? (
-          filteredAndSortedFAQs.map((faq, index) => (
-            <div
-              key={index}
-              className="bg-white rounded-lg shadow-md border border-taupe overflow-hidden"
-            >
-              <button
-                onClick={() => toggleAccordion(index)}
-                className="w-full px-6 py-4 text-left flex justify-between items-center hover:bg-secondary/50 transition-colors"
+          <>
+            {filteredAndSortedFAQs.slice(0, displayCount).map((faq, index) => (
+              <div
+                key={index}
+                className="bg-white rounded-lg shadow-md border border-taupe overflow-hidden"
               >
-                <span className="font-semibold text-primary pr-8">
-                  {faq.question}
-                </span>
-                <svg
-                  className={`w-5 h-5 text-accent transition-transform flex-shrink-0 ${
-                    openIndex === index ? 'rotate-180' : ''
-                  }`}
-                  fill="none"
-                  stroke="currentColor"
-                  viewBox="0 0 24 24"
+                <button
+                  onClick={() => toggleAccordion(index)}
+                  className="w-full px-6 py-4 text-left flex justify-between items-center hover:bg-secondary/50 transition-colors"
                 >
-                  <path
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
-                    strokeWidth={2}
-                    d="M19 9l-7 7-7-7"
-                  />
-                </svg>
-              </button>
-              {openIndex === index && (
-                <div className="px-6 py-4 bg-secondary/30 border-t border-taupe">
-                  <p className="text-brown leading-relaxed">{faq.answer}</p>
-                  <span className="inline-block mt-3 text-sm text-brown/60 italic">
-                    Category: {faq.category}
+                  <span className="font-semibold text-primary pr-8">
+                    {faq.question}
                   </span>
-                </div>
-              )}
-            </div>
-          ))
+                  <svg
+                    className={`w-5 h-5 text-accent transition-transform flex-shrink-0 ${
+                      openIndex === index ? 'rotate-180' : ''
+                    }`}
+                    fill="none"
+                    stroke="currentColor"
+                    viewBox="0 0 24 24"
+                  >
+                    <path
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                      strokeWidth={2}
+                      d="M19 9l-7 7-7-7"
+                    />
+                  </svg>
+                </button>
+                {openIndex === index && (
+                  <div className="px-6 py-4 bg-secondary/30 border-t border-taupe">
+                    <p className="text-brown leading-relaxed">{faq.answer}</p>
+                    <span className="inline-block mt-3 text-sm text-brown/60 italic">
+                      Category: {faq.category}
+                    </span>
+                  </div>
+                )}
+              </div>
+            ))}
+
+            {/* Load More Button */}
+            {displayCount < filteredAndSortedFAQs.length && (
+              <div className="text-center pt-6">
+                <button
+                  onClick={() => setDisplayCount(prev => prev + 5)}
+                  className="px-8 py-3 bg-primary text-secondary font-semibold rounded-md hover:bg-primary/90 transition-colors"
+                >
+                  Load More ({filteredAndSortedFAQs.length - displayCount} remaining)
+                </button>
+              </div>
+            )}
+
+            {/* Show All Loaded Message */}
+            {displayCount >= filteredAndSortedFAQs.length && filteredAndSortedFAQs.length > 5 && (
+              <div className="text-center pt-6">
+                <p className="text-brown/60 text-sm">
+                  Showing all {filteredAndSortedFAQs.length} FAQs
+                </p>
+              </div>
+            )}
+          </>
         ) : (
           <div className="text-center py-12 bg-secondary rounded-lg border border-taupe">
             <p className="text-brown text-lg">No FAQs found matching your search.</p>

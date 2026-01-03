@@ -215,6 +215,9 @@ export function generateTimeSlots(
   let currentMinutes = startHour * 60;
   const endMinutes = endHour * 60;
 
+  // FIXED: Increment by 30-minute blocks (Airtable block size) instead of service duration
+  const BLOCK_SIZE_MINUTES = 30;
+
   while (currentMinutes + duration <= endMinutes) {
     const startHours = Math.floor(currentMinutes / 60);
     const startMins = currentMinutes % 60;
@@ -231,7 +234,7 @@ export function generateTimeSlots(
 
     slots.push({ start, end });
 
-    currentMinutes += duration;
+    currentMinutes += BLOCK_SIZE_MINUTES;  // ✓ FIXED: Always increment by 30 minutes
   }
 
   return slots;

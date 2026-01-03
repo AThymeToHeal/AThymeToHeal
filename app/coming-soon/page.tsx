@@ -1,11 +1,78 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import Link from 'next/link';
+
+interface ComingSoonFeature {
+  id: string;
+  title: string;
+  description: string;
+  icon: string;
+  eta: string;
+  status?: string;
+  priority?: string;
+  displayOrder?: number;
+  isVisible?: boolean;
+}
 
 export default function ComingSoonPage() {
   const [email, setEmail] = useState('');
   const [status, setStatus] = useState<'idle' | 'submitting' | 'success' | 'error'>('idle');
+  const [features, setFeatures] = useState<ComingSoonFeature[]>([]);
+  const [loadingFeatures, setLoadingFeatures] = useState(true);
+
+  // Fallback features in case Airtable is unavailable
+  const fallbackFeatures: ComingSoonFeature[] = [
+    {
+      id: '1',
+      icon: '🛒',
+      title: 'Online Store',
+      description: 'Shop our full range of herbal products directly from our website with easy checkout and secure payment.',
+      eta: 'Coming Q2 2025',
+    },
+    {
+      id: '2',
+      icon: '📱',
+      title: 'Mobile App',
+      description: 'Track your wellness journey, manage consultations, and access herbal guides on the go.',
+      eta: 'Coming 2025',
+    },
+    {
+      id: '3',
+      icon: '📚',
+      title: 'Member Resources',
+      description: 'Exclusive access to herbal guides, video tutorials, seasonal recipes, and wellness tips.',
+      eta: 'Coming Q3 2025',
+    },
+    {
+      id: '4',
+      icon: '📅',
+      title: 'Online Booking',
+      description: 'Schedule consultations and workshops directly through our website at your convenience.',
+      eta: 'Coming Q1 2025',
+    },
+  ];
+
+  // Fetch coming soon features from Airtable
+  useEffect(() => {
+    async function fetchFeatures() {
+      try {
+        const response = await fetch('/api/coming-soon');
+        if (!response.ok) {
+          throw new Error('Failed to fetch features');
+        }
+        const data = await response.json();
+        setFeatures(data.length > 0 ? data : fallbackFeatures);
+      } catch (error) {
+        console.error('Error fetching coming soon features:', error);
+        setFeatures(fallbackFeatures);
+      } finally {
+        setLoadingFeatures(false);
+      }
+    }
+
+    fetchFeatures();
+  }, []);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -34,33 +101,6 @@ export default function ComingSoonPage() {
     }
   };
 
-  const upcomingFeatures = [
-    {
-      icon: '🛒',
-      title: 'Online Store',
-      description: 'Shop our full range of herbal products directly from our website with easy checkout and secure payment.',
-      eta: 'Coming Q2 2025',
-    },
-    {
-      icon: '📱',
-      title: 'Mobile App',
-      description: 'Track your wellness journey, manage consultations, and access herbal guides on the go.',
-      eta: 'Coming 2025',
-    },
-    {
-      icon: '📚',
-      title: 'Member Resources',
-      description: 'Exclusive access to herbal guides, video tutorials, seasonal recipes, and wellness tips.',
-      eta: 'Coming Q3 2025',
-    },
-    {
-      icon: '📅',
-      title: 'Online Booking',
-      description: 'Schedule consultations and workshops directly through our website at your convenience.',
-      eta: 'Coming Q1 2025',
-    },
-  ];
-
   return (
     <div className="bg-background min-h-screen">
       {/* Hero Section */}
@@ -82,23 +122,30 @@ export default function ComingSoonPage() {
           <h2 className="text-3xl md:text-4xl font-serif font-bold text-center mb-12 text-primary">
             What&apos;s Coming Soon
           </h2>
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
-            {upcomingFeatures.map((feature, index) => (
-              <div
-                key={index}
-                className="bg-white p-8 rounded-lg shadow-md border border-taupe hover:shadow-lg transition-shadow"
-              >
-                <div className="text-5xl mb-4">{feature.icon}</div>
-                <h3 className="text-2xl font-semibold mb-3 text-primary">
-                  {feature.title}
-                </h3>
-                <p className="text-brown mb-4">{feature.description}</p>
-                <span className="inline-block px-4 py-2 bg-sage/20 text-primary font-medium rounded-md">
-                  {feature.eta}
-                </span>
-              </div>
-            ))}
-          </div>
+          {loadingFeatures ? (
+            <div className="text-center text-brown py-12">
+              <div className="animate-pulse text-4xl mb-4">🌿</div>
+              <p>Loading exciting features...</p>
+            </div>
+          ) : (
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
+              {features.map((feature) => (
+                <div
+                  key={feature.id}
+                  className="bg-white p-8 rounded-lg shadow-md border border-taupe hover:shadow-lg transition-shadow"
+                >
+                  <div className="text-5xl mb-4">{feature.icon}</div>
+                  <h3 className="text-2xl font-semibold mb-3 text-primary">
+                    {feature.title}
+                  </h3>
+                  <p className="text-brown mb-4">{feature.description}</p>
+                  <span className="inline-block px-4 py-2 bg-sage/20 text-primary font-medium rounded-md">
+                    {feature.eta}
+                  </span>
+                </div>
+              ))}
+            </div>
+          )}
         </div>
       </section>
 

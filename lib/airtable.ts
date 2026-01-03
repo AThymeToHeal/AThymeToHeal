@@ -26,6 +26,9 @@ export const TABLES = {
   FAQS: 'FAQs',
   FAQ_CLICKS: 'FAQ Clicks',
   NEWSLETTER: 'Newsletter Signups',
+  COMING_SOON: 'Coming Soon Features',
+  ADVISOR_AVAILABILITY: 'Advisor Availability',
+  ADVISOR_DAYS_OFF: 'Advisor Days Off',
 };
 
 // ============================================================================
@@ -87,10 +90,29 @@ export interface FAQ {
   clickCount?: number;
 }
 
+export interface ComingSoonFeature {
+  id: string;
+  title: string;
+  description: string;
+  icon: string;
+  eta: string;
+  status?: string;
+  priority?: string;
+  displayOrder?: number;
+  isVisible?: boolean;
+}
+
 export interface TimeSlot {
   start: string;
   end: string;
   available: boolean;
+  availableWithOther?: boolean;
+  otherConsultant?: ConsultantType;
+}
+
+export interface AdvisorDaysOffResult {
+  isFullDayOff: boolean;
+  partialTimeOffRanges: Array<{ start: string; end: string }>;
 }
 
 // Service Types
@@ -187,6 +209,29 @@ export async function createNewsletterSignup(email: string, name?: string, sourc
 
 // ============================================================================
 // BOOKING / CONSULTATIONS
+// ============================================================================
+
+// ============================================================================
+// TIMEZONE CONVENTIONS
+// ============================================================================
+//
+// IMPORTANT: All time conversions in this file follow these rules:
+//
+// 1. Advisor Availability Table (TimeSlot field):
+//    - Stored as single-line text in HH:MM format (24-hour)
+//    - Timezone: Mountain Time (America/Denver)
+//    - Example: "09:00" = 9:00 AM Mountain Time
+//    - DST handled automatically: MDT (UTC-6) Mar-Nov, MST (UTC-7) Nov-Mar
+//
+// 2. Booked Table (dateAndTime field):
+//    - Stored in UTC as ISO 8601 string
+//    - Example: "2024-03-15T16:00:00.000Z"
+//    - Converted from Mountain Time using mstToUtcIso()
+//
+// 3. User Display Times:
+//    - Shown in user's local timezone
+//    - Converted using lib/timezone.ts utilities
+//
 // ============================================================================
 
 /**
@@ -479,11 +524,12 @@ export async function createOrUpdateClient(data: ClientFormData) {
 
 /**
  * Get all bookings for a specific date, optionally filtered by consultant
+ * Returns array of objects with timeSlot and consultant information
  */
 export async function getBookingsForDate(
   date: string,
   consultant?: ConsultantType
-): Promise<string[]> {
+): Promise<Array<{ timeSlot: string; consultant: ConsultantType }>> {
   try {
     const startOfDay = mstToUtcIso(date, '00:00');
     const endOfDay = mstToUtcIso(date, '23:59');
@@ -505,16 +551,34 @@ export async function getBookingsForDate(
     const records = await getBase()(TABLES.BOOKED)
       .select({
         filterByFormula: filterFormula,
-        fields: ['dateAndTime'],
+        fields: ['dateAndTime', 'Consultant'],
       })
       .all();
 
     return records.map((record) => {
       const dateTime = record.get('dateAndTime') as string;
-      const date = new Date(dateTime);
-      const hours = date.getUTCHours() - 7; // Convert UTC to MST (UTC-7)
-      const minutes = date.getUTCMinutes();
-      return `${hours.toString().padStart(2, '0')}:${minutes.toString().padStart(2, '0')}`;
+      const utcDate = new Date(dateTime);
+
+      // Convert UTC to Mountain Time using Intl (handles DST automatically)
+      // MDT = UTC-6 (March-November), MST = UTC-7 (November-March)
+      const formatter = new Intl.DateTimeFormat('en-US', {
+        timeZone: 'America/Denver',
+        hour: '2-digit',
+        minute: '2-digit',
+        hour12: false,
+      });
+
+      const parts = formatter.formatToParts(utcDate);
+      const hours = parts.find(p => p.type === 'hour')?.value || '00';
+      const minutes = parts.find(p => p.type === 'minute')?.value || '00';
+      const timeSlot = `${hours}:${minutes}`;
+
+      const consultantName = record.get('Consultant') as ConsultantType;
+
+      return {
+        timeSlot,
+        consultant: consultantName,
+      };
     });
   } catch (error) {
     console.error('Error fetching bookings for date:', error);
@@ -582,7 +646,7 @@ export async function getTestimonials(): Promise<Testimonial[]> {
   try {
     const records = await getBase()(TABLES.TESTIMONIALS)
       .select({
-        filterByFormula: '{Approved} = TRUE()',
+        filterByFormula: '{Approved}',
         sort: [{ field: 'DateCreated', direction: 'desc' }],
       })
       .all();
@@ -669,4 +733,428 @@ export async function trackFAQClick(faqId: string) {
     console.error('Error tracking FAQ click:', error);
     throw error;
   }
+}
+
+// ============================================================================
+// COMING SOON FEATURES
+// ============================================================================
+
+export async function getComingSoonFeatures(): Promise<ComingSoonFeature[]> {
+  try {
+    const records = await getBase()(TABLES.COMING_SOON)
+      .select({
+        filterByFormula: '{IsVisible}',
+        sort: [{ field: 'DisplayOrder', direction: 'asc' }],
+      })
+      .all();
+
+    return records.map((record) => ({
+      id: record.id,
+      title: record.get('Title') as string,
+      description: record.get('Description') as string,
+      icon: record.get('Icon') as string,
+      eta: record.get('ETA') as string,
+      status: record.get('Status') as string,
+      priority: record.get('Priority') as string,
+      displayOrder: record.get('DisplayOrder') as number,
+      isVisible: record.get('IsVisible') as boolean,
+    }));
+  } catch (error) {
+    console.error('Error fetching coming soon features:', error);
+    return [];
+  }
+}
+
+// ============================================================================
+// ADVISOR AVAILABILITY
+// ============================================================================
+
+/**
+ * Get advisor's recurring weekly availability for a specific day
+ * Returns array of available 30-minute time slots in HH:MM format
+ */
+export async function getAdvisorAvailability(
+  consultant: ConsultantType,
+  dayOfWeek: string
+): Promise<string[]> {
+  try {
+    const records = await getBase()(TABLES.ADVISOR_AVAILABILITY)
+      .select({
+        filterByFormula: `AND({Consultant} = '${consultant}', {DayOfWeek} = '${dayOfWeek}', {IsAvailable})`,
+        sort: [{ field: 'TimeSlot', direction: 'asc' }],
+      })
+      .all();
+
+    // Validate TimeSlot format (HH:MM in 24-hour format)
+    const timeSlotRegex = /^([01]\d|2[0-3]):([0-5]\d)$/;
+
+    return records
+      .map((record) => record.get('TimeSlot') as string)
+      .filter((timeSlot) => {
+        if (!timeSlot || !timeSlotRegex.test(timeSlot)) {
+          console.warn(`Invalid TimeSlot format: "${timeSlot}" for ${consultant} on ${dayOfWeek}. Expected HH:MM in Mountain Time.`);
+          return false;
+        }
+        return true;
+      });
+  } catch (error) {
+    console.error('Error fetching advisor availability:', error);
+    // Return empty array - fallback logic will handle this
+    return [];
+  }
+}
+
+/**
+ * Check if advisor has any time off on a specific date
+ * Returns object with full day off flag and partial time off ranges
+ */
+export async function getAdvisorDaysOff(
+  consultant: ConsultantType,
+  date: string
+): Promise<AdvisorDaysOffResult> {
+  try {
+    const records = await getBase()(TABLES.ADVISOR_DAYS_OFF)
+      .select({
+        filterByFormula: `AND({Consultant} = '${consultant}', {Date} = '${date}')`,
+      })
+      .all();
+
+    // No days off records for this date
+    if (records.length === 0) {
+      return { isFullDayOff: false, partialTimeOffRanges: [] };
+    }
+
+    // Check if any record is marked as all day
+    const hasFullDayOff = records.some((record) => record.get('AllDay') === true);
+
+    if (hasFullDayOff) {
+      return { isFullDayOff: true, partialTimeOffRanges: [] };
+    }
+
+    // Collect partial time off ranges
+    const partialTimeOffRanges = records
+      .filter((record) => !record.get('AllDay'))
+      .map((record) => ({
+        start: record.get('StartTime') as string,
+        end: record.get('EndTime') as string,
+      }))
+      .filter((range) => range.start && range.end);
+
+    return { isFullDayOff: false, partialTimeOffRanges };
+  } catch (error) {
+    console.error('Error fetching advisor days off:', error);
+    // Return no days off on error - safer to show availability
+    return { isFullDayOff: false, partialTimeOffRanges: [] };
+  }
+}
+
+/**
+ * Helper function to convert HH:MM time to minutes since midnight
+ */
+function timeToMinutes(time: string): number {
+  const [hours, minutes] = time.split(':').map(Number);
+  return hours * 60 + minutes;
+}
+
+/**
+ * Helper function to convert minutes since midnight to HH:MM format
+ */
+function minutesToTime(minutes: number): string {
+  const hours = Math.floor(minutes / 60);
+  const mins = minutes % 60;
+  return `${hours.toString().padStart(2, '0')}:${mins.toString().padStart(2, '0')}`;
+}
+
+/**
+ * Check if a time falls within a time range
+ */
+function isTimeInRange(time: string, start: string, end: string): boolean {
+  const timeMinutes = timeToMinutes(time);
+  const startMinutes = timeToMinutes(start);
+  const endMinutes = timeToMinutes(end);
+  return timeMinutes >= startMinutes && timeMinutes < endMinutes;
+}
+
+/**
+ * Get day of week name from date string (YYYY-MM-DD)
+ */
+function getDayOfWeek(dateString: string): string {
+  const date = new Date(dateString + 'T12:00:00'); // Noon to avoid timezone issues
+  const days = ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday'];
+  return days[date.getDay()];
+}
+
+/**
+ * Check if a specific advisor is available at a given date/time
+ * This is the main availability check function that combines all rules
+ */
+export async function isAdvisorAvailable(
+  consultant: ConsultantType,
+  date: string,
+  timeSlot: string
+): Promise<boolean> {
+  try {
+    // Get day of week
+    const dayOfWeek = getDayOfWeek(date);
+
+    // 1. Check if weekend
+    if (dayOfWeek === 'Saturday' || dayOfWeek === 'Sunday') {
+      return false;
+    }
+
+    // 2. Get advisor's weekly schedule
+    const weeklySchedule = await getAdvisorAvailability(consultant, dayOfWeek);
+
+    // If empty, use fallback 9-5 schedule (09:00-16:30 in 30-min blocks)
+    const availableSlots = weeklySchedule.length > 0 ? weeklySchedule : generateFallbackSchedule();
+
+    // 3. Check if time slot is in weekly schedule
+    if (!availableSlots.includes(timeSlot)) {
+      return false;
+    }
+
+    // 4. Check days off
+    const daysOff = await getAdvisorDaysOff(consultant, date);
+
+    if (daysOff.isFullDayOff) {
+      return false;
+    }
+
+    // Check partial day off ranges
+    for (const range of daysOff.partialTimeOffRanges) {
+      if (isTimeInRange(timeSlot, range.start, range.end)) {
+        return false;
+      }
+    }
+
+    // 5. Check if already booked (this will be checked in the main availability function)
+    // We'll handle this in getAvailabilityForBothAdvisors
+
+    // All checks passed
+    return true;
+  } catch (error) {
+    console.error('Error checking advisor availability:', error);
+    // On error, return true to avoid blocking bookings
+    return true;
+  }
+}
+
+/**
+ * Generate fallback 9-5 schedule (used when no availability records exist)
+ */
+function generateFallbackSchedule(): string[] {
+  const slots: string[] = [];
+  for (let hour = 9; hour < 17; hour++) {
+    slots.push(`${hour.toString().padStart(2, '0')}:00`);
+    slots.push(`${hour.toString().padStart(2, '0')}:30`);
+  }
+  return slots;
+}
+
+/**
+ * Check if consecutive 30-min blocks are available
+ * Used to validate if a service duration can fit in the schedule
+ */
+function hasConsecutiveBlocks(
+  startTime: string,
+  serviceDuration: number,
+  availableBlocks: string[]
+): boolean {
+  // Calculate how many 30-min blocks are needed (round up)
+  const blocksNeeded = Math.ceil(serviceDuration / 30);
+
+  // Generate required block times
+  const requiredBlocks: string[] = [];
+  let currentMinutes = timeToMinutes(startTime);
+
+  for (let i = 0; i < blocksNeeded; i++) {
+    requiredBlocks.push(minutesToTime(currentMinutes));
+    currentMinutes += 30;
+  }
+
+  // Check if all required blocks are available
+  return requiredBlocks.every((block) => availableBlocks.includes(block));
+}
+
+/**
+ * Get availability for both advisors for a specific date
+ * Returns categorized time slots for selected and other advisor
+ */
+export async function getAvailabilityForBothAdvisors(
+  date: string,
+  selectedConsultant: ConsultantType,
+  serviceType: ServiceType
+): Promise<{
+  selectedAdvisorSlots: TimeSlot[];
+  otherAdvisorSlots: TimeSlot[];
+  otherConsultantName: ConsultantType;
+}> {
+  try {
+    // Determine the other consultant
+    const otherConsultant: ConsultantType =
+      selectedConsultant === 'Heidi Lynn' ? 'Illiana' : 'Heidi Lynn';
+
+    // Get service configuration
+    const serviceConfig = SERVICES[serviceType];
+    const serviceDuration = serviceConfig.duration;
+
+    // Get day of week
+    const dayOfWeek = getDayOfWeek(date);
+
+    // Get both advisors' weekly schedules
+    const [selectedSchedule, otherSchedule] = await Promise.all([
+      getAdvisorAvailability(selectedConsultant, dayOfWeek),
+      getAdvisorAvailability(otherConsultant, dayOfWeek),
+    ]);
+
+    // Use fallback if needed
+    const selectedAvailableBlocks =
+      selectedSchedule.length > 0 ? selectedSchedule : generateFallbackSchedule();
+    const otherAvailableBlocks =
+      otherSchedule.length > 0 ? otherSchedule : generateFallbackSchedule();
+
+    // Get days off for both advisors
+    const [selectedDaysOff, otherDaysOff] = await Promise.all([
+      getAdvisorDaysOff(selectedConsultant, date),
+      getAdvisorDaysOff(otherConsultant, date),
+    ]);
+
+    // Get existing bookings for both advisors
+    const bookings = await getBookingsForDate(date);
+    const selectedBookedSlots = bookings
+      .filter((b) => b.consultant === selectedConsultant)
+      .map((b) => b.timeSlot);
+    const otherBookedSlots = bookings
+      .filter((b) => b.consultant === otherConsultant)
+      .map((b) => b.timeSlot);
+
+    // Generate time slots based on service duration
+    const allPossibleSlots = generateTimeSlots(serviceDuration);
+
+    const selectedAdvisorSlots: TimeSlot[] = [];
+    const otherAdvisorSlots: TimeSlot[] = [];
+
+    // Calculate minimum booking time (8 hours from now in MST)
+    const now = new Date();
+    const mstOffset = isDST(now) ? -6 : -7; // MDT is UTC-6, MST is UTC-7
+    const mstNow = new Date(now.getTime() + mstOffset * 60 * 60 * 1000);
+    const minimumBookingTime = new Date(mstNow.getTime() + 8 * 60 * 60 * 1000);
+    const minimumTimeString = `${minimumBookingTime.getUTCHours().toString().padStart(2, '0')}:${minimumBookingTime.getUTCMinutes().toString().padStart(2, '0')}`;
+
+    for (const slot of allPossibleSlots) {
+      const slotTime = slot.start;
+
+      // Check if slot is too soon
+      const slotDate = new Date(date + 'T' + slotTime + ':00');
+      const isTooSoon = slotDate < minimumBookingTime;
+
+      // Check selected advisor availability
+      const selectedHasBlocks = hasConsecutiveBlocks(
+        slotTime,
+        serviceDuration,
+        selectedAvailableBlocks
+      );
+      const selectedNotDayOff =
+        !selectedDaysOff.isFullDayOff &&
+        !selectedDaysOff.partialTimeOffRanges.some((range) =>
+          isTimeInRange(slotTime, range.start, range.end)
+        );
+      const selectedNotBooked = !selectedBookedSlots.includes(slotTime);
+      const selectedAvailable =
+        selectedHasBlocks && selectedNotDayOff && selectedNotBooked && !isTooSoon;
+
+      // Check other advisor availability
+      const otherHasBlocks = hasConsecutiveBlocks(slotTime, serviceDuration, otherAvailableBlocks);
+      const otherNotDayOff =
+        !otherDaysOff.isFullDayOff &&
+        !otherDaysOff.partialTimeOffRanges.some((range) =>
+          isTimeInRange(slotTime, range.start, range.end)
+        );
+      const otherNotBooked = !otherBookedSlots.includes(slotTime);
+      const otherAvailable = otherHasBlocks && otherNotDayOff && otherNotBooked && !isTooSoon;
+
+      // Add to selected advisor slots if they're available
+      if (selectedAvailable) {
+        selectedAdvisorSlots.push({
+          start: slot.start,
+          end: slot.end,
+          available: true,
+        });
+      } else if (otherAvailable) {
+        // Add to selected advisor slots as "available with other"
+        selectedAdvisorSlots.push({
+          start: slot.start,
+          end: slot.end,
+          available: false,
+          availableWithOther: true,
+          otherConsultant: otherConsultant,
+        });
+      }
+
+      // Add to other advisor slots if they're available
+      if (otherAvailable) {
+        otherAdvisorSlots.push({
+          start: slot.start,
+          end: slot.end,
+          available: true,
+        });
+      }
+    }
+
+    return {
+      selectedAdvisorSlots,
+      otherAdvisorSlots,
+      otherConsultantName: otherConsultant,
+    };
+  } catch (error) {
+    console.error('Error getting availability for both advisors:', error);
+    // Return empty slots on error
+    return {
+      selectedAdvisorSlots: [],
+      otherAdvisorSlots: [],
+      otherConsultantName: selectedConsultant === 'Heidi Lynn' ? 'Illiana' : 'Heidi Lynn',
+    };
+  }
+}
+
+/**
+ * Helper function to check if a date is in DST
+ */
+function isDST(date: Date): boolean {
+  const jan = new Date(date.getFullYear(), 0, 1);
+  const jul = new Date(date.getFullYear(), 6, 1);
+  return date.getTimezoneOffset() < Math.max(jan.getTimezoneOffset(), jul.getTimezoneOffset());
+}
+
+/**
+ * Generate time slots for a given duration
+ * (This might already exist in timezone.ts, but including here for completeness)
+ */
+function generateTimeSlots(
+  duration: number,
+  startHour: number = 9,
+  endHour: number = 17
+): TimeSlot[] {
+  const slots: TimeSlot[] = [];
+  let currentMinutes = startHour * 60;
+  const endMinutes = endHour * 60;
+
+  // FIXED: Increment by 30-minute blocks (Airtable block size) instead of service duration
+  // This allows 40-minute slots to start at 9:00, 9:30, 10:00, 10:30, etc.
+  const BLOCK_SIZE_MINUTES = 30;
+
+  while (currentMinutes + duration <= endMinutes) {
+    const start = minutesToTime(currentMinutes);
+    const end = minutesToTime(currentMinutes + duration);
+
+    slots.push({
+      start,
+      end,
+      available: false, // Will be set by availability check
+    });
+
+    currentMinutes += BLOCK_SIZE_MINUTES;  // ✓ FIXED: Always increment by 30 minutes
+  }
+
+  return slots;
 }

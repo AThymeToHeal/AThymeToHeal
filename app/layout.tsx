@@ -3,6 +3,7 @@ import "./globals.css";
 import Header from "./components/Header";
 import Footer from "./components/Footer";
 import { SpeedInsights } from "@vercel/speed-insights/next";
+import { Analytics } from "@vercel/analytics/next";
 
 export const metadata: Metadata = {
   title: "A Thyme to Heal LLC - Natural Herbal Remedies & Wellness",
@@ -10,10 +11,10 @@ export const metadata: Metadata = {
   keywords: "herbal remedies, natural wellness, holistic health, herbal medicine, wellness solutions",
   icons: {
     icon: [
-      { url: '/icon.jpg', type: 'image/jpeg' },
+      { url: '/images/favicon.jpg', type: 'image/jpeg' },
     ],
     apple: [
-      { url: '/icon.jpg', type: 'image/jpeg' },
+      { url: '/images/favicon.jpg', type: 'image/jpeg' },
     ],
   },
   openGraph: {
@@ -39,6 +40,7 @@ export default function RootLayout({
         </main>
         <Footer />
         <SpeedInsights />
+        <Analytics />
       </body>
     </html>
   );

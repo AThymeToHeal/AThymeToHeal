@@ -513,15 +513,8 @@ export default function BookingModal({
     );
   };
 
-  // Handle modal close with confirmation
+  // Handle modal close
   const handleClose = () => {
-    if (step !== 'success' && hasEnteredData()) {
-      const confirmed = window.confirm(
-        "You have unsaved booking information. If you close now, your progress will be saved and you can continue later. Close anyway?"
-      );
-      if (!confirmed) return;
-    }
-
     // If closing from success step, reset the form
     if (step === 'success') {
       clearSavedData();
@@ -855,8 +848,6 @@ export default function BookingModal({
                 ) : (
                   <div className="grid grid-cols-2 md:grid-cols-3 gap-3 max-h-96 overflow-y-auto">
                     {availableSlots.map((slot) => {
-                      if (!slot.available) return null;
-
                       const displayStart = formatTimeForDisplay(
                         convertFromMST(
                           selectedDate ? getDateString(selectedDate) : '',
@@ -872,15 +863,38 @@ export default function BookingModal({
                         )
                       );
 
-                      return (
-                        <button
-                          key={`${slot.start}-${slot.end}`}
-                          onClick={() => handleTimeSlotSelect(slot)}
-                          className="px-4 py-3 border-2 border-primary rounded-md text-brown font-medium hover:bg-primary hover:text-secondary transition-colors"
-                        >
-                          {displayStart} - {displayEnd}
-                        </button>
-                      );
+                      // Selected advisor available - clickable, green
+                      if (slot.available) {
+                        return (
+                          <button
+                            key={`${slot.start}-${slot.end}`}
+                            onClick={() => handleTimeSlotSelect(slot)}
+                            className="px-4 py-3 border-2 border-primary rounded-md text-brown font-medium hover:bg-primary hover:text-secondary transition-colors"
+                          >
+                            {displayStart} - {displayEnd}
+                          </button>
+                        );
+                      }
+
+                      // Other advisor available - greyed out, not clickable
+                      if (slot.availableWithOther && slot.otherConsultant) {
+                        return (
+                          <div
+                            key={`${slot.start}-${slot.end}`}
+                            className="px-4 py-3 border-2 border-taupe/50 rounded-md bg-taupe/10 text-brown/60 cursor-not-allowed relative"
+                          >
+                            <div className="text-sm font-medium line-through">
+                              {displayStart} - {displayEnd}
+                            </div>
+                            <div className="text-xs mt-1 text-primary font-medium">
+                              Available with {slot.otherConsultant}
+                            </div>
+                          </div>
+                        );
+                      }
+
+                      // Completely unavailable - don't render
+                      return null;
                     })}
                   </div>
                 )}
@@ -1136,10 +1150,10 @@ export default function BookingModal({
                 </p>
               </div>
               <button
-                onClick={onClose}
+                onClick={handleClose}
                 className="px-8 py-3 bg-primary text-secondary font-semibold rounded-md hover:bg-primary/90 transition-colors"
               >
-                Close
+                Reset Booking
               </button>
             </div>
           )}
