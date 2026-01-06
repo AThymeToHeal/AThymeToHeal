@@ -1,11 +1,12 @@
 /**
  * Populate Advisor Availability Script
  *
- * This script populates the Advisor Availability table with default 9 AM - 5 PM
- * availability for both advisors (Heidi Lynn and Illiana) in 30-minute blocks.
+ * This script populates the Advisor Availability table with custom schedules
+ * for both advisors using flexible start/end times.
  *
- * Total records created: 160
- * - 5 days (Mon-Fri) × 16 time slots (09:00-16:30) × 2 advisors = 160 records
+ * Total records created: 12
+ * - Heidi Lynn: 6 days (Mon-Sat), 12:00 PM - 6:00 PM
+ * - Illiana: 6 days (Mon-Sat), variable hours (8 AM-12 PM, except Tue 9 AM-7 PM)
  *
  * Usage:
  * 1. Ensure AIRTABLE_API_KEY and AIRTABLE_BASE_ID are set in .env.local
@@ -31,31 +32,36 @@ if (!AIRTABLE_API_KEY || !AIRTABLE_BASE_ID) {
   process.exit(1);
 }
 
-const TABLE_NAME = 'Advisor Availability';
+const TABLE_NAME = 'Advisor Schedules';
 const BASE_URL = `https://api.airtable.com/v0/${AIRTABLE_BASE_ID}`;
 
-const CONSULTANTS = ['Heidi Lynn', 'Illiana'];
-const DAYS_OF_WEEK = ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday'];
+const DAYS_OF_WEEK = ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday'];
 
 /**
- * Generate 30-minute time slots from 9 AM to 5 PM
- * Slots: 09:00, 09:30, 10:00, ..., 16:00, 16:30
- * (16:30 is last slot, allows 30-min booking until 5 PM)
+ * Define advisor schedules
+ *
+ * Heidi Lynn: 12:00 PM - 6:00 PM (noon to 6 PM) every day Mon-Sat
+ * Illiana: 8:00 AM - 12:00 PM Mon, Wed, Thu, Fri, Sat
+ *          9:00 AM - 7:00 PM Tuesday (special hours)
  */
-function generateTimeSlots() {
-  const slots = [];
-  const startHour = 9;  // 9 AM
-  const endHour = 17;   // 5 PM (17:00 in 24h format)
-
-  for (let hour = startHour; hour < endHour; hour++) {
-    // Add :00 slot
-    slots.push(`${hour.toString().padStart(2, '0')}:00`);
-    // Add :30 slot
-    slots.push(`${hour.toString().padStart(2, '0')}:30`);
+const ADVISOR_SCHEDULES = {
+  'Heidi Lynn': {
+    'Monday': { start: '12:00', end: '18:00' },
+    'Tuesday': { start: '12:00', end: '18:00' },
+    'Wednesday': { start: '12:00', end: '18:00' },
+    'Thursday': { start: '12:00', end: '18:00' },
+    'Friday': { start: '12:00', end: '18:00' },
+    'Saturday': { start: '12:00', end: '18:00' },
+  },
+  'Illiana': {
+    'Monday': { start: '08:00', end: '12:00' },
+    'Tuesday': { start: '09:00', end: '19:00' },  // Special Tuesday hours
+    'Wednesday': { start: '08:00', end: '12:00' },
+    'Thursday': { start: '08:00', end: '12:00' },
+    'Friday': { start: '08:00', end: '12:00' },
+    'Saturday': { start: '08:00', end: '12:00' },
   }
-
-  return slots;
-}
+};
 
 /**
  * Create availability records in batches of 10 (Airtable API limit)
@@ -110,25 +116,26 @@ async function createAvailabilityRecords(records) {
 }
 
 /**
- * Generate all availability records for both advisors
+ * Generate all availability schedule records for both advisors
  */
 function generateAllRecords() {
   const records = [];
-  const timeSlots = generateTimeSlots();
   const now = new Date().toISOString();
 
-  for (const consultant of CONSULTANTS) {
-    for (const day of DAYS_OF_WEEK) {
-      for (const timeSlot of timeSlots) {
-        records.push({
-          Consultant: consultant,
-          DayOfWeek: day,
-          TimeSlot: timeSlot,
-          IsAvailable: true,  // All slots available by default
-          CreatedAt: now,
-          Notes: 'Default 9-5 schedule'
-        });
-      }
+  for (const [consultant, schedule] of Object.entries(ADVISOR_SCHEDULES)) {
+    for (const [day, hours] of Object.entries(schedule)) {
+      records.push({
+        ScheduleName: `${consultant} - ${day}`,  // Primary field
+        Consultant: consultant,
+        DayOfWeek: day,
+        StartTime: hours.start,
+        EndTime: hours.end,
+        IsActive: true,  // All schedules active by default
+        CreatedAt: now,
+        Notes: day === 'Tuesday' && consultant === 'Illiana'
+          ? 'Extended Tuesday hours: 9 AM - 7 PM'
+          : `${consultant} standard schedule`
+      });
     }
   }
 
@@ -141,24 +148,25 @@ async function main() {
   console.log(`Table: ${TABLE_NAME}`);
 
   console.log('\n📊 Generation Summary:');
-  console.log(`   - Consultants: ${CONSULTANTS.join(', ')}`);
+  console.log(`   - Consultants: Heidi Lynn, Illiana`);
   console.log(`   - Days: ${DAYS_OF_WEEK.join(', ')}`);
-  console.log(`   - Time Slots: 09:00 - 16:30 (30-minute blocks)`);
+  console.log('\n   Heidi Lynn Schedule:');
+  console.log('      Mon-Sat: 12:00 PM - 6:00 PM');
+  console.log('\n   Illiana Schedule:');
+  console.log('      Mon, Wed-Sat: 8:00 AM - 12:00 PM');
+  console.log('      Tuesday: 9:00 AM - 7:00 PM (extended hours)');
 
-  const timeSlots = generateTimeSlots();
-  console.log(`   - Slots per day: ${timeSlots.length}`);
-
-  const expectedRecords = CONSULTANTS.length * DAYS_OF_WEEK.length * timeSlots.length;
-  console.log(`   - Expected total: ${expectedRecords} records`);
+  const expectedRecords = 12;  // 6 days × 2 advisors
+  console.log(`\n   - Expected total: ${expectedRecords} records`);
 
   const records = generateAllRecords();
-  console.log(`\n✅ Generated ${records.length} availability records`);
+  console.log(`\n✅ Generated ${records.length} schedule records`);
 
   const created = await createAvailabilityRecords(records);
 
   console.log('\n' + '='.repeat(60));
   if (created === expectedRecords) {
-    console.log('✨ SUCCESS! All availability records created');
+    console.log('✨ SUCCESS! All availability schedule records created');
   } else {
     console.log(`⚠️  WARNING: Expected ${expectedRecords} but created ${created}`);
   }
@@ -166,11 +174,11 @@ async function main() {
 
   console.log('\n📝 Next steps:');
   console.log('   1. Visit your Airtable base to verify the data');
-  console.log('   2. Both advisors now have 9 AM - 5 PM availability (Mon-Fri)');
-  console.log('   3. Advisors can customize their schedules by:');
-  console.log('      - Unchecking "IsAvailable" for unavailable time slots');
+  console.log('   2. Advisors can now customize their schedules by:');
+  console.log('      - Modifying StartTime/EndTime for different hours');
+  console.log('      - Unchecking "IsActive" to disable specific days');
   console.log('      - Adding days off in the "Advisor Days Off" table');
-  console.log('   4. Changes will automatically reflect in the booking system\n');
+  console.log('   3. Changes will automatically reflect in the booking system\n');
 }
 
 main();

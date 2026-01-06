@@ -7,7 +7,6 @@ import {
   convertFromMST,
   formatTimeForDisplay,
   getSupportedTimezones,
-  isWeekend,
   isPast,
   getDateString,
   formatDateForDisplay,
@@ -69,6 +68,10 @@ export default function BookingModal({
   const [isLoadingBookedDates, setIsLoadingBookedDates] = useState(false);
   const [cachedMonths, setCachedMonths] = useState<Map<string, string[]>>(new Map());
 
+  // Available days of week state (from Airtable schedules)
+  const [availableDaysOfWeek, setAvailableDaysOfWeek] = useState<Set<string>>(new Set());
+  const [isLoadingAvailableDays, setIsLoadingAvailableDays] = useState(false);
+
   // Client form state
   const [firstName, setFirstName] = useState('');
   const [lastName, setLastName] = useState('');
@@ -83,6 +86,13 @@ export default function BookingModal({
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [formError, setFormError] = useState<string | null>(null);
 
+  // Helper function to check if a date's day of week has any advisor availability
+  const isDayUnavailable = useCallback((date: Date): boolean => {
+    const dayNames = ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday'];
+    const dayOfWeek = dayNames[date.getDay()];
+    return !availableDaysOfWeek.has(dayOfWeek);
+  }, [availableDaysOfWeek]);
+
   // Helper function to get service-type-specific cache key
   const getCacheKey = useCallback(() => {
     // Determine the service type to use for cache key
@@ -95,6 +105,34 @@ export default function BookingModal({
     // For generic booking (no pre-selected service), use general key
     return 'bookingProgress_General';
   }, [selectedServiceType, defaultServiceType]);
+
+  // Fetch available days of week from Airtable schedules
+  useEffect(() => {
+    if (!isOpen) return;
+
+    const fetchAvailableDays = async () => {
+      setIsLoadingAvailableDays(true);
+      try {
+        const response = await fetch('/api/available-days');
+        if (response.ok) {
+          const data = await response.json();
+          setAvailableDaysOfWeek(new Set(data.availableDays));
+        } else {
+          console.error('Failed to fetch available days');
+          // Default to all days if fetch fails
+          setAvailableDaysOfWeek(new Set(['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday']));
+        }
+      } catch (error) {
+        console.error('Error fetching available days:', error);
+        // Default to all days if fetch fails
+        setAvailableDaysOfWeek(new Set(['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday']));
+      } finally {
+        setIsLoadingAvailableDays(false);
+      }
+    };
+
+    fetchAvailableDays();
+  }, [isOpen]);
 
   // Initialize timezone detection and load saved data
   useEffect(() => {
@@ -317,7 +355,7 @@ export default function BookingModal({
   // Handle date selection
   const handleDateSelect = async (date: Date) => {
     const dateStr = getDateString(date);
-    if (isWeekend(date) || isPast(date) || fullyBookedDates.has(dateStr)) return;
+    if (isDayUnavailable(date) || isPast(date) || fullyBookedDates.has(dateStr)) return;
 
     // Validate that consultant and service are selected before proceeding
     if (!selectedConsultant || !selectedServiceType) {
@@ -768,7 +806,7 @@ export default function BookingModal({
                   const isToday = dateStr === getDateString(new Date());
                   const isSelected = selectedDate && dateStr === getDateString(selectedDate);
                   const isDisabled =
-                    isWeekend(date) || isPast(date) || fullyBookedDates.has(dateStr);
+                    isDayUnavailable(date) || isPast(date) || fullyBookedDates.has(dateStr);
 
                   return (
                     <button

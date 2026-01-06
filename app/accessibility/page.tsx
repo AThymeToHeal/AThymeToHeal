@@ -165,8 +165,8 @@ export default function AccessibilityPage() {
               In addition to our website, you can reach us through the following methods:
             </p>
             <ul className="list-disc pl-6 mb-6 text-brown space-y-2">
-              <li><strong>Phone:</strong> <a href="tel:+1234567890" className="text-accent hover:underline">(123) 456-7890</a></li>
-              <li><strong>Email:</strong> <a href="mailto:info@athymetoheal.org" className="text-accent hover:underline">info@athymetoheal.org</a></li>
+              <li><strong>Email:</strong> <a href="mailto:athyme4healing@gmail.com" className="text-accent hover:underline">athyme4healing@gmail.com</a></li>
+              <li><strong>Contact Form:</strong> <a href="/contact" className="text-accent hover:underline">Send us a message</a></li>
               <li><strong>In Person:</strong> Visit us at 123 Wellness Way, Suite 100, Herbal City, HC 12345</li>
             </ul>
 

@@ -35,14 +35,14 @@ export default function Footer() {
             <div className="text-sm">
               <p className="mb-1">
                 <span className="font-semibold">Email:</span>{' '}
-                <a href="mailto:info@athymetoheal.org" className="hover:text-accent transition-colors">
-                  info@athymetoheal.org
+                <a href="mailto:athyme4healing@gmail.com" className="hover:text-accent transition-colors">
+                  athyme4healing@gmail.com
                 </a>
               </p>
               <p className="mb-1">
-                <span className="font-semibold">Phone:</span>{' '}
-                <a href="tel:+1234567890" className="hover:text-accent transition-colors">
-                  (123) 456-7890
+                <span className="font-semibold">Contact:</span>{' '}
+                <a href="/contact" className="hover:text-accent transition-colors">
+                  Send us a message
                 </a>
               </p>
             </div>

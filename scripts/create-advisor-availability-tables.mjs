@@ -30,15 +30,15 @@ if (!AIRTABLE_API_KEY || !AIRTABLE_BASE_ID) {
 const META_API_URL = `https://api.airtable.com/v0/meta/bases/${AIRTABLE_BASE_ID}/tables`;
 
 const tables = [
-  // Table 1: Advisor Availability (Recurring Weekly Schedule)
+  // Table 1: Advisor Schedules (NEW - Recurring Weekly Schedule)
   {
-    name: 'Advisor Availability',
-    description: 'Recurring weekly availability schedules for advisors in 30-minute blocks',
+    name: 'Advisor Schedules',
+    description: 'Recurring weekly availability schedules for advisors with flexible start/end times',
     fields: [
       {
-        name: 'TimeSlot',
+        name: 'ScheduleName',
         type: 'singleLineText',
-        description: 'Start time of 30-minute block in HH:MM format (Mountain Time)'
+        description: 'Auto-generated name: Consultant - Day (e.g., "Heidi Lynn - Monday")'
       },
       {
         name: 'Consultant',
@@ -59,12 +59,23 @@ const tables = [
             { name: 'Tuesday' },
             { name: 'Wednesday' },
             { name: 'Thursday' },
-            { name: 'Friday' }
+            { name: 'Friday' },
+            { name: 'Saturday' }
           ]
         }
       },
       {
-        name: 'IsAvailable',
+        name: 'StartTime',
+        type: 'singleLineText',
+        description: 'Daily start time in HH:MM format (Mountain Time, 24-hour)'
+      },
+      {
+        name: 'EndTime',
+        type: 'singleLineText',
+        description: 'Daily end time in HH:MM format (Mountain Time, 24-hour)'
+      },
+      {
+        name: 'IsActive',
         type: 'checkbox',
         options: {
           icon: 'check',

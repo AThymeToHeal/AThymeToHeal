@@ -27,7 +27,7 @@ export const TABLES = {
   FAQ_CLICKS: 'FAQ Clicks',
   NEWSLETTER: 'Newsletter Signups',
   COMING_SOON: 'Coming Soon Features',
-  ADVISOR_AVAILABILITY: 'Advisor Availability',
+  ADVISOR_AVAILABILITY: 'Advisor Schedules',  // NEW: Updated to use new table
   ADVISOR_DAYS_OFF: 'Advisor Days Off',
 };
 
@@ -130,21 +130,21 @@ export interface ServiceConfig {
 export const SERVICES: Record<ServiceType, ServiceConfig> = {
   'Free Consult': {
     name: 'Free Consult',
-    duration: 40,
+    duration: 30,
     price: 0,
     description: 'A consultation to start you on your health journey',
-  },
-  'Essential Emotions': {
-    name: 'Essential Emotions',
-    duration: 60,
-    price: 60,
-    description: 'Identify emotions and create new neuropathways',
   },
   'Symphony of Cells': {
     name: 'Symphony of Cells',
     duration: 30,
     price: 45,
     description: 'Essential oils and therapeutic massage for detox and healing',
+  },
+  'Essential Emotions': {
+    name: 'Essential Emotions',
+    duration: 60,
+    price: 60,
+    description: 'Identify emotions and create new neuropathways',
   },
 };
 
@@ -770,8 +770,41 @@ export async function getComingSoonFeatures(): Promise<ComingSoonFeature[]> {
 // ============================================================================
 
 /**
+ * Helper function to generate 30-minute time slots from start to end time
+ * Returns array of time strings in HH:MM format
+ */
+function generateTimeSlotsFromRange(startTime: string, endTime: string): string[] {
+  const slots: string[] = [];
+  const timeRegex = /^([01]\d|2[0-3]):([0-5]\d)$/;
+
+  // Validate time format
+  if (!timeRegex.test(startTime) || !timeRegex.test(endTime)) {
+    console.warn(`Invalid time format: start="${startTime}", end="${endTime}"`);
+    return [];
+  }
+
+  // Convert times to minutes since midnight
+  const [startHour, startMin] = startTime.split(':').map(Number);
+  const [endHour, endMin] = endTime.split(':').map(Number);
+
+  let currentMinutes = startHour * 60 + startMin;
+  const endMinutes = endHour * 60 + endMin;
+
+  // Generate 30-minute slots
+  while (currentMinutes < endMinutes) {
+    const hours = Math.floor(currentMinutes / 60);
+    const minutes = currentMinutes % 60;
+    slots.push(`${hours.toString().padStart(2, '0')}:${minutes.toString().padStart(2, '0')}`);
+    currentMinutes += 30;  // 30-minute blocks
+  }
+
+  return slots;
+}
+
+/**
  * Get advisor's recurring weekly availability for a specific day
  * Returns array of available 30-minute time slots in HH:MM format
+ * NEW: Generates slots dynamically from StartTime/EndTime schedule
  */
 export async function getAdvisorAvailability(
   consultant: ConsultantType,
@@ -780,27 +813,51 @@ export async function getAdvisorAvailability(
   try {
     const records = await getBase()(TABLES.ADVISOR_AVAILABILITY)
       .select({
-        filterByFormula: `AND({Consultant} = '${consultant}', {DayOfWeek} = '${dayOfWeek}', {IsAvailable})`,
-        sort: [{ field: 'TimeSlot', direction: 'asc' }],
+        filterByFormula: `AND({Consultant} = '${consultant}', {DayOfWeek} = '${dayOfWeek}', {IsActive})`,
       })
       .all();
 
-    // Validate TimeSlot format (HH:MM in 24-hour format)
-    const timeSlotRegex = /^([01]\d|2[0-3]):([0-5]\d)$/;
+    // Should only be one record per advisor per day
+    if (records.length === 0) {
+      return [];
+    }
 
-    return records
-      .map((record) => record.get('TimeSlot') as string)
-      .filter((timeSlot) => {
-        if (!timeSlot || !timeSlotRegex.test(timeSlot)) {
-          console.warn(`Invalid TimeSlot format: "${timeSlot}" for ${consultant} on ${dayOfWeek}. Expected HH:MM in Mountain Time.`);
-          return false;
-        }
-        return true;
-      });
+    const record = records[0];
+    const startTime = record.get('StartTime') as string;
+    const endTime = record.get('EndTime') as string;
+
+    if (!startTime || !endTime) {
+      console.warn(`Missing StartTime or EndTime for ${consultant} on ${dayOfWeek}`);
+      return [];
+    }
+
+    // Generate 30-minute time slots from the schedule
+    return generateTimeSlotsFromRange(startTime, endTime);
   } catch (error) {
     console.error('Error fetching advisor availability:', error);
     // Return empty array - fallback logic will handle this
     return [];
+  }
+}
+
+/**
+ * Check if any advisor has availability on a specific day of the week
+ * Returns true if at least one advisor is scheduled for that day
+ */
+export async function hasAnyAdvisorAvailability(dayOfWeek: string): Promise<boolean> {
+  try {
+    const records = await getBase()(TABLES.ADVISOR_AVAILABILITY)
+      .select({
+        filterByFormula: `AND({DayOfWeek} = '${dayOfWeek}', {IsActive})`,
+        maxRecords: 1, // We only need to know if at least one exists
+      })
+      .all();
+
+    return records.length > 0;
+  } catch (error) {
+    console.error('Error checking advisor availability for day:', error);
+    // Default to allowing the day if there's an error
+    return true;
   }
 }
 
@@ -897,11 +954,6 @@ export async function isAdvisorAvailable(
     // Get day of week
     const dayOfWeek = getDayOfWeek(date);
 
-    // 1. Check if weekend
-    if (dayOfWeek === 'Saturday' || dayOfWeek === 'Sunday') {
-      return false;
-    }
-
     // 2. Get advisor's weekly schedule
     const weeklySchedule = await getAdvisorAvailability(consultant, dayOfWeek);
 
@@ -940,11 +992,12 @@ export async function isAdvisorAvailable(
 }
 
 /**
- * Generate fallback 9-5 schedule (used when no availability records exist)
+ * Generate fallback 24-hour schedule (used when no availability records exist)
  */
 function generateFallbackSchedule(): string[] {
   const slots: string[] = [];
-  for (let hour = 9; hour < 17; hour++) {
+  // Support full 24-hour schedule (midnight to 11:30 PM)
+  for (let hour = 0; hour < 24; hour++) {
     slots.push(`${hour.toString().padStart(2, '0')}:00`);
     slots.push(`${hour.toString().padStart(2, '0')}:30`);
   }
@@ -1132,8 +1185,8 @@ function isDST(date: Date): boolean {
  */
 function generateTimeSlots(
   duration: number,
-  startHour: number = 9,
-  endHour: number = 17
+  startHour: number = 0,
+  endHour: number = 24
 ): TimeSlot[] {
   const slots: TimeSlot[] = [];
   let currentMinutes = startHour * 60;

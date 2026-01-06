@@ -6,23 +6,23 @@ import TestimonialsCarousel from './components/TestimonialsCarousel';
 export default function Home() {
   const services = [
     {
-      title: 'Herbal Consultations',
-      description: 'Personalized consultations to find the perfect herbal remedies for your unique wellness needs.',
+      title: '1:1 Consultations',
+      description: 'Explore your health and possible paths forward in personalized one-on-one sessions',
       backgroundImage: '/images/oil-in-hand-image.avif',
     },
     {
-      title: 'Custom Blends',
-      description: 'Expertly crafted herbal blends tailored to support your health and wellness goals.',
+      title: 'Essential Oil Guidance',
+      description: 'Not sure which oils are ideal for you? We offer 1:1 calls where we use muscle testing and learn more about you to best identify which oils best support you',
       backgroundImage: '/images/Bowl-of-greens-image.jpg',
     },
     {
-      title: 'Wellness Coaching',
-      description: 'Holistic guidance to help you achieve optimal health through natural remedies and lifestyle changes.',
+      title: 'Essential Emotions Sessions',
+      description: 'Helping you identify and heal the roots of emotional pain',
       backgroundImage: '/images/Background2.avif',
     },
     {
       title: 'Educational Workshops',
-      description: 'Learn about the healing power of herbs through our engaging and informative workshops.',
+      description: 'Want to learn more about specific health related topics? We host educational classes monthly',
       backgroundImage: '/images/Tablets-image.jpg',
     },
   ];
@@ -37,7 +37,7 @@ export default function Home() {
             A Thyme To Heal
           </h1>
           <p className="text-xl md:text-2xl mb-8 max-w-3xl mx-auto">
-            Combining holistic practices with science-based guidance, to help you restore balance and long-term well-being
+            Combining kind holistic practices with science based guidance, to help you restore balance and long term health and happiness
           </p>
           <div className="flex flex-col sm:flex-row gap-4 justify-center">
             <Link
@@ -76,12 +76,14 @@ export default function Home() {
                 {/* Dark overlay for text readability */}
                 <div className="absolute inset-0 bg-black/50"></div>
 
-                {/* Content */}
-                <div className="relative z-10 p-6 h-full flex flex-col justify-end">
-                  <h3 className="text-xl font-semibold mb-3 text-white">
+                {/* Content - Title at top (centered), description centered */}
+                <div className="relative z-10 p-6 h-full flex flex-col">
+                  <h3 className="text-xl font-semibold mb-3 text-white text-center">
                     {service.title}
                   </h3>
-                  <p className="text-white/90">{service.description}</p>
+                  <div className="flex-grow flex items-center justify-center">
+                    <p className="text-white/90 text-center">{service.description}</p>
+                  </div>
                 </div>
               </div>
             ))}

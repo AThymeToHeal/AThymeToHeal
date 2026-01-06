@@ -11,10 +11,10 @@ export default function ServicesPage() {
   const services = [
     {
       title: 'Free Consult',
-      description: 'A consultation with one of our coaches to start you on your health journey.',
-      duration: '40 minute',
+      description: 'A consultation with one of our wellness guides to start you on your health journey.',
+      duration: '30 minutes',
       price: '0',
-      note: 'Services offered by both our coaches',
+      note: 'Services offered by both our wellness guides',
     },
     {
       title: 'Symphony of Cells',
@@ -65,9 +65,9 @@ export default function ServicesPage() {
                   )}
                 </div>
 
-                {/* Service Body */}
-                <div className="p-6 flex-grow flex flex-col">
-                  <p className="text-brown mb-6 flex-grow">
+                {/* Service Body - Centered Text */}
+                <div className="p-6 flex-grow flex flex-col justify-center items-center">
+                  <p className="text-brown mb-6 text-center">
                     {service.description}
                   </p>
 
@@ -103,7 +103,7 @@ export default function ServicesPage() {
             Ready to Begin Your Healing Journey?
           </h2>
           <p className="text-lg mb-8 text-brown">
-            All services are offered by both our coaches and can be scheduled in-person or virtually to accommodate your needs.
+            All services are offered by both our wellness guides and can be scheduled in-person or virtually to accommodate your needs.
           </p>
           <Booking />
         </div>

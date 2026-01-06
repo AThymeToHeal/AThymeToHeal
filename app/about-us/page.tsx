@@ -40,7 +40,7 @@ export default function AboutPage() {
               <div className="w-80 h-80 rounded-lg overflow-hidden border-4 border-primary shadow-lg">
                 <Image
                   src="/images/Heidi-Oval.avif"
-                  alt="Heidi Lynn - A Thyme to Heal Coach"
+                  alt="Heidi Lynn - A Thyme to Heal Wellness Guide"
                   width={320}
                   height={320}
                   className="w-full h-full object-cover object-top"
@@ -109,13 +109,22 @@ export default function AboutPage() {
               </h2>
               <div className="space-y-4 text-brown">
                 <p>
-                  I&apos;m Illiana and I can&apos;t wait to help you in your thyme to heal.
+                  I&apos;m Illiana, and I can&apos;t wait to help you in your thyme to heal. I understand just how lonely this journey can be, as I walked through my own season of chronic illness. For the first year, I was mostly confined to bed—alone, without answers, and searching for relief. After months of silence, I was led toward a path of natural healing, where I learned that sometimes our physical pain is a manifestation of deeper emotional wounds and unresolved trauma.
                 </p>
                 <p>
-                  I understand just how lonely this can be as I went through my own journey of chronic illness. For the first year of my journey I was in bed and completely alone, with no answers. After months of silence, I was lead to a path of natural healing. I learned that sometimes, our physical pain is a manifestation of our emotional state and traumas. So, for the next years I prioritized healing. I released my version of what my like should look like and fully surrendered, to the Divine and to healing. I spent countless hours pursuing truth and freedom from my pain. I dove deep into my emotional baggage. Using a variety of techniques such as EMDR, emotional release, somatic movement and rewiring neuropathways, I learned true release and healing. I healed, and continue to heal from C-PTSD, anxiety and depression. I learned true rest, and built a beautiful, slow life for myself. While those years were formative and beautiful, they were also very isolated and lonely. From that was born my goal, that my clients never feel alone while navigating health. I am so passionate about not only healing the physical body but healing the deeper emotional roots that often trigger health crisis&apos;s. I deeply believe our bodies hold everything we need inside to heal and I can&apos;t wait to come alongside you in your journey as we do just that.
+                  Over the years that followed, I made healing my priority. I released the version of life I thought I should have and fully surrendered—to the Divine, to rest, and to the process of healing. I spent countless hours pursuing truth and freedom from pain, diving deep into emotional work through practices such as EMDR, emotional release, somatic movement, and rewiring neural pathways. Through this, I healed—and continue to heal—from C-PTSD, anxiety, and depression. I learned what true rest feels like and slowly built a life that is gentle, grounded, and deeply meaningful.
+                </p>
+                <p>
+                  While those years were formative and beautiful, they were also isolating. From that season, a clear calling emerged: that no one I work with would ever feel alone while navigating their health. I am deeply passionate about not only healing the physical body, but tending to the emotional roots that often sit beneath health crises. I believe our bodies hold an innate wisdom and capacity to heal, and I am honored to walk alongside you as you reconnect with that truth.
+                </p>
+                <p>
+                  As my own healing deepened, I also felt called to support women who sensed that their experiences were meant to become something more. Today, I help women in the health and wellness space build soul-led, sustainable businesses—ones that honor rest, integrity, and real life. We build slowly and intentionally, focusing on alignment, nervous system regulation, and creating work that supports your wellbeing rather than depleting it. I believe our healing stories carry purpose, and I am passionate about helping women steward them into businesses that feel rooted, nourishing, and true.
                 </p>
                 <p className="font-semibold text-primary">
-                  I can&apos;t promise it will be easy but I can promise that I will be with you every step of the way.
+                  I can&apos;t promise this journey will be easy—but I can promise that I will be with you every step of the way.
+                </p>
+                <p className="mt-6">
+                  My work supports women in two sacred spaces: healing and building. I offer one-on-one support for women navigating health challenges and guide those who feel called to create soul-led health businesses rooted in integrity, rest, and sustainability. If either path resonates, you can schedule a call with me below.
                 </p>
               </div>
 
@@ -135,7 +144,7 @@ export default function AboutPage() {
               <div className="w-80 h-80 rounded-lg overflow-hidden border-4 border-primary shadow-lg">
                 <Image
                   src="/images/Illiana-Oval.avif"
-                  alt="Illiana - A Thyme to Heal Coach"
+                  alt="Illiana - A Thyme to Heal Wellness Guide"
                   width={320}
                   height={320}
                   className="w-full h-full object-cover object-top"
