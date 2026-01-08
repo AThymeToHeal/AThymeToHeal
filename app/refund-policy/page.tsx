@@ -6,7 +6,7 @@ export const metadata: Metadata = {
 };
 
 export default function RefundPolicyPage() {
-  const lastUpdated = 'December 16, 2025';
+  const lastUpdated = 'January 8, 2026';
 
   return (
     <div className="bg-background min-h-screen">
@@ -61,7 +61,7 @@ export default function RefundPolicyPage() {
               To initiate a return:
             </p>
             <ol className="list-decimal pl-6 mb-6 text-brown space-y-2">
-              <li>Contact us at <a href="mailto:returns@athymetoheal.org" className="text-accent hover:underline">returns@athymetoheal.org</a> or call <a href="tel:+1234567890" className="text-accent hover:underline">(123) 456-7890</a></li>
+              <li>Contact us at <a href="mailto:athyme4healing@gmail.com" className="text-accent hover:underline">athyme4healing@gmail.com</a> or through our <a href="/contact" className="text-accent hover:underline">contact form</a></li>
               <li>Provide your order number and reason for return</li>
               <li>Wait for our return authorization and instructions</li>
               <li>Package the product securely in its original packaging</li>
@@ -171,10 +171,8 @@ export default function RefundPolicyPage() {
             </p>
             <div className="bg-secondary p-4 rounded-md border border-taupe text-brown">
               <p><strong>A Thyme to Heal LLC</strong></p>
-              <p>Email: <a href="mailto:returns@athymetoheal.org" className="text-accent hover:underline">returns@athymetoheal.org</a></p>
-              <p>Phone: <a href="tel:+1234567890" className="text-accent hover:underline">(123) 456-7890</a></p>
-              <p>Business Hours: Monday-Friday, 9:00 AM - 6:00 PM</p>
-              <p>Address: 123 Wellness Way, Suite 100, Herbal City, HC 12345</p>
+              <p>Email: <a href="mailto:athyme4healing@gmail.com" className="text-accent hover:underline">athyme4healing@gmail.com</a></p>
+              <p>Contact Form: <a href="/contact" className="text-accent hover:underline">Send us a message</a></p>
             </div>
 
             <div className="mt-8 p-4 bg-sage/10 rounded-md border border-sage">

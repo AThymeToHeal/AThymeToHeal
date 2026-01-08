@@ -6,7 +6,7 @@ export const metadata: Metadata = {
 };
 
 export default function AccessibilityPage() {
-  const lastUpdated = 'December 16, 2025';
+  const lastUpdated = 'January 8, 2026';
 
   return (
     <div className="bg-background min-h-screen">
@@ -135,8 +135,8 @@ export default function AccessibilityPage() {
             </p>
             <div className="bg-secondary p-4 rounded-md border border-taupe text-brown mb-6">
               <p><strong>Accessibility Contact</strong></p>
-              <p>Email: <a href="mailto:accessibility@athymetoheal.org" className="text-accent hover:underline">accessibility@athymetoheal.org</a></p>
-              <p>Phone: <a href="tel:+1234567890" className="text-accent hover:underline">(123) 456-7890</a></p>
+              <p>Email: <a href="mailto:athyme4healing@gmail.com" className="text-accent hover:underline">athyme4healing@gmail.com</a></p>
+              <p>Contact Form: <a href="/contact" className="text-accent hover:underline">Send us a message</a></p>
               <p>We aim to respond to accessibility inquiries within 2 business days.</p>
             </div>
 
@@ -167,7 +167,6 @@ export default function AccessibilityPage() {
             <ul className="list-disc pl-6 mb-6 text-brown space-y-2">
               <li><strong>Email:</strong> <a href="mailto:athyme4healing@gmail.com" className="text-accent hover:underline">athyme4healing@gmail.com</a></li>
               <li><strong>Contact Form:</strong> <a href="/contact" className="text-accent hover:underline">Send us a message</a></li>
-              <li><strong>In Person:</strong> Visit us at 123 Wellness Way, Suite 100, Herbal City, HC 12345</li>
             </ul>
 
             <h2 className="text-2xl font-serif font-bold mb-4 mt-8 text-primary">Formal Complaints</h2>

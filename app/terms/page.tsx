@@ -144,7 +144,6 @@ export default function TermsPage() {
               <p><strong>A Thyme to Heal LLC</strong></p>
               <p>Email: <a href="mailto:athyme4healing@gmail.com" className="text-accent hover:underline">athyme4healing@gmail.com</a></p>
               <p>Contact Form: <a href="/contact" className="text-accent hover:underline">Send us a message</a></p>
-              <p>Address: 123 Wellness Way, Suite 100, Herbal City, HC 12345</p>
             </div>
           </div>
         </div>
