@@ -77,23 +77,31 @@ export default function TestimonialsCarousel() {
   const loadTestimonials = async () => {
     if (hasLoaded) return;
 
-    setIsLoading(true);
+    // Only show loading state if we don't have testimonials yet
+    // This prevents hardcoded testimonials from disappearing during fetch
+    const showLoadingState = testimonials.length === 0;
+    if (showLoadingState) {
+      setIsLoading(true);
+    }
     setHasLoaded(true);
 
     try {
       const response = await fetch('/api/testimonials');
       if (!response.ok) throw new Error('Failed to fetch testimonials');
       const data = await response.json();
-      setTestimonials(data);
 
-      // Trigger animation after data loads
-      setTimeout(() => setShowAnimation(true), 50);
+      // Only update if we got data
+      if (data && data.length > 0) {
+        setTestimonials(data);
+      }
     } catch (error) {
       console.error('Error loading testimonials:', error);
       // Keep hardcoded testimonials as fallback - don't clear them
       // setTestimonials remains as INITIAL_TESTIMONIALS from useState initialization
     } finally {
-      setIsLoading(false);
+      if (showLoadingState) {
+        setIsLoading(false);
+      }
     }
   };
 
