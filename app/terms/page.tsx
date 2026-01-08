@@ -72,6 +72,11 @@ export default function TermsPage() {
               <li>We reserve the right to reschedule appointments due to unforeseen circumstances</li>
             </ul>
 
+            <h2 className="text-2xl font-serif font-bold mb-4 mt-8 text-primary">Right to Refuse Service</h2>
+            <p className="text-brown mb-6">
+              A Thyme to Heal LLC reserves the right to refuse service, consultations, appointments, or orders to anyone for any reason at our sole discretion. This includes, but is not limited to, situations where we believe a client relationship would not be mutually beneficial, when safety concerns arise, or when our services may not be appropriate for an individual&apos;s needs.
+            </p>
+
             <h2 className="text-2xl font-serif font-bold mb-4 mt-8 text-primary">Product Information and Orders</h2>
             <p className="text-brown mb-4">
               Regarding our products:

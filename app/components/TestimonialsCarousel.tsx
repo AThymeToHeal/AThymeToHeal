@@ -9,9 +9,26 @@ interface Testimonial {
   rating?: number;
 }
 
+// Hardcoded initial testimonials from Airtable for instant loading
+// These are the first 3 approved testimonials and serve as fallback data
+const INITIAL_TESTIMONIALS: Testimonial[] = [
+  {
+    name: 'Abby',
+    text: 'The passion for health and wellbeing that Illiana and Heidi share is so contagious! They are both so patient and gracious to explain the step by step processes that have worked wonders in their own life as well as countless others.',
+  },
+  {
+    name: 'Anna',
+    text: 'Illiana and Heidi are the most compassionate and caring humans. They have helped guide me through my health issues, which have gotten so debilitating I\'m on medical leave, and with their assistance, I am finally starting to feel like I can live again. They never make me feel judged or guilty for my choices, only supported me as appropriate and provided education if something was not a good choice. Through the essential emotions sessions with Illiana, I have started processing things that I have never even figured out in regular therapy. I cannot recommend working with these two enough!',
+  },
+  {
+    name: 'Heather',
+    text: 'Since using the supplements Heidi recommended, I have felt an overall improvement in my health. I\'m feeling more vibrant and have more energy. I also feel that the supplements have helped me with menopause symptoms and have increased the vitality of my hair, nails, and skin.',
+  },
+];
+
 export default function TestimonialsCarousel() {
-  // Data state
-  const [testimonials, setTestimonials] = useState<Testimonial[]>([]);
+  // Data state - initialize with hardcoded testimonials for instant display
+  const [testimonials, setTestimonials] = useState<Testimonial[]>(INITIAL_TESTIMONIALS);
   const [isLoading, setIsLoading] = useState(false);
   const [hasLoaded, setHasLoaded] = useState(false);
 
@@ -30,7 +47,12 @@ export default function TestimonialsCarousel() {
   const [selectedTestimonial, setSelectedTestimonial] = useState<Testimonial | null>(null);
   const [isModalOpen, setIsModalOpen] = useState(false);
 
-  // IntersectionObserver for lazy loading
+  // Trigger animation for initial hardcoded testimonials on mount
+  useEffect(() => {
+    setTimeout(() => setShowAnimation(true), 50);
+  }, []);
+
+  // IntersectionObserver for lazy loading additional testimonials
   useEffect(() => {
     const observer = new IntersectionObserver(
       (entries) => {
@@ -68,7 +90,8 @@ export default function TestimonialsCarousel() {
       setTimeout(() => setShowAnimation(true), 50);
     } catch (error) {
       console.error('Error loading testimonials:', error);
-      setTestimonials([]); // Empty state on error
+      // Keep hardcoded testimonials as fallback - don't clear them
+      // setTestimonials remains as INITIAL_TESTIMONIALS from useState initialization
     } finally {
       setIsLoading(false);
     }
@@ -105,8 +128,8 @@ export default function TestimonialsCarousel() {
   return (
     <>
       <div ref={sectionRef} className="relative">
-        {/* Loading State */}
-        {isLoading && (
+        {/* Loading State - only show skeleton if we don't have any testimonials yet */}
+        {isLoading && testimonials.length === 0 && (
           <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
             {[1, 2, 3].map((i) => (
               <div key={i} className="bg-white/20 p-6 rounded-lg animate-pulse">
