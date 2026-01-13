@@ -4,16 +4,16 @@ import type { ServiceType } from '@/lib/airtable';
 
 export const metadata: Metadata = {
   title: 'Services & Pricing - A Thyme To Heal',
-  description: 'Explore our personalized holistic consults including free consultations, Essential Emotions sessions, and Symphony of Cells treatments.',
+  description: 'Explore our personalized holistic consults including consultations, Essential Emotions sessions, and Symphony of Cells treatments.',
 };
 
 export default function ServicesPage() {
   const services = [
     {
-      title: 'Free Consult',
+      title: 'Health Consult',
       description: 'A consultation with one of our wellness guides to start you on your health journey.',
       duration: '30 minutes',
-      price: '0',
+      price: '30',
       note: 'Services offered by both our wellness guides',
     },
     {

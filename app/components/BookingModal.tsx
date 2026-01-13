@@ -1159,7 +1159,7 @@ export default function BookingModal({
                   Booking Confirmed!
                 </h3>
                 <p className="text-brown">
-                  Thank you for scheduling your free consultation with A Thyme To Heal.
+                  Thank you for scheduling your consultation with A Thyme To Heal.
                 </p>
                 <p className="text-brown mt-2">
                   You'll receive a confirmation email shortly with all the details.

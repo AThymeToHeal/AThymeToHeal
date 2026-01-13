@@ -11,7 +11,7 @@ interface BookingProps {
 }
 
 export default function Booking({
-  buttonText = 'Book Your Free Consultation',
+  buttonText = 'Book Your Consultation',
   defaultConsultant,
   defaultServiceType,
 }: BookingProps) {

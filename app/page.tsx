@@ -150,14 +150,14 @@ export default function Home() {
         </div>
       </section>
 
-      {/* Call to Action - Book Free Consultation */}
+      {/* Call to Action - Book Consultation */}
       <section className="py-16 px-4 bg-secondary">
         <div className="mx-auto max-w-4xl text-center">
           <h2 className="text-3xl md:text-4xl font-serif font-bold mb-6 text-primary">
             Ready to Begin Your Wellness Journey?
           </h2>
           <p className="text-lg mb-8 text-brown">
-            Schedule a free consultation to discover personalized natural solutions for your health and wellness needs.
+            Schedule a consultation to discover personalized natural solutions for your health and wellness needs.
           </p>
           <Booking />
         </div>

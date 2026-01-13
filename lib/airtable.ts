@@ -116,7 +116,7 @@ export interface AdvisorDaysOffResult {
 }
 
 // Service Types
-export type ServiceType = 'Free Consult' | 'Essential Emotions' | 'Symphony of Cells';
+export type ServiceType = 'Health Consult' | 'Essential Emotions' | 'Symphony of Cells';
 export type ConsultantType = 'Heidi Lynn' | 'Illiana';
 
 export interface ServiceConfig {
@@ -128,10 +128,10 @@ export interface ServiceConfig {
 
 // Service configuration constant
 export const SERVICES: Record<ServiceType, ServiceConfig> = {
-  'Free Consult': {
-    name: 'Free Consult',
+  'Health Consult': {
+    name: 'Health Consult',
     duration: 30,
-    price: 0,
+    price: 30,
     description: 'A consultation to start you on your health journey',
   },
   'Symphony of Cells': {
