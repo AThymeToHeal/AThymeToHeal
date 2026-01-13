@@ -1,7 +1,7 @@
 import type { Metadata } from 'next';
 
 export const metadata: Metadata = {
-  title: 'Accessibility Statement - A Thyme to Heal LLC',
+  title: 'Accessibility Statement - A Thyme to Heal',
   description: 'Learn about our commitment to digital accessibility and how we ensure our website is accessible to all users.',
 };
 
@@ -28,7 +28,7 @@ export default function AccessibilityPage() {
           <div className="bg-white p-8 rounded-lg shadow-md border border-taupe">
             <h2 className="text-2xl font-serif font-bold mb-4 text-primary">Our Commitment to Accessibility</h2>
             <p className="text-brown mb-6">
-              A Thyme to Heal LLC is committed to ensuring digital accessibility for people with disabilities. We are continually improving the user experience for everyone and applying the relevant accessibility standards to ensure we provide equal access to all of our users.
+              A Thyme to Heal is committed to ensuring digital accessibility for people with disabilities. We are continually improving the user experience for everyone and applying the relevant accessibility standards to ensure we provide equal access to all of our users.
             </p>
 
             <h2 className="text-2xl font-serif font-bold mb-4 mt-8 text-primary">Conformance Status</h2>

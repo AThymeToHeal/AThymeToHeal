@@ -1,7 +1,7 @@
 import type { Metadata } from 'next';
 
 export const metadata: Metadata = {
-  title: 'Terms and Conditions - A Thyme to Heal LLC',
+  title: 'Terms and Conditions - A Thyme to Heal',
   description: 'Read our terms and conditions for using A Thyme to Heal services and website.',
 };
 
@@ -28,12 +28,12 @@ export default function TermsPage() {
           <div className="bg-white p-8 rounded-lg shadow-md border border-taupe">
             <h2 className="text-2xl font-serif font-bold mb-4 text-primary">Agreement to Terms</h2>
             <p className="text-brown mb-6">
-              By accessing or using the A Thyme to Heal LLC website (athymetoheal.org) and services, you agree to be bound by these Terms and Conditions. If you do not agree with any part of these terms, you may not use our services.
+              By accessing or using the A Thyme to Heal website (athymetoheal.org) and services, you agree to be bound by these Terms and Conditions. If you do not agree with any part of these terms, you may not use our services.
             </p>
 
             <h2 className="text-2xl font-serif font-bold mb-4 mt-8 text-primary">Services Description</h2>
             <p className="text-brown mb-6">
-              A Thyme to Heal LLC provides herbal wellness consultations, custom herbal blends, wellness coaching, educational workshops, and related products and services. Our services are intended to support your wellness journey and are not a substitute for medical advice, diagnosis, or treatment.
+              A Thyme to Heal provides herbal wellness consultations, custom herbal blends, wellness coaching, educational workshops, and related products and services. Our services are intended to support your wellness journey and are not a substitute for medical advice, diagnosis, or treatment.
             </p>
 
             <h2 className="text-2xl font-serif font-bold mb-4 mt-8 text-primary">Medical Disclaimer</h2>
@@ -74,7 +74,7 @@ export default function TermsPage() {
 
             <h2 className="text-2xl font-serif font-bold mb-4 mt-8 text-primary">Right to Refuse Service</h2>
             <p className="text-brown mb-6">
-              A Thyme to Heal LLC reserves the right to refuse service, consultations, appointments, or orders to anyone for any reason at our sole discretion. This includes, but is not limited to, situations where we believe a client relationship would not be mutually beneficial, when safety concerns arise, or when our services may not be appropriate for an individual&apos;s needs.
+              A Thyme to Heal reserves the right to refuse service, consultations, appointments, or orders to anyone for any reason at our sole discretion. This includes, but is not limited to, situations where we believe a client relationship would not be mutually beneficial, when safety concerns arise, or when our services may not be appropriate for an individual&apos;s needs.
             </p>
 
             <h2 className="text-2xl font-serif font-bold mb-4 mt-8 text-primary">Product Information and Orders</h2>
@@ -103,17 +103,17 @@ export default function TermsPage() {
 
             <h2 className="text-2xl font-serif font-bold mb-4 mt-8 text-primary">Intellectual Property</h2>
             <p className="text-brown mb-6">
-              All content on our website, including text, graphics, logos, images, and software, is the property of A Thyme to Heal LLC and is protected by copyright and trademark laws. You may not reproduce, distribute, or create derivative works without our express written permission.
+              All content on our website, including text, graphics, logos, images, and software, is the property of A Thyme to Heal and is protected by copyright and trademark laws. You may not reproduce, distribute, or create derivative works without our express written permission.
             </p>
 
             <h2 className="text-2xl font-serif font-bold mb-4 mt-8 text-primary">Limitation of Liability</h2>
             <p className="text-brown mb-6">
-              To the maximum extent permitted by law, A Thyme to Heal LLC shall not be liable for any indirect, incidental, special, consequential, or punitive damages, or any loss of profits or revenues, whether incurred directly or indirectly, or any loss of data, use, goodwill, or other intangible losses resulting from your use of our services.
+              To the maximum extent permitted by law, A Thyme to Heal shall not be liable for any indirect, incidental, special, consequential, or punitive damages, or any loss of profits or revenues, whether incurred directly or indirectly, or any loss of data, use, goodwill, or other intangible losses resulting from your use of our services.
             </p>
 
             <h2 className="text-2xl font-serif font-bold mb-4 mt-8 text-primary">Indemnification</h2>
             <p className="text-brown mb-6">
-              You agree to indemnify and hold harmless A Thyme to Heal LLC, its officers, directors, employees, and agents from any claims, damages, obligations, losses, liabilities, costs, or expenses arising from your use of our services or violation of these Terms.
+              You agree to indemnify and hold harmless A Thyme to Heal, its officers, directors, employees, and agents from any claims, damages, obligations, losses, liabilities, costs, or expenses arising from your use of our services or violation of these Terms.
             </p>
 
             <h2 className="text-2xl font-serif font-bold mb-4 mt-8 text-primary">Dispute Resolution</h2>
@@ -123,7 +123,7 @@ export default function TermsPage() {
 
             <h2 className="text-2xl font-serif font-bold mb-4 mt-8 text-primary">Governing Law</h2>
             <p className="text-brown mb-6">
-              These Terms shall be governed by and construed in accordance with the laws of the state in which A Thyme to Heal LLC operates, without regard to its conflict of law provisions.
+              These Terms shall be governed by and construed in accordance with the laws of the state in which A Thyme to Heal operates, without regard to its conflict of law provisions.
             </p>
 
             <h2 className="text-2xl font-serif font-bold mb-4 mt-8 text-primary">Changes to Terms</h2>
@@ -141,7 +141,7 @@ export default function TermsPage() {
               For questions about these Terms and Conditions, please contact us:
             </p>
             <div className="bg-secondary p-4 rounded-md border border-taupe text-brown">
-              <p><strong>A Thyme to Heal LLC</strong></p>
+              <p><strong>A Thyme to Heal</strong></p>
               <p>Email: <a href="mailto:athyme4healing@gmail.com" className="text-accent hover:underline">athyme4healing@gmail.com</a></p>
               <p>Contact Form: <a href="/contact" className="text-accent hover:underline">Send us a message</a></p>
             </div>

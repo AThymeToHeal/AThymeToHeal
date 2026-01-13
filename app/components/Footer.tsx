@@ -26,7 +26,7 @@ export default function Footer() {
           {/* Company Info */}
           <div className="col-span-1 md:col-span-2">
             <h3 className="text-3xl font-script mb-4 text-accent">
-              A Thyme to Heal LLC
+              A Thyme to Heal
             </h3>
             <p className="text-sm mb-4 text-secondary/90">
               Your trusted source for natural herbal remedies and wellness solutions.
@@ -152,7 +152,7 @@ export default function Footer() {
 
             {/* Copyright */}
             <p className="text-sm text-secondary/80">
-              &copy; {currentYear} A Thyme to Heal LLC. All rights reserved.
+              &copy; {currentYear} A Thyme to Heal. All rights reserved.
             </p>
           </div>
         </div>

@@ -1,7 +1,7 @@
 import type { Metadata } from 'next';
 
 export const metadata: Metadata = {
-  title: 'Privacy Policy - A Thyme to Heal LLC',
+  title: 'Privacy Policy - A Thyme to Heal',
   description: 'Learn how A Thyme to Heal collects, uses, and protects your personal information.',
 };
 
@@ -28,7 +28,7 @@ export default function PrivacyPolicyPage() {
           <div className="bg-white p-8 rounded-lg shadow-md border border-taupe">
             <h2 className="text-2xl font-serif font-bold mb-4 text-primary">Introduction</h2>
             <p className="text-brown mb-6">
-              At A Thyme to Heal LLC (&quot;we,&quot; &quot;our,&quot; or &quot;us&quot;), we respect your privacy and are committed to protecting your personal information. This Privacy Policy explains how we collect, use, disclose, and safeguard your information when you visit our website athymetoheal.org or use our services.
+              At A Thyme to Heal (&quot;we,&quot; &quot;our,&quot; or &quot;us&quot;), we respect your privacy and are committed to protecting your personal information. This Privacy Policy explains how we collect, use, disclose, and safeguard your information when you visit our website athymetoheal.org or use our services.
             </p>
 
             <h2 className="text-2xl font-serif font-bold mb-4 mt-8 text-primary">Information We Collect</h2>
@@ -146,7 +146,7 @@ export default function PrivacyPolicyPage() {
               If you have questions or concerns about this Privacy Policy, please contact us:
             </p>
             <div className="bg-secondary p-4 rounded-md border border-taupe text-brown">
-              <p><strong>A Thyme to Heal LLC</strong></p>
+              <p><strong>A Thyme to Heal</strong></p>
               <p>Email: <a href="mailto:athyme4healing@gmail.com" className="text-accent hover:underline">athyme4healing@gmail.com</a></p>
               <p>Contact Form: <a href="/contact" className="text-accent hover:underline">Send us a message</a></p>
             </div>

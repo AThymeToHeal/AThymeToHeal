@@ -2,7 +2,7 @@ import ContactForm from '../components/ContactForm';
 import type { Metadata } from 'next';
 
 export const metadata: Metadata = {
-  title: 'Contact Us - A Thyme to Heal LLC',
+  title: 'Contact Us - A Thyme to Heal',
   description: 'Get in touch with A Thyme to Heal. Contact us for herbal consultations, custom blends, wellness coaching, and more.',
 };
 

@@ -6,11 +6,11 @@ import { SpeedInsights } from "@vercel/speed-insights/next";
 import { Analytics } from "@vercel/analytics/next";
 
 export const metadata: Metadata = {
-  title: "A Thyme to Heal LLC - Natural Herbal Remedies & Wellness",
+  title: "A Thyme to Heal - Natural Herbal Remedies & Wellness",
   description: "Your trusted source for natural herbal remedies and wellness solutions. Discover the healing power of nature with A Thyme to Heal.",
   keywords: "herbal remedies, natural wellness, holistic health, herbal medicine, wellness solutions",
   openGraph: {
-    title: "A Thyme to Heal LLC",
+    title: "A Thyme to Heal",
     description: "Natural herbal remedies and wellness solutions",
     url: "https://athymetoheal.org",
     siteName: "A Thyme to Heal",

@@ -1,7 +1,7 @@
 import type { Metadata } from 'next';
 
 export const metadata: Metadata = {
-  title: 'Refund Policy - A Thyme to Heal LLC',
+  title: 'Refund Policy - A Thyme to Heal',
   description: 'Learn about our refund and return policy for products and services.',
 };
 
@@ -28,7 +28,7 @@ export default function RefundPolicyPage() {
           <div className="bg-white p-8 rounded-lg shadow-md border border-taupe">
             <h2 className="text-2xl font-serif font-bold mb-4 text-primary">Our Commitment</h2>
             <p className="text-brown mb-6">
-              At A Thyme to Heal LLC, we are committed to your satisfaction. We want you to be completely happy with your purchase and experience with us. This Refund Policy outlines our procedures for returns, refunds, and cancellations.
+              At A Thyme to Heal, we are committed to your satisfaction. We want you to be completely happy with your purchase and experience with us. This Refund Policy outlines our procedures for returns, refunds, and cancellations.
             </p>
 
             <h2 className="text-2xl font-serif font-bold mb-4 mt-8 text-primary">Product Returns and Refunds</h2>
@@ -170,7 +170,7 @@ export default function RefundPolicyPage() {
               For refund requests or questions about this policy:
             </p>
             <div className="bg-secondary p-4 rounded-md border border-taupe text-brown">
-              <p><strong>A Thyme to Heal LLC</strong></p>
+              <p><strong>A Thyme to Heal</strong></p>
               <p>Email: <a href="mailto:athyme4healing@gmail.com" className="text-accent hover:underline">athyme4healing@gmail.com</a></p>
               <p>Contact Form: <a href="/contact" className="text-accent hover:underline">Send us a message</a></p>
             </div>

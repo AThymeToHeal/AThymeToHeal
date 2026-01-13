@@ -3,7 +3,7 @@ import Link from 'next/link';
 import type { Metadata } from 'next';
 
 export const metadata: Metadata = {
-  title: 'FAQ - Frequently Asked Questions | A Thyme to Heal LLC',
+  title: 'FAQ - Frequently Asked Questions | A Thyme to Heal',
   description: 'Find answers to common questions about our herbal remedies, consultations, products, and services.',
 };
 
