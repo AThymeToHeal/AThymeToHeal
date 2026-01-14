@@ -868,6 +868,29 @@ export async function hasAnyAdvisorAvailability(dayOfWeek: string): Promise<bool
 }
 
 /**
+ * Check if a specific consultant has availability on a specific day of week
+ */
+export async function hasConsultantAvailability(
+  consultant: ConsultantType,
+  dayOfWeek: string
+): Promise<boolean> {
+  try {
+    const records = await getBase()(TABLES.ADVISOR_AVAILABILITY)
+      .select({
+        filterByFormula: `AND({Consultant} = '${consultant}', {DayOfWeek} = '${dayOfWeek}', {IsActive})`,
+        maxRecords: 1,
+      })
+      .all();
+
+    return records.length > 0;
+  } catch (error) {
+    console.error(`Error checking availability for ${consultant} on ${dayOfWeek}:`, error);
+    // Default to allowing the day if there's an error
+    return true;
+  }
+}
+
+/**
  * Check if advisor has any time off on a specific date
  * Returns object with full day off flag and partial time off ranges
  */

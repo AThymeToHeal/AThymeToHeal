@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { hasAnyAdvisorAvailability } from '@/lib/airtable';
+import { hasAnyAdvisorAvailability, hasConsultantAvailability, ConsultantType } from '@/lib/airtable';
 
 const DAYS_OF_WEEK = ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday'];
 
@@ -7,16 +7,25 @@ const DAYS_OF_WEEK = ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'F
  * GET /api/available-days
  *
  * Returns which days of the week have at least one advisor available
+ * Optional query param: consultant - filters to specific consultant's availability
  *
  * Response: { availableDays: string[] }
  * Example: { availableDays: ["Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday"] }
  */
 export async function GET(request: NextRequest) {
   try {
+    // Get optional consultant filter from query params
+    const { searchParams } = new URL(request.url);
+    const consultant = searchParams.get('consultant') as ConsultantType | null;
+
     // Check each day of the week
     const availabilityChecks = await Promise.all(
       DAYS_OF_WEEK.map(async (day) => {
-        const hasAvailability = await hasAnyAdvisorAvailability(day);
+        // If consultant is specified, check only their availability
+        // Otherwise check if any advisor is available
+        const hasAvailability = consultant
+          ? await hasConsultantAvailability(consultant, day)
+          : await hasAnyAdvisorAvailability(day);
         return { day, hasAvailability };
       })
     );

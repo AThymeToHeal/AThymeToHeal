@@ -122,7 +122,13 @@ export default function BookingModal({
     const fetchAvailableDays = async () => {
       setIsLoadingAvailableDays(true);
       try {
-        const response = await fetch('/api/available-days');
+        // If only one consultant is available, filter by that consultant
+        const consultant = availableConsultants.length === 1 ? availableConsultants[0] : null;
+        const url = consultant
+          ? `/api/available-days?consultant=${encodeURIComponent(consultant)}`
+          : '/api/available-days';
+
+        const response = await fetch(url);
         if (response.ok) {
           const data = await response.json();
           setAvailableDaysOfWeek(new Set(data.availableDays));
@@ -141,7 +147,7 @@ export default function BookingModal({
     };
 
     fetchAvailableDays();
-  }, [isOpen]);
+  }, [isOpen, availableConsultants]);
 
   // Initialize timezone detection and load saved data
   useEffect(() => {
