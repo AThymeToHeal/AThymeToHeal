@@ -36,7 +36,7 @@ export default function ServicesPage() {
       duration: '6 weeks',
       price: '350',
       paymentOptions: 'Optional split: $175 upfront + $175 halfway',
-      tagline: 'This is your gentle first step into consistent health. Perfect if you're feeling overwhelmed or unsure where to start.',
+      tagline: 'This is your gentle first step into consistent health. Perfect if you&apos;re feeling overwhelmed or unsure where to start.',
       included: [
         'Intake + follow-up consults',
         '6 Symphony of Cells sessions (1 per week)',
