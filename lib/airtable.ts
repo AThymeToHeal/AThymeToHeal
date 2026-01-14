@@ -116,7 +116,14 @@ export interface AdvisorDaysOffResult {
 }
 
 // Service Types
-export type ServiceType = 'Health Consult' | 'Essential Emotions' | 'Symphony of Cells' | 'Business Consultation';
+export type ServiceType =
+  | 'Health Consult'
+  | 'Essential Emotions'
+  | 'Symphony of Cells'
+  | 'Business Consultation'
+  | 'Tier 1 - Back to Basics'
+  | 'Tier 2 - A Thyme to Heal'
+  | 'Tier 3 - Deep Roots Healing';
 export type ConsultantType = 'Heidi Lynn' | 'Illiana';
 
 export interface ServiceConfig {
@@ -153,6 +160,24 @@ export const SERVICES: Record<ServiceType, ServiceConfig> = {
     price: 0,
     description: 'Turn your health journey into a thriving business',
     availableConsultants: ['Illiana'], // Only Illiana offers this service
+  },
+  'Tier 1 - Back to Basics': {
+    name: 'Tier 1 - Back to Basics',
+    duration: 60,
+    price: 350,
+    description: '6-week foundational wellness program with weekly Symphony of Cells sessions',
+  },
+  'Tier 2 - A Thyme to Heal': {
+    name: 'Tier 2 - A Thyme to Heal',
+    duration: 60,
+    price: 699,
+    description: '8-week integrated program combining emotional work, body support, and lifestyle guidance',
+  },
+  'Tier 3 - Deep Roots Healing': {
+    name: 'Tier 3 - Deep Roots Healing',
+    duration: 60,
+    price: 2000,
+    description: '10-week intensive program for complex or layered health challenges',
   },
 };
 
