@@ -15,6 +15,8 @@ export default function Header() {
     { name: 'Coming Soon', href: '/coming-soon' },
   ];
 
+  const rightNavigation = { name: 'Business Consultation', href: '/business-consultation' };
+
   return (
     <header className="bg-primary text-white sticky top-0 z-50 shadow-md">
       <nav className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
@@ -29,7 +31,7 @@ export default function Header() {
           </div>
 
           {/* Desktop Navigation */}
-          <div className="hidden md:block">
+          <div className="hidden md:flex md:flex-1 md:items-center md:justify-between">
             <div className="ml-10 flex items-baseline space-x-6">
               {navigation.map((item) => (
                 <Link
@@ -40,6 +42,14 @@ export default function Header() {
                   {item.name}
                 </Link>
               ))}
+            </div>
+            <div className="ml-6">
+              <Link
+                href={rightNavigation.href}
+                className="bg-accent text-primary hover:bg-accent/90 transition-colors duration-200 px-4 py-2 rounded-md text-sm font-semibold"
+              >
+                {rightNavigation.name}
+              </Link>
             </div>
           </div>
 
@@ -99,6 +109,13 @@ export default function Header() {
               {item.name}
             </Link>
           ))}
+          <Link
+            href={rightNavigation.href}
+            className="bg-accent text-primary hover:bg-accent/90 block px-3 py-2 rounded-md text-base font-semibold mt-2"
+            onClick={() => setIsMenuOpen(false)}
+          >
+            {rightNavigation.name}
+          </Link>
         </div>
       </div>
     </header>
