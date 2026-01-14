@@ -1,6 +1,6 @@
 'use client';
 
-import { useEffect, useState, useCallback } from 'react';
+import { useEffect, useState, useCallback, useMemo } from 'react';
 import {
   detectUserTimezone,
   getTimezoneFriendlyName,
@@ -108,12 +108,17 @@ export default function BookingModal({
     return 'bookingProgress_General';
   }, [selectedServiceType, defaultServiceType]);
 
+  // Create a stable consultant filter value for useEffect dependencies
+  const consultantFilter = useMemo(() => {
+    return availableConsultants.length === 1 ? availableConsultants[0] : null;
+  }, [availableConsultants.join(',')]);
+
   // Auto-select consultant if only one is available
   useEffect(() => {
-    if (availableConsultants.length === 1 && !selectedConsultant) {
-      setSelectedConsultant(availableConsultants[0]);
+    if (consultantFilter && !selectedConsultant) {
+      setSelectedConsultant(consultantFilter);
     }
-  }, [availableConsultants, selectedConsultant]);
+  }, [consultantFilter, selectedConsultant]);
 
   // Fetch available days of week from Airtable schedules
   useEffect(() => {
@@ -123,9 +128,8 @@ export default function BookingModal({
       setIsLoadingAvailableDays(true);
       try {
         // If only one consultant is available, filter by that consultant
-        const consultant = availableConsultants.length === 1 ? availableConsultants[0] : null;
-        const url = consultant
-          ? `/api/available-days?consultant=${encodeURIComponent(consultant)}`
+        const url = consultantFilter
+          ? `/api/available-days?consultant=${encodeURIComponent(consultantFilter)}`
           : '/api/available-days';
 
         const response = await fetch(url);
@@ -147,7 +151,7 @@ export default function BookingModal({
     };
 
     fetchAvailableDays();
-  }, [isOpen, availableConsultants]);
+  }, [isOpen, consultantFilter]);
 
   // Initialize timezone detection and load saved data
   useEffect(() => {
