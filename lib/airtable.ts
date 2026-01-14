@@ -124,6 +124,7 @@ export interface ServiceConfig {
   duration: number; // in minutes
   price: number;
   description: string;
+  availableConsultants?: ConsultantType[]; // Optional: restrict service to specific consultants
 }
 
 // Service configuration constant
@@ -151,6 +152,7 @@ export const SERVICES: Record<ServiceType, ServiceConfig> = {
     duration: 60,
     price: 0,
     description: 'Turn your health journey into a thriving business',
+    availableConsultants: ['Illiana'], // Only Illiana offers this service
   },
 };
 
@@ -1080,25 +1082,39 @@ export async function getAvailabilityForBothAdvisors(
     const serviceConfig = SERVICES[serviceType];
     const serviceDuration = serviceConfig.duration;
 
+    // Check if other consultant offers this service
+    const otherConsultantOffersService =
+      !serviceConfig.availableConsultants ||
+      serviceConfig.availableConsultants.includes(otherConsultant);
+
     // Get day of week
     const dayOfWeek = getDayOfWeek(date);
 
-    // Get both advisors' weekly schedules
+    // Get selected advisor's schedule (always needed)
+    // Only get other advisor's schedule if they offer this service
     const [selectedSchedule, otherSchedule] = await Promise.all([
       getAdvisorAvailability(selectedConsultant, dayOfWeek),
-      getAdvisorAvailability(otherConsultant, dayOfWeek),
+      otherConsultantOffersService
+        ? getAdvisorAvailability(otherConsultant, dayOfWeek)
+        : Promise.resolve([]), // Empty schedule if they don't offer this service
     ]);
 
-    // Use fallback if needed
+    // Use fallback if needed for selected consultant
     const selectedAvailableBlocks =
       selectedSchedule.length > 0 ? selectedSchedule : generateFallbackSchedule();
-    const otherAvailableBlocks =
-      otherSchedule.length > 0 ? otherSchedule : generateFallbackSchedule();
 
-    // Get days off for both advisors
+    // For other consultant: only use their schedule/fallback if they offer this service
+    const otherAvailableBlocks = otherConsultantOffersService
+      ? (otherSchedule.length > 0 ? otherSchedule : generateFallbackSchedule())
+      : []; // Empty array if they don't offer this service
+
+    // Get days off for selected advisor
+    // Only get other advisor's days off if they offer this service
     const [selectedDaysOff, otherDaysOff] = await Promise.all([
       getAdvisorDaysOff(selectedConsultant, date),
-      getAdvisorDaysOff(otherConsultant, date),
+      otherConsultantOffersService
+        ? getAdvisorDaysOff(otherConsultant, date)
+        : Promise.resolve({ isFullDayOff: true, partialTimeOffRanges: [] }), // Full day off if they don't offer service
     ]);
 
     // Get existing bookings for both advisors
