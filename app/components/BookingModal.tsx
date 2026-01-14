@@ -25,6 +25,7 @@ interface BookingModalProps {
   onClose: () => void;
   defaultConsultant?: ConsultantType;
   defaultServiceType?: ServiceType;
+  availableConsultants?: ConsultantType[];
 }
 
 type BookingStep = 'selection' | 'calendar' | 'timeSlots' | 'contactInfo' | 'success';
@@ -34,6 +35,7 @@ export default function BookingModal({
   onClose,
   defaultConsultant,
   defaultServiceType,
+  availableConsultants = ['Heidi Lynn', 'Illiana'], // Default to all consultants
 }: BookingModalProps) {
   // Modal state
   const [isAnimating, setIsAnimating] = useState(false);
@@ -105,6 +107,13 @@ export default function BookingModal({
     // For generic booking (no pre-selected service), use general key
     return 'bookingProgress_General';
   }, [selectedServiceType, defaultServiceType]);
+
+  // Auto-select consultant if only one is available
+  useEffect(() => {
+    if (availableConsultants.length === 1 && !selectedConsultant) {
+      setSelectedConsultant(availableConsultants[0]);
+    }
+  }, [availableConsultants, selectedConsultant]);
 
   // Fetch available days of week from Airtable schedules
   useEffect(() => {
@@ -663,38 +672,42 @@ export default function BookingModal({
           {/* Selection Step */}
           {step === 'selection' && (
             <div className="space-y-8">
-              {/* Consultant Selection */}
-              <div className="space-y-4">
-                <h3 className="text-xl font-semibold text-primary">Select Your Consultant</h3>
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                  <button
-                    onClick={() => setSelectedConsultant('Heidi Lynn')}
-                    className={`p-6 border-2 rounded-lg transition-all text-left ${
-                      selectedConsultant === 'Heidi Lynn'
-                        ? 'border-primary bg-primary/10'
-                        : 'border-taupe hover:border-primary/50'
-                    }`}
-                  >
-                    <h4 className="text-lg font-semibold text-primary mb-2">Heidi Lynn</h4>
-                    <p className="text-sm text-brown">
-                      Experienced holistic health coach specializing in natural healing and autoimmune recovery
-                    </p>
-                  </button>
-                  <button
-                    onClick={() => setSelectedConsultant('Illiana')}
-                    className={`p-6 border-2 rounded-lg transition-all text-left ${
-                      selectedConsultant === 'Illiana'
-                        ? 'border-primary bg-primary/10'
-                        : 'border-taupe hover:border-primary/50'
-                    }`}
-                  >
-                    <h4 className="text-lg font-semibold text-primary mb-2">Illiana</h4>
-                    <p className="text-sm text-brown">
-                      Specializing in emotional healing, trauma release, and holistic wellness
-                    </p>
-                  </button>
+              {/* Consultant Selection - Only show if multiple consultants available */}
+              {availableConsultants.length > 1 && (
+                <div className="space-y-4">
+                  <h3 className="text-xl font-semibold text-primary">Select Your Consultant</h3>
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    {availableConsultants.map((consultant) => {
+                      const consultantInfo = {
+                        'Heidi Lynn': {
+                          name: 'Heidi Lynn',
+                          description: 'Experienced holistic health coach specializing in natural healing and autoimmune recovery',
+                        },
+                        'Illiana': {
+                          name: 'Illiana',
+                          description: 'Specializing in emotional healing, trauma release, and holistic wellness',
+                        },
+                      };
+                      const info = consultantInfo[consultant];
+
+                      return (
+                        <button
+                          key={consultant}
+                          onClick={() => setSelectedConsultant(consultant)}
+                          className={`p-6 border-2 rounded-lg transition-all text-left ${
+                            selectedConsultant === consultant
+                              ? 'border-primary bg-primary/10'
+                              : 'border-taupe hover:border-primary/50'
+                          }`}
+                        >
+                          <h4 className="text-lg font-semibold text-primary mb-2">{info.name}</h4>
+                          <p className="text-sm text-brown">{info.description}</p>
+                        </button>
+                      );
+                    })}
+                  </div>
                 </div>
-              </div>
+              )}
 
               {/* Service Type Selection */}
               <div className="space-y-4">
@@ -727,11 +740,14 @@ export default function BookingModal({
               <div className="flex justify-end">
                 <button
                   onClick={() => {
-                    if (selectedConsultant && selectedServiceType) {
+                    // Auto-select single consultant if not already selected
+                    const consultant = selectedConsultant || (availableConsultants.length === 1 ? availableConsultants[0] : null);
+                    if (consultant && selectedServiceType) {
+                      if (!selectedConsultant) setSelectedConsultant(consultant);
                       setStep('calendar');
                     }
                   }}
-                  disabled={!selectedConsultant || !selectedServiceType}
+                  disabled={(!selectedConsultant && availableConsultants.length > 1) || !selectedServiceType}
                   className="px-8 py-3 bg-primary text-secondary font-semibold rounded-md hover:bg-primary/90 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
                 >
                   Continue to Calendar

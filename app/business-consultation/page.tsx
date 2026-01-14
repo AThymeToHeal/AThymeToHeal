@@ -1,5 +1,5 @@
 import type { Metadata } from 'next';
-import Link from 'next/link';
+import Booking from '../components/Booking';
 
 export const metadata: Metadata = {
   title: 'Business Consultation - A Thyme to Heal',
@@ -138,14 +138,14 @@ export default function BusinessConsultationPage() {
             Ready to Start Your Journey?
           </h2>
           <p className="text-lg mb-8 text-brown">
-            Take the first step towards building your health-based business and transforming lives.
+            Book a consultation with Illiana to learn more about building your health-based business and transforming lives.
           </p>
-          <Link
-            href="/contact"
-            className="inline-block px-8 py-3 bg-primary text-secondary font-semibold rounded-md hover:bg-primary/90 transition-colors text-lg"
-          >
-            Contact Us to Get Started
-          </Link>
+          <Booking
+            buttonText="Book a Business Consultation"
+            defaultConsultant="Illiana"
+            defaultServiceType="Business Consultation"
+            availableConsultants={['Illiana']}
+          />
         </div>
       </section>
     </div>

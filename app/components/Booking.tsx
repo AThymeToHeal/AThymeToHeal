@@ -8,12 +8,14 @@ interface BookingProps {
   buttonText?: string;
   defaultConsultant?: ConsultantType;
   defaultServiceType?: ServiceType;
+  availableConsultants?: ConsultantType[];
 }
 
 export default function Booking({
   buttonText = 'Book Your Consultation',
   defaultConsultant,
   defaultServiceType,
+  availableConsultants,
 }: BookingProps) {
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [hasSavedProgress, setHasSavedProgress] = useState(false);
@@ -66,6 +68,7 @@ export default function Booking({
         onClose={() => setIsModalOpen(false)}
         defaultConsultant={defaultConsultant}
         defaultServiceType={defaultServiceType}
+        availableConsultants={availableConsultants}
       />
     </>
   );

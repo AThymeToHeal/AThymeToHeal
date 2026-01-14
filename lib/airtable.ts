@@ -116,7 +116,7 @@ export interface AdvisorDaysOffResult {
 }
 
 // Service Types
-export type ServiceType = 'Health Consult' | 'Essential Emotions' | 'Symphony of Cells';
+export type ServiceType = 'Health Consult' | 'Essential Emotions' | 'Symphony of Cells' | 'Business Consultation';
 export type ConsultantType = 'Heidi Lynn' | 'Illiana';
 
 export interface ServiceConfig {
@@ -145,6 +145,12 @@ export const SERVICES: Record<ServiceType, ServiceConfig> = {
     duration: 60,
     price: 60,
     description: 'Identify emotions and create new neuropathways',
+  },
+  'Business Consultation': {
+    name: 'Business Consultation',
+    duration: 60,
+    price: 0,
+    description: 'Turn your health journey into a thriving business',
   },
 };
 
