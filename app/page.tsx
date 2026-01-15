@@ -13,7 +13,7 @@ export default function Home() {
     {
       title: 'Essential Oil Guidance',
       description: 'Not sure which oils are ideal for you? We offer 1:1 calls where we use muscle testing and learn more about you to best identify which oils best support you',
-      backgroundImage: '/images/Bowl-of-greens-image.jpg',
+      backgroundImage: '/images/Bowl-of-greens-image.webp',
     },
     {
       title: 'Essential Emotions Sessions',
@@ -23,7 +23,7 @@ export default function Home() {
     {
       title: 'Educational Workshops',
       description: 'Want to learn more about specific health related topics? We host educational classes monthly',
-      backgroundImage: '/images/Tablets-image.jpg',
+      backgroundImage: '/images/Tablets-image.webp',
     },
   ];
 
