@@ -1,9 +1,18 @@
 import type { Metadata, Viewport } from "next";
+import { Allura } from 'next/font/google';
 import "./globals.css";
 import Header from "./components/Header";
 import Footer from "./components/Footer";
 import { SpeedInsights } from "@vercel/speed-insights/next";
 import { Analytics } from "@vercel/analytics/next";
+
+// Optimize font loading with next/font
+const allura = Allura({
+  weight: '400',
+  subsets: ['latin'],
+  display: 'swap',
+  variable: '--font-script',
+});
 
 export const viewport: Viewport = {
   width: 'device-width',
@@ -22,12 +31,18 @@ export const metadata: Metadata = {
   authors: [{ name: "A Thyme to Heal" }],
   creator: "A Thyme to Heal",
   publisher: "A Thyme to Heal",
+  alternates: {
+    canonical: "https://athymetoheal.org",
+  },
   robots: {
     index: true,
     follow: true,
     googleBot: {
       index: true,
       follow: true,
+      'max-image-preview': 'large',
+      'max-snippet': -1,
+      'max-video-preview': -1,
     },
   },
   openGraph: {
@@ -43,6 +58,9 @@ export const metadata: Metadata = {
     title: "A Thyme to Heal",
     description: "Natural herbal remedies and wellness solutions",
   },
+  verification: {
+    google: 'google-site-verification-placeholder',
+  },
 };
 
 export default function RootLayout({
@@ -51,12 +69,7 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <html lang="en">
-      <head>
-        {/* Preconnect to Google Fonts for faster loading */}
-        <link rel="preconnect" href="https://fonts.googleapis.com" />
-        <link rel="preconnect" href="https://fonts.gstatic.com" crossOrigin="anonymous" />
-      </head>
+    <html lang="en" className={allura.variable}>
       <body className="antialiased flex flex-col min-h-screen">
         <Header />
         <main className="flex-grow">

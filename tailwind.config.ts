@@ -23,7 +23,7 @@ const config: Config = {
       fontFamily: {
         sans: ["var(--font-sans)", "ui-sans-serif", "system-ui", "sans-serif"],
         serif: ["var(--font-serif)", "ui-serif", "Georgia", "serif"],
-        script: ["var(--font-script)", "cursive"],
+        script: ["var(--font-script)", "Allura", "cursive"],
       },
     },
   },

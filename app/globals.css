@@ -1,5 +1,4 @@
-/* Google Fonts - Optimized loading */
-@import url('https://fonts.googleapis.com/css2?family=Allura&display=swap') layer(fonts);
+/* Fonts are now loaded via next/font in layout.tsx for optimal performance */
 
 @tailwind base;
 @tailwind components;
@@ -19,13 +18,21 @@
   --foreground: #2a2319;
   --font-sans: ui-sans-serif, system-ui, sans-serif;
   --font-serif: ui-serif, Georgia, serif;
-  --font-script: "Allura", cursive;
+  /* Font script is now loaded via next/font - variable is set in layout.tsx */
 }
 
 body {
   background: var(--background);
   color: var(--foreground);
   font-family: var(--font-sans);
+}
+
+/* Optimize animations for GPU acceleration - only on interactive elements */
+button:hover,
+a:hover,
+[class*="hover:"]:hover {
+  transform: translateZ(0);
+  will-change: transform;
 }
 
 .line-clamp-3 {
