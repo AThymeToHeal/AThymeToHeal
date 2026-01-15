@@ -10,8 +10,7 @@ const nextConfig: NextConfig = {
   productionBrowserSourceMaps: false,
   // Enable React strict mode for better performance
   reactStrictMode: true,
-  // Minimize JavaScript
-  swcMinify: true,
+  // Note: swcMinify is enabled by default in Next.js 13+
 };
 
 export default nextConfig;
