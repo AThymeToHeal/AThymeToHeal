@@ -14,7 +14,7 @@ export default function AboutPage() {
       <section className="bg-primary text-secondary py-16 px-4">
         <div className="mx-auto max-w-7xl text-center">
           <h1 className="text-4xl md:text-5xl font-serif font-bold mb-4 text-accent">
-            Who is <span className="font-script">A Thyme To Heal</span>?
+            Who is <span className="font-script">A Thyme To Heal?</span>
           </h1>
         </div>
       </section>
@@ -22,11 +22,8 @@ export default function AboutPage() {
       {/* Introduction */}
       <section className="py-16 px-4">
         <div className="mx-auto max-w-4xl text-center">
-          <p className="text-lg md:text-xl leading-relaxed text-brown mb-6">
-            We are a mom daughter team who have both experienced severe health issues and in the midst, found a world of healing and hope. Now our passion is helping others heal in body, mind, and spirit.
-          </p>
           <p className="text-lg md:text-xl leading-relaxed text-brown">
-            Whether dealing with pain born of generational trauma, or deep rooted illness, we are here to offer a variety of natural solutions, health protocols and support. We work individually and as a team depending on the needs of the client. We offer in person and virtual.
+            We&apos;re a mother–daughter team who have both walked long seasons of pain, confusion, and feeling like no one was listening. In those seasons, we discovered something that gave us hope again — a grounded way of healing that blends nature&apos;s rhythms with science‑informed support. Now our passion is helping women who feel unseen, exhausted, or overwhelmed find a steadier path back to themselves.
           </p>
         </div>
       </section>
@@ -52,11 +49,11 @@ export default function AboutPage() {
             {/* Bio */}
             <div>
               <h2 className="text-3xl md:text-4xl font-serif font-bold mb-6 text-primary">
-                Hello, my fellow sojourner!
+                Why I Do This Work
               </h2>
               <div className="space-y-4 text-brown">
                 <p>
-                  I&apos;m Heidi Lynn, and I&apos;m honored to walk this healing path alongside you. My calling in life is to support and empower others as they learn to heal their bodies from the inside out.
+                  Hello, my fellow sojourner! I&apos;m Heidi Lynn, and I&apos;m honored to walk this healing path alongside you. My calling in life is to support and empower others as they learn to heal their bodies from the inside out.
                 </p>
                 <p>
                   Growing up, I was taught that rest was a form of laziness — that if there was time in the day, it should be filled with work. I carried that belief into adulthood, and as a mom and homeschool teacher of five, there was always something to do. To me, rest was perceived as a bad word.
@@ -105,11 +102,11 @@ export default function AboutPage() {
             {/* Bio */}
             <div className="order-2 lg:order-1">
               <h2 className="text-3xl md:text-4xl font-serif font-bold mb-6 text-primary">
-                Hi friend!
+                Why I Do This Work
               </h2>
               <div className="space-y-4 text-brown">
                 <p>
-                  I&apos;m Illiana, and I can&apos;t wait to help you in your thyme to heal. I understand just how lonely this journey can be, as I walked through my own season of chronic illness. For the first year, I was mostly confined to bed—alone, without answers, and searching for relief. After months of silence, I was led toward a path of natural healing, where I learned that sometimes our physical pain is a manifestation of deeper emotional wounds and unresolved trauma.
+                  Hi friend! I&apos;m Illiana, and I can&apos;t wait to help you in your thyme to heal. I understand just how lonely this journey can be, as I walked through my own season of chronic illness. For the first year, I was mostly confined to bed—alone, without answers, and searching for relief. After months of silence, I was led toward a path of natural healing, where I learned that sometimes our physical pain is a manifestation of deeper emotional wounds and unresolved trauma.
                 </p>
                 <p>
                   Over the years that followed, I made healing my priority. I released the version of life I thought I should have and fully surrendered—to the Divine, to rest, and to the process of healing. I spent countless hours pursuing truth and freedom from pain, diving deep into emotional work through practices such as EMDR, emotional release, somatic movement, and rewiring neural pathways. Through this, I healed—and continue to heal—from C-PTSD, anxiety, and depression. I learned what true rest feels like and slowly built a life that is gentle, grounded, and deeply meaningful.

@@ -4,7 +4,7 @@ import type { ServiceType } from '@/lib/airtable';
 
 export const metadata: Metadata = {
   title: 'Services & Pricing - A Thyme To Heal',
-  description: 'Explore our personalized holistic consults including consultations, Essential Emotions sessions, and Symphony of Cells treatments.',
+  description: 'Explore our personalized holistic consultations including one-on-one sessions, Essential Emotions sessions, and Symphony of Cells treatments.',
 };
 
 export default function ServicesPage() {
@@ -18,13 +18,13 @@ export default function ServicesPage() {
     },
     {
       title: 'Symphony of Cells',
-      description: 'A technique using essential oils and therapeutic massage that helps bodies detox and heal. Experience relief and freedom from pain in our cozy, relaxing healing clinic.',
+      description: 'A technique using essential oils applied on the spine and feet. It encompasses a variety of tailored oil applications that target different body systems and related conditions.',
       duration: '30 minutes',
       price: '45',
     },
     {
       title: 'Essential Emotions',
-      description: 'Often our physical pain is manifestation of emotional roots. Begin the journey of identifying emotions and creating new neuropathways in your brain with an Essential Emotions session.',
+      description: 'Often our physical pain is a manifestation of emotional roots. Begin the journey of identifying emotions and creating new neuropathways in your brain with an Essential Emotions session.',
       duration: '1 hr',
       price: '60',
     },
@@ -36,7 +36,7 @@ export default function ServicesPage() {
       duration: '6 weeks',
       price: '350',
       paymentOptions: 'Optional split: $175 upfront + $175 halfway',
-      tagline: 'This is your gentle first step into consistent health. Perfect if you&apos;re feeling overwhelmed or unsure where to start.',
+      tagline: 'Your nourishing first step. If you\'re unsure where to begin or feel overwhelmed, this is for you. You\'ll receive consistent support so your body and mind start to feel grounded and balanced.',
       included: [
         'Intake + follow-up consults',
         '6 Symphony of Cells sessions (1 per week)',
@@ -46,6 +46,7 @@ export default function ServicesPage() {
         'New to wellness work',
         'Want simple, structured habits',
         'Looking for foundational support without overwhelm',
+        'Ready to begin your healing journey',
       ],
       outcome: 'Build a strong, nourished foundation for your body and mind, with tools to support your daily habits.',
     },
@@ -53,8 +54,8 @@ export default function ServicesPage() {
       title: 'Tier 2 — A Thyme to Heal',
       duration: '8 weeks',
       price: '699',
-      paymentOptions: 'Full upfront recommended',
-      tagline: 'This is your integrated, next-level container. Combine emotional work, body support, and lifestyle guidance to create lasting change.',
+      paymentOptions: '',
+      tagline: 'A fuller container of support — combining emotional work, body-centered sessions, and lifestyle guidance to create real momentum. You\'ll build routines that feel nurturing rather than burdensome and create patterns that gently support a healthy lifestyle fit for you.',
       included: [
         'Intake + follow-up consults',
         'A 90 day reset in the beginning to start off with clean slate',
@@ -75,8 +76,8 @@ export default function ServicesPage() {
       title: 'Tier 3 — Deep Roots Healing',
       duration: '10 weeks',
       price: '2,000',
-      paymentOptions: 'Full upfront',
-      tagline: 'This is your intensive, highly personalized program for complex or layered health challenges.',
+      paymentOptions: '',
+      tagline: 'Chronic illness can steal your hope and make you feel unheard. This container is for women who are tired, discouraged, and done doing it alone. We move at your pace and support your whole system through emotional work, nervous system support, and hands-on body care that aims at root patterns—not just symptoms. You don\'t have to carry this by yourself anymore.',
       included: [
         'Intake + follow-up consults',
         '5 Essential Emotions sessions (every 2 weeks)',
@@ -100,10 +101,33 @@ export default function ServicesPage() {
       <section className="bg-primary text-secondary py-16 px-4">
         <div className="mx-auto max-w-7xl text-center">
           <h1 className="text-4xl md:text-5xl font-serif font-bold mb-4 text-accent">
-            <span className="font-script">A Thyme to Heal</span>: Services & Pricing
+            <span className="font-script">A Thyme to Heal: </span>Services & Pricing
           </h1>
           <p className="text-lg md:text-xl max-w-3xl mx-auto">
-            We offer personalized holistic consults tailored to your needs. Explore our services and choose the option that works best for you
+            We offer personalized holistic consultations tailored to your needs. Explore our services and choose the option that works best for you
+          </p>
+        </div>
+      </section>
+
+      {/* Hippocrates Quote */}
+      <section className="py-12 px-4 bg-sage/10">
+        <div className="mx-auto max-w-3xl">
+          <blockquote className="text-center">
+            <p className="text-lg md:text-xl text-brown italic mb-4">
+              &ldquo;If someone wishes for good health, one must first ask oneself if he or she is ready to do away with the reasons for their illness. Only then is it possible to help them.&rdquo;
+            </p>
+            <footer className="text-brown font-semibold">
+              — Hippocrates
+            </footer>
+          </blockquote>
+        </div>
+      </section>
+
+      {/* Intro Section */}
+      <section className="py-12 px-4">
+        <div className="mx-auto max-w-3xl text-center">
+          <p className="text-lg md:text-xl text-brown leading-relaxed">
+            If you&apos;ve ever felt stuck, exhausted, or unsure where to begin with your health — you&apos;re not alone. We meet you exactly where you are and walk with you step-by-step. Our approach blends nature&apos;s wisdom with what modern science understands about the human body, so you feel supported, seen, and empowered to make the changes that matter most.
           </p>
         </div>
       </section>
@@ -196,9 +220,11 @@ export default function ServicesPage() {
                     <p className="text-4xl font-bold text-primary">
                       ${bundle.price}
                     </p>
-                    <p className="text-xs text-brown mt-1 italic">
-                      {bundle.paymentOptions}
-                    </p>
+                    {bundle.paymentOptions && (
+                      <p className="text-xs text-brown mt-1 italic">
+                        {bundle.paymentOptions}
+                      </p>
+                    )}
                   </div>
 
                   {/* Tagline */}
@@ -262,9 +288,16 @@ export default function ServicesPage() {
             Ready to Begin Your Healing Journey?
           </h2>
           <p className="text-lg mb-8 text-brown">
-            All services are offered by both our wellness guides and can be scheduled in-person or virtually to accommodate your needs.
+            Most services are offered by both our wellness guides and can be scheduled in-person or virtually to accommodate your needs.
           </p>
           <Booking />
+
+          {/* Legal Disclaimer */}
+          <div className="mt-12 pt-8 border-t border-taupe">
+            <p className="text-sm text-brown/70 italic text-center max-w-2xl mx-auto">
+              Our services support wellbeing and education. They are not medical diagnoses or treatments. We encourage you to maintain ongoing care with your licensed providers.
+            </p>
+          </div>
         </div>
       </section>
     </div>

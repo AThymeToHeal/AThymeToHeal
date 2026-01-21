@@ -26,9 +26,38 @@ export default function BusinessConsultationPage() {
         <div className="mx-auto max-w-4xl">
           {/* Introduction */}
           <div className="bg-white p-8 rounded-lg shadow-md border border-taupe mb-12">
-            <p className="text-lg text-brown leading-relaxed">
-              This program is for women ages 20–60 who are ready to take their personal health experiences and transform them into passion, purpose, and income. No prior business experience is needed — just a desire to help others, create freedom, and build a beautiful life on your own terms. Whether you&apos;re a young mom, a woman who is ready to achieve financial freedom, or someone ready to leave a full-time job behind, this container is for you.
+            <p className="text-lg text-brown leading-relaxed mb-6">
+              This program is for women ages 20–60 who are ready to take their personal health experiences and transform them into passion, purpose, and income. No prior business experience is needed — just a desire to help others, create freedom, and build a beautiful life on your own terms.
             </p>
+            <div className="space-y-3">
+              <div className="flex items-start">
+                <svg className="w-6 h-6 text-accent mr-3 flex-shrink-0 mt-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
+                </svg>
+                <div>
+                  <span className="text-brown font-semibold">Practitioners</span>
+                  <span className="text-brown"> — Grow your practice without losing your peace</span>
+                </div>
+              </div>
+              <div className="flex items-start">
+                <svg className="w-6 h-6 text-accent mr-3 flex-shrink-0 mt-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
+                </svg>
+                <div>
+                  <span className="text-brown font-semibold">Heart-Led Entrepreneurs</span>
+                  <span className="text-brown"> — Build a business that feels nourishing, not draining</span>
+                </div>
+              </div>
+              <div className="flex items-start">
+                <svg className="w-6 h-6 text-accent mr-3 flex-shrink-0 mt-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
+                </svg>
+                <div>
+                  <span className="text-brown font-semibold">Creatives & Coaches</span>
+                  <span className="text-brown"> — Turn your experience into impact and income</span>
+                </div>
+              </div>
+            </div>
           </div>
 
           {/* How I Help You */}

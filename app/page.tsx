@@ -56,8 +56,67 @@ export default function Home() {
         </div>
       </section>
 
-      {/* Services Highlights */}
+      {/* WHO We Serve Section */}
+      <section className="py-16 px-4 bg-sage/10">
+        <div className="mx-auto max-w-4xl text-center">
+          <h2 className="text-3xl md:text-4xl font-serif font-bold mb-6 text-primary">
+            Who This Is For
+          </h2>
+          <p className="text-lg md:text-xl text-brown leading-relaxed mb-6">
+            For the woman who feels overwhelmed, exhausted, or unsure where to begin — A Thyme to Heal offers compassionate guidance rooted in nature and science to help you create the life of your dreams.
+          </p>
+          <p className="text-lg md:text-xl text-brown leading-relaxed font-semibold">
+            Real support for your body and spirit — rooted in what&apos;s natural and proven. We guide you gently back to balance so you can feel more vibrant, grounded, and in control of your health journey.
+          </p>
+        </div>
+      </section>
+
+      {/* 3-Step Pathway */}
       <section className="py-16 px-4 bg-secondary">
+        <div className="mx-auto max-w-5xl">
+          <h2 className="text-3xl md:text-4xl font-serif font-bold text-center mb-12 text-primary">
+            Your Path to Healing
+          </h2>
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
+            <div className="text-center">
+              <div className="w-16 h-16 bg-primary rounded-full flex items-center justify-center mx-auto mb-4">
+                <span className="text-3xl font-bold text-accent">1</span>
+              </div>
+              <h3 className="text-xl font-semibold text-primary mb-3">
+                Explore Support Options
+              </h3>
+              <p className="text-brown">
+                Discover the services and programs that resonate with your unique needs and wellness goals.
+              </p>
+            </div>
+            <div className="text-center">
+              <div className="w-16 h-16 bg-primary rounded-full flex items-center justify-center mx-auto mb-4">
+                <span className="text-3xl font-bold text-accent">2</span>
+              </div>
+              <h3 className="text-xl font-semibold text-primary mb-3">
+                Choose What Fits Your Needs
+              </h3>
+              <p className="text-brown">
+                Select the path that feels right for you — whether it&apos;s a single session or a comprehensive program.
+              </p>
+            </div>
+            <div className="text-center">
+              <div className="w-16 h-16 bg-primary rounded-full flex items-center justify-center mx-auto mb-4">
+                <span className="text-3xl font-bold text-accent">3</span>
+              </div>
+              <h3 className="text-xl font-semibold text-primary mb-3">
+                Start Feeling More Grounded
+              </h3>
+              <p className="text-brown">
+                Begin your journey with support, guidance, and a clear path forward to lasting wellness.
+              </p>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      {/* Services Highlights */}
+      <section className="py-16 px-4 bg-background">
         <div className="mx-auto max-w-7xl">
           <h2 className="text-3xl md:text-4xl font-serif font-bold text-center mb-12 text-primary">
             How We Can Help You
@@ -117,7 +176,7 @@ export default function Home() {
           {/* About Us Introduction */}
           <div className="mx-auto max-w-4xl text-center mb-16">
             <h2 className="text-3xl md:text-4xl font-serif font-bold text-center mb-8 text-white">
-              Who is <span className="font-script text-accent">A Thyme To Heal</span>?
+              Who is <span className="font-script text-accent">A Thyme To Heal?</span>
             </h2>
             <p className="text-lg md:text-xl leading-relaxed text-white/95 mb-6">
               We are a mom daughter team who have both experienced severe health issues and in the midst, found a world of healing and hope. Now our passion is helping others heal in body, mind, and spirit.
