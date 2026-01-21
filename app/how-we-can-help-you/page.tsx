@@ -32,7 +32,7 @@ export default function ServicesPage() {
 
   const bundles = [
     {
-      title: 'Tier 1 — Back to Basics',
+      title: 'Back to Basics Package',
       duration: '6 weeks',
       price: '350',
       paymentOptions: 'Optional split: $175 upfront + $175 halfway',
@@ -51,7 +51,7 @@ export default function ServicesPage() {
       outcome: 'Build a strong, nourished foundation for your body and mind, with tools to support your daily habits.',
     },
     {
-      title: 'Tier 2 — A Thyme to Heal',
+      title: 'A Thyme to Heal Package',
       duration: '8 weeks',
       price: '699',
       paymentOptions: '',
@@ -73,7 +73,7 @@ export default function ServicesPage() {
       outcome: 'Transform your daily routines, regulate your emotions, and create balanced, sustainable practices that support your health and energy.',
     },
     {
-      title: 'Tier 3 — Deep Roots Healing',
+      title: 'Deep Roots Healing Package',
       duration: '10 weeks',
       price: '2,000',
       paymentOptions: '',
