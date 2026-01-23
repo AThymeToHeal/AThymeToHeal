@@ -68,7 +68,7 @@ export default function BookingModal({
   // Fully booked dates state (for calendar indicators)
   const [fullyBookedDates, setFullyBookedDates] = useState<Set<string>>(new Set());
   const [isLoadingBookedDates, setIsLoadingBookedDates] = useState(false);
-  const [cachedMonths, setCachedMonths] = useState<Map<string, string[]>>(new Map());
+  const [cachedMonths, setCachedMonths] = useState<Map<string, { dates: string[]; timestamp: number }>>(new Map());
 
   // Available days of week state (from Airtable schedules)
   const [availableDaysOfWeek, setAvailableDaysOfWeek] = useState<Set<string>>(new Set());
@@ -210,11 +210,12 @@ export default function BookingModal({
       const year = date.getFullYear();
       const month = date.getMonth() + 1;
       const cacheKey = `${year}-${month}-${selectedConsultant || 'all'}`;
+      const CACHE_TTL = 5 * 60 * 1000; // 5 minutes
 
-      // Check cache first
-      if (cachedMonths.has(cacheKey)) {
-        const cached = cachedMonths.get(cacheKey)!;
-        setFullyBookedDates(new Set(cached));
+      // Check cache first with TTL validation
+      const cached = cachedMonths.get(cacheKey);
+      if (cached && Date.now() - cached.timestamp < CACHE_TTL) {
+        setFullyBookedDates(new Set(cached.dates));
         return;
       }
 
@@ -237,7 +238,7 @@ export default function BookingModal({
         }
         const bookedDates: string[] = await response.json();
 
-        setCachedMonths((prev) => new Map(prev).set(cacheKey, bookedDates));
+        setCachedMonths((prev) => new Map(prev).set(cacheKey, { dates: bookedDates, timestamp: Date.now() }));
         setFullyBookedDates(new Set(bookedDates));
       } catch (error) {
         if (retryCount < 2) {

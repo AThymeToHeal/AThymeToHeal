@@ -1,10 +1,18 @@
 import { NextResponse } from 'next/server';
 import { getTestimonials, createTestimonial, type Testimonial } from '@/lib/airtable';
 
+// Cache testimonials for 30 minutes
+export const revalidate = 1800;
+
 export async function GET() {
   try {
     const testimonials = await getTestimonials();
-    return NextResponse.json(testimonials, { status: 200 });
+    return NextResponse.json(testimonials, {
+      status: 200,
+      headers: {
+        'Cache-Control': 'public, s-maxage=1800, stale-while-revalidate=900',
+      },
+    });
   } catch (error) {
     console.error('Error in testimonials GET API:', error);
     return NextResponse.json(

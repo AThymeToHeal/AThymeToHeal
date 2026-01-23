@@ -3,6 +3,10 @@ import Airtable from 'airtable';
 // Lazy initialization of Airtable - only runs when actually needed
 let _base: ReturnType<Airtable['base']> | null = null;
 
+// In-memory cache for advisor schedules (weekly schedules are static)
+const SCHEDULE_CACHE = new Map<string, { data: string[]; timestamp: number }>();
+const CACHE_TTL = 24 * 60 * 60 * 1000; // 24 hours
+
 function getBase() {
   if (_base) return _base;
 
@@ -747,25 +751,9 @@ export async function getFAQs(): Promise<FAQ[]> {
 }
 
 export async function trackFAQClick(faqId: string) {
-  try {
-    // Increment the click count on the FAQ record
-    const record = await getBase()(TABLES.FAQS).find(faqId);
-    const currentCount = (record.get('ClickCount') as number) || 0;
-
-    await getBase()(TABLES.FAQS).update([
-      {
-        id: faqId,
-        fields: {
-          ClickCount: currentCount + 1,
-        },
-      } as any,
-    ]);
-
-    return { success: true };
-  } catch (error) {
-    console.error('Error tracking FAQ click:', error);
-    throw error;
-  }
+  // FAQ click tracking disabled to reduce Airtable API usage
+  // Analytics can be tracked client-side via localStorage if needed
+  return { success: true };
 }
 
 // ============================================================================
@@ -844,6 +832,15 @@ export async function getAdvisorAvailability(
   dayOfWeek: string
 ): Promise<string[]> {
   try {
+    // Check cache first (24-hour TTL for static weekly schedules)
+    const cacheKey = `${consultant}:${dayOfWeek}`;
+    const cached = SCHEDULE_CACHE.get(cacheKey);
+
+    if (cached && Date.now() - cached.timestamp < CACHE_TTL) {
+      return cached.data;
+    }
+
+    // Fetch from Airtable if not cached or expired
     const records = await getBase()(TABLES.ADVISOR_AVAILABILITY)
       .select({
         filterByFormula: `AND({Consultant} = '${consultant}', {DayOfWeek} = '${dayOfWeek}', {IsActive})`,
@@ -852,6 +849,8 @@ export async function getAdvisorAvailability(
 
     // Should only be one record per advisor per day
     if (records.length === 0) {
+      // Cache empty result to avoid repeated failed lookups
+      SCHEDULE_CACHE.set(cacheKey, { data: [], timestamp: Date.now() });
       return [];
     }
 
@@ -865,7 +864,12 @@ export async function getAdvisorAvailability(
     }
 
     // Generate 30-minute time slots from the schedule
-    return generateTimeSlotsFromRange(startTime, endTime);
+    const schedule = generateTimeSlotsFromRange(startTime, endTime);
+
+    // Store in cache with timestamp
+    SCHEDULE_CACHE.set(cacheKey, { data: schedule, timestamp: Date.now() });
+
+    return schedule;
   } catch (error) {
     console.error('Error fetching advisor availability:', error);
     // Return empty array - fallback logic will handle this

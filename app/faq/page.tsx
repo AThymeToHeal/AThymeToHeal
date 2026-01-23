@@ -10,7 +10,7 @@ export const metadata: Metadata = {
 async function getFAQs() {
   try {
     const res = await fetch(`${process.env.NEXT_PUBLIC_SITE_URL || 'http://localhost:3000'}/api/faqs`, {
-      cache: 'no-store', // Always fetch fresh data
+      next: { revalidate: 3600 }, // Cache for 1 hour (ISR)
     });
 
     if (!res.ok) {
