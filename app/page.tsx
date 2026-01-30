@@ -63,10 +63,10 @@ export default function Home() {
             Who This Is For
           </h2>
           <p className="text-lg md:text-xl text-brown leading-relaxed mb-6">
-            For the woman who feels overwhelmed, exhausted, or unsure where to begin — A Thyme to Heal offers compassionate guidance rooted in nature and science to help you create the life of your dreams.
+            For the woman who feels overwhelmed, exhausted, or unsure where to begin, A Thyme to Heal offers compassionate guidance rooted in nature and science to help you create the life of your dreams.
           </p>
           <p className="text-lg md:text-xl text-brown leading-relaxed font-semibold">
-            Real support for your body and spirit — rooted in what&apos;s natural and proven. We guide you gently back to balance so you can feel more vibrant, grounded, and in control of your health journey.
+            Real support for your body and spirit, rooted in what&apos;s natural and proven. We guide you gently back to balance so you can feel more vibrant, grounded, and in control of your health journey.
           </p>
         </div>
       </section>
@@ -97,7 +97,7 @@ export default function Home() {
                 Choose What Fits Your Needs
               </h3>
               <p className="text-brown">
-                Select the path that feels right for you — whether it&apos;s a single session or a comprehensive program.
+                Select the path that feels right for you, whether it&apos;s a single session or a comprehensive program.
               </p>
             </div>
             <div className="text-center">

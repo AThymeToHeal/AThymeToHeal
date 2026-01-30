@@ -19,7 +19,7 @@ export default function ContactPage() {
             We&apos;re so glad you&apos;re here.
           </p>
           <p className="text-base md:text-lg max-w-3xl mx-auto">
-            If you&apos;re feeling overwhelmed, unsure where to begin, or just need someone to listen — you&apos;ve landed in a safe place. You don&apos;t have to figure this all out alone anymore. Whether you want to ask a question, explore which support feels right, or start with a gentle first step — we&apos;d love to hear from you.
+            If you&apos;re feeling overwhelmed, unsure where to begin, or just need someone to listen, you&apos;ve landed in a safe place. You don&apos;t have to figure this all out alone anymore. Whether you want to ask a question, explore which support feels right, or start with a gentle first step, we&apos;d love to hear from you.
           </p>
         </div>
       </section>
@@ -34,12 +34,12 @@ export default function ContactPage() {
                 Send Us a Message
               </h2>
               <p className="text-brown mb-6">
-                <strong>Not Sure What You Need Yet?</strong> That&apos;s okay. Just tell us what you&apos;re experiencing and we&apos;ll help guide you. There&apos;s no pressure — only support. We know reaching out can feel intimidating — especially when you&apos;ve felt dismissed or unheard in the past. We see you, we hear you, and we&apos;re here for you.
+                <strong>Not Sure What You Need Yet?</strong> That&apos;s okay. Just tell us what you&apos;re experiencing and we&apos;ll help guide you. There&apos;s no pressure, only support. We know reaching out can feel intimidating, especially when you&apos;ve felt dismissed or unheard in the past. We see you, we hear you, and we&apos;re here for you.
               </p>
               <div className="bg-secondary p-8 rounded-lg shadow-md border border-taupe">
                 <ContactForm />
                 <p className="text-sm text-brown/70 italic text-center mt-4">
-                  We read every message personally — thank you for trusting us.
+                  We read every message personally. Thank you for trusting us.
                 </p>
               </div>
             </div>

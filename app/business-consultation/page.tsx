@@ -27,7 +27,7 @@ export default function BusinessConsultationPage() {
           {/* Introduction */}
           <div className="bg-white p-8 rounded-lg shadow-md border border-taupe mb-12">
             <p className="text-lg text-brown leading-relaxed mb-6">
-              This program is for women ages 20–60 who are ready to take their personal health experiences and transform them into passion, purpose, and income. No prior business experience is needed — just a desire to help others, create freedom, and build a beautiful life on your own terms.
+              This program is for women ages 20-60 who are ready to take their personal health experiences and transform them into passion, purpose, and income. No prior business experience is needed, just a desire to help others, create freedom, and build a beautiful life on your own terms.
             </p>
             <div className="space-y-3">
               <div className="flex items-start">
@@ -36,7 +36,7 @@ export default function BusinessConsultationPage() {
                 </svg>
                 <div>
                   <span className="text-brown font-semibold">Practitioners</span>
-                  <span className="text-brown"> — Grow your practice without losing your peace</span>
+                  <span className="text-brown"> Grow your practice without losing your peace</span>
                 </div>
               </div>
               <div className="flex items-start">
@@ -45,7 +45,7 @@ export default function BusinessConsultationPage() {
                 </svg>
                 <div>
                   <span className="text-brown font-semibold">Heart-Led Entrepreneurs</span>
-                  <span className="text-brown"> — Build a business that feels nourishing, not draining</span>
+                  <span className="text-brown"> Build a business that feels nourishing, not draining</span>
                 </div>
               </div>
               <div className="flex items-start">
@@ -54,7 +54,7 @@ export default function BusinessConsultationPage() {
                 </svg>
                 <div>
                   <span className="text-brown font-semibold">Creatives & Coaches</span>
-                  <span className="text-brown"> — Turn your experience into impact and income</span>
+                  <span className="text-brown"> Turn your experience into impact and income</span>
                 </div>
               </div>
             </div>
@@ -90,7 +90,7 @@ export default function BusinessConsultationPage() {
                 </li>
               </ul>
               <p className="text-lg text-brown leading-relaxed">
-                Through 1:1 coaching, encouragement, goal-setting, and ongoing support, I help you create a clear, simple plan that&apos;s easy to follow and designed for success. Beyond business, I mentor you personally — helping you understand your own strengths, story, and potential so you can show up authentically in your business.
+                Through 1:1 coaching, encouragement, goal-setting, and ongoing support, I help you create a clear, simple plan that&apos;s easy to follow and designed for success. Beyond business, I mentor you personally, helping you understand your own strengths, story, and potential so you can show up authentically in your business.
               </p>
             </div>
           </div>
@@ -102,7 +102,7 @@ export default function BusinessConsultationPage() {
             </h2>
             <div className="bg-white p-8 rounded-lg shadow-md border border-taupe">
               <p className="text-lg text-brown leading-relaxed">
-                We genuinely care about your success — in business and in life. We want to see you thrive in every area, achieve your dreams, and build the life you&apos;ve always imagined. We are committed to supporting you fully, helping you uncover your story, strengths, and potential so you can show up authentically in your business. Your health and mental health is our top priority and will always come before business.
+                We genuinely care about your success in business and in life. We want to see you thrive in every area, achieve your dreams, and build the life you&apos;ve always imagined. We are committed to supporting you fully, helping you uncover your story, strengths, and potential so you can show up authentically in your business. Your health and mental health is our top priority and will always come before business.
               </p>
             </div>
           </div>
@@ -150,10 +150,10 @@ export default function BusinessConsultationPage() {
             </h2>
             <div className="bg-white p-8 rounded-lg shadow-md border border-taupe">
               <p className="text-lg text-brown mb-4 leading-relaxed">
-                This is a long-term mentorship, designed to guide you as you build your health business and step into your full potential. Most clients experience the most intense support in the first 6–12 months, with weekly calls, group support, and 1:1 coaching.
+                This is a long-term mentorship, designed to guide you as you build your health business and step into your full potential. Most clients experience the most intense support in the first 6-12 months, with weekly calls, group support, and 1:1 coaching.
               </p>
               <p className="text-lg text-brown leading-relaxed">
-                Some clients move through the program faster — as little as six weeks — depending on your goals and pace. You&apos;ll have ongoing access to mentorship and guidance as long as you&apos;re building your business, so you&apos;re never navigating it alone.
+                Some clients move through the program faster, as little as six weeks, depending on your goals and pace. You&apos;ll have ongoing access to mentorship and guidance as long as you&apos;re building your business, so you&apos;re never navigating it alone.
               </p>
             </div>
           </div>

@@ -55,7 +55,7 @@ export default function ServicesPage() {
       duration: '8 weeks',
       price: '699',
       paymentOptions: '',
-      tagline: 'A fuller container of support — combining emotional work, body-centered sessions, and lifestyle guidance to create real momentum. You\'ll build routines that feel nurturing rather than burdensome and create patterns that gently support a healthy lifestyle fit for you.',
+      tagline: 'A fuller container of support combining emotional work, body-centered sessions, and lifestyle guidance to create real momentum. You\'ll build routines that feel nurturing rather than burdensome and create patterns that gently support a healthy lifestyle fit for you.',
       included: [
         'Intake + follow-up consults',
         'A 90 day reset in the beginning to start off with clean slate',
@@ -77,7 +77,7 @@ export default function ServicesPage() {
       duration: '10 weeks',
       price: '2,000',
       paymentOptions: '',
-      tagline: 'Chronic illness can steal your hope and make you feel unheard. This container is for women who are tired, discouraged, and done doing it alone. We move at your pace and support your whole system through emotional work, nervous system support, and hands-on body care that aims at root patterns—not just symptoms. You don\'t have to carry this by yourself anymore.',
+      tagline: 'Chronic illness can steal your hope and make you feel unheard. This container is for women who are tired, discouraged, and done doing it alone. We move at your pace and support your whole system through emotional work, nervous system support, and hands-on body care that aims at root patterns, not just symptoms. You don\'t have to carry this by yourself anymore.',
       included: [
         'Intake + follow-up consults',
         '5 Essential Emotions sessions (every 2 weeks)',
@@ -127,7 +127,7 @@ export default function ServicesPage() {
       <section className="py-12 px-4">
         <div className="mx-auto max-w-3xl text-center">
           <p className="text-lg md:text-xl text-brown leading-relaxed">
-            If you&apos;ve ever felt stuck, exhausted, or unsure where to begin with your health — you&apos;re not alone. We meet you exactly where you are and walk with you step-by-step. Our approach blends nature&apos;s wisdom with what modern science understands about the human body, so you feel supported, seen, and empowered to make the changes that matter most.
+            If you&apos;ve ever felt stuck, exhausted, or unsure where to begin with your health, you&apos;re not alone. We meet you exactly where you are and walk with you step-by-step. Our approach blends nature&apos;s wisdom with what modern science understands about the human body, so you feel supported, seen, and empowered to make the changes that matter most.
           </p>
         </div>
       </section>

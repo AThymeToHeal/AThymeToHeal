@@ -27,7 +27,7 @@ export default function HealthBusinessCoachingPage() {
         <div className="mx-auto max-w-4xl">
           <div className="text-center mb-12">
             <p className="text-lg md:text-xl leading-relaxed text-brown mb-6">
-              Have you walked through your own healing journey and sensed that your experience was meant to become something more? Do you feel called to build a business in the health and wellness space—but want to do it in a way that feels aligned, sustainable, and true?
+              Have you walked through your own healing journey and sensed that your experience was meant to become something more? Do you feel called to build a business in the health and wellness space, but want to do it in a way that feels aligned, sustainable, and true?
             </p>
             <p className="text-lg md:text-xl leading-relaxed text-brown">
               You&apos;re in the right place.
@@ -48,7 +48,7 @@ export default function HealthBusinessCoachingPage() {
                 Business Strategy & Foundation
               </h3>
               <p className="text-brown leading-relaxed">
-                Build your business from the ground up with clarity and intention. We help you define your niche, understand your ideal clients, create sustainable offerings, and develop a business model that supports your life—not depletes it.
+                Build your business from the ground up with clarity and intention. We help you define your niche, understand your ideal clients, create sustainable offerings, and develop a business model that supports your life, not depletes it.
               </p>
             </div>
 
@@ -66,7 +66,7 @@ export default function HealthBusinessCoachingPage() {
                 Nervous System-Centered Growth
               </h3>
               <p className="text-brown leading-relaxed">
-                Growing a business doesn&apos;t mean burning out. We prioritize nervous system regulation, sustainable pacing, and building work rhythms that honor your capacity. Success and rest are not opposites—they&apos;re partners.
+                Growing a business doesn&apos;t mean burning out. We prioritize nervous system regulation, sustainable pacing, and building work rhythms that honor your capacity. Success and rest are not opposites, they&apos;re partners.
               </p>
             </div>
 
@@ -75,7 +75,7 @@ export default function HealthBusinessCoachingPage() {
                 Integrity & Ethics
               </h3>
               <p className="text-brown leading-relaxed">
-                Build a business rooted in honesty, transparency, and ethical practices. We help you navigate the wellness space with integrity—creating offerings that truly serve, pricing that honors your value, and marketing that feels aligned.
+                Build a business rooted in honesty, transparency, and ethical practices. We help you navigate the wellness space with integrity, creating offerings that truly serve, pricing that honors your value, and marketing that feels aligned.
               </p>
             </div>
           </div>
@@ -90,13 +90,13 @@ export default function HealthBusinessCoachingPage() {
           </h2>
           <div className="space-y-6 text-brown text-lg leading-relaxed">
             <p>
-              We build slowly and intentionally. There are no quick fixes or overnight success formulas here—just honest, grounded work that creates something sustainable and real.
+              We build slowly and intentionally. There are no quick fixes or overnight success formulas here, just honest, grounded work that creates something sustainable and real.
             </p>
             <p>
               We focus on alignment over hustle. Your business should feel like an extension of your values, not a compromise of them. We help you create work that supports your wellbeing rather than demanding you sacrifice it.
             </p>
             <p>
-              We honor the journey. Your healing story carries purpose, and we believe it can be stewarded into a business that feels rooted, nourishing, and true. We walk alongside you as you build something meaningful—one intentional step at a time.
+              We honor the journey. Your healing story carries purpose, and we believe it can be stewarded into a business that feels rooted, nourishing, and true. We walk alongside you as you build something meaningful, one intentional step at a time.
             </p>
           </div>
         </div>
@@ -112,7 +112,7 @@ export default function HealthBusinessCoachingPage() {
             <p className="text-lg text-brown italic">
               &quot;Working with Illiana transformed not just my business, but my entire relationship with work. She helped me build something sustainable that honors rest and real life.&quot;
             </p>
-            <p className="mt-4 text-primary font-semibold">— Past Client</p>
+            <p className="mt-4 text-primary font-semibold">Past Client</p>
           </div>
         </div>
       </section>
