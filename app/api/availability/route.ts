@@ -38,11 +38,17 @@ export async function GET(request: Request) {
     }
 
     // Get availability for both advisors using the new function
-    const { selectedAdvisorSlots, otherAdvisorSlots, otherConsultantName } =
+    const { selectedAdvisorSlots, otherAdvisorSlots, otherConsultantName, bookingDataUnavailable } =
       await getAvailabilityForBothAdvisors(date, consultant, serviceType);
 
     // Return the selected advisor's slots (includes both available and "available with other")
-    return NextResponse.json(selectedAdvisorSlots, { status: 200 });
+    // Include a header to indicate if booking data verification failed
+    return NextResponse.json(selectedAdvisorSlots, {
+      status: 200,
+      headers: {
+        'X-Booking-Data-Unavailable': bookingDataUnavailable ? 'true' : 'false',
+      },
+    });
   } catch (error) {
     console.error('Error in availability API:', error);
     return NextResponse.json(

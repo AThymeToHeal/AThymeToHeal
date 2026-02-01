@@ -20,6 +20,8 @@ interface MaintenanceBookingProps {
   currentMedications?: string;
   healthConditions?: string;
   preferredContactMethod?: string;
+  warningTitle?: string;
+  warningMessage?: string;
 }
 
 export default function MaintenanceBooking({
@@ -38,6 +40,8 @@ export default function MaintenanceBooking({
   currentMedications,
   healthConditions,
   preferredContactMethod,
+  warningTitle = 'Booking System Under Maintenance',
+  warningMessage = "Our online booking system is temporarily unavailable. Please copy your booking details below and send them to us via email. We'll confirm your appointment as soon as possible.",
 }: MaintenanceBookingProps) {
   const [copyStatus, setCopyStatus] = useState<'idle' | 'copied'>('idle');
 
@@ -96,12 +100,10 @@ Health Conditions: ${healthConditions || 'Not provided'}
           <div className="text-3xl">⚠️</div>
           <div className="flex-1">
             <h3 className="text-xl font-semibold text-primary mb-2">
-              Booking System Under Maintenance
+              {warningTitle}
             </h3>
             <p className="text-brown mb-4">
-              Our online booking system is temporarily unavailable. Please copy your booking
-              details below and send them to us via email. We&apos;ll confirm your appointment as
-              soon as possible.
+              {warningMessage}
             </p>
             <div className="bg-white/50 p-3 rounded-md">
               <p className="text-sm font-medium text-brown">

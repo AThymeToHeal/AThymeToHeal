@@ -641,7 +641,9 @@ export async function getBookingsForDate(
     });
   } catch (error) {
     console.error('Error fetching bookings for date:', error);
-    return [];
+    // CRITICAL: Don't return empty array - this would make all slots appear available
+    // and could allow double booking! Throw error to signal data unavailable.
+    throw new Error('BOOKING_DATA_UNAVAILABLE');
   }
 }
 
@@ -1152,6 +1154,7 @@ export async function getAvailabilityForBothAdvisors(
   selectedAdvisorSlots: TimeSlot[];
   otherAdvisorSlots: TimeSlot[];
   otherConsultantName: ConsultantType;
+  bookingDataUnavailable: boolean;
 }> {
   try {
     // Determine the other consultant
@@ -1198,7 +1201,23 @@ export async function getAvailabilityForBothAdvisors(
     ]);
 
     // Get existing bookings for both advisors
-    const bookings = await getBookingsForDate(date);
+    // If booking data is unavailable (API failure), allow booking but flag for manual verification
+    let bookings: Array<{ timeSlot: string; consultant: ConsultantType }> = [];
+    let bookingDataUnavailable = false;
+
+    try {
+      bookings = await getBookingsForDate(date);
+    } catch (error) {
+      const errorMessage = error instanceof Error ? error.message : String(error);
+      if (errorMessage.includes('BOOKING_DATA_UNAVAILABLE')) {
+        console.warn('Booking data unavailable - allowing booking with manual verification flag');
+        bookingDataUnavailable = true;
+        // bookings stays as empty array - all slots will appear available
+      } else {
+        throw error; // Re-throw other errors
+      }
+    }
+
     const selectedBookedSlots = bookings
       .filter((b) => b.consultant === selectedConsultant)
       .map((b) => b.timeSlot);
@@ -1283,6 +1302,7 @@ export async function getAvailabilityForBothAdvisors(
       selectedAdvisorSlots,
       otherAdvisorSlots,
       otherConsultantName: otherConsultant,
+      bookingDataUnavailable,
     };
   } catch (error) {
     console.error('Error getting availability for both advisors:', error);
@@ -1291,6 +1311,7 @@ export async function getAvailabilityForBothAdvisors(
       selectedAdvisorSlots: [],
       otherAdvisorSlots: [],
       otherConsultantName: selectedConsultant === 'Heidi Lynn' ? 'Illiana' : 'Heidi Lynn',
+      bookingDataUnavailable: true, // Flag as unavailable since we hit an error
     };
   }
 }

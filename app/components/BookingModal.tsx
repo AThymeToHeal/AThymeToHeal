@@ -94,6 +94,9 @@ export default function BookingModal({
     process.env.NEXT_PUBLIC_BOOKING_MAINTENANCE_MODE === 'true'
   );
 
+  // Track if booking data verification failed (potential conflicts)
+  const [bookingDataUnavailable, setBookingDataUnavailable] = useState(false);
+
   // Helper function to check if a date's day of week has any advisor availability
   const isDayUnavailable = useCallback((date: Date): boolean => {
     const dayNames = ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday'];
@@ -419,6 +422,11 @@ export default function BookingModal({
         setAvailableSlots([]);
         return;
       }
+
+      // Check if booking data verification failed
+      const dataUnavailable = response.headers.get('X-Booking-Data-Unavailable') === 'true';
+      setBookingDataUnavailable(dataUnavailable);
+
       const slots: TimeSlot[] = await response.json();
       setAvailableSlots(slots);
     } catch (error) {
@@ -445,8 +453,8 @@ export default function BookingModal({
     e.preventDefault();
     setFormError(null);
 
-    // Check if maintenance mode is enabled
-    if (isMaintenanceMode) {
+    // Check if maintenance mode is enabled or booking data is unavailable
+    if (isMaintenanceMode || bookingDataUnavailable) {
       setStep('maintenance');
       return;
     }
@@ -907,6 +915,23 @@ export default function BookingModal({
           {/* Time Slots Step */}
           {step === 'timeSlots' && (
             <div className="space-y-6">
+              {/* Warning banner when booking data verification fails */}
+              {bookingDataUnavailable && (
+                <div className="bg-orange/10 border-l-4 border-orange p-4 rounded-md">
+                  <div className="flex items-start space-x-3">
+                    <div className="text-2xl">⚠️</div>
+                    <div className="flex-1">
+                      <h4 className="font-semibold text-primary mb-1">
+                        Unable to Verify Existing Bookings
+                      </h4>
+                      <p className="text-sm text-brown">
+                        We can&apos;t verify existing bookings at this time. You can still request a booking, but we&apos;ll need to manually confirm there are no conflicts. We&apos;ll email you confirmation shortly.
+                      </p>
+                    </div>
+                  </div>
+                </div>
+              )}
+
               <div className="bg-sage/10 p-4 rounded-md">
                 <p className="text-brown font-medium">
                   {selectedDate && formatDateForDisplay(selectedDate)}
@@ -1288,6 +1313,16 @@ export default function BookingModal({
                 currentMedications={currentMedications}
                 healthConditions={healthConditions}
                 preferredContactMethod={preferredContactMethod}
+                warningTitle={
+                  bookingDataUnavailable
+                    ? 'Unable to Verify Booking Availability'
+                    : 'Booking System Under Maintenance'
+                }
+                warningMessage={
+                  bookingDataUnavailable
+                    ? "We're unable to verify existing bookings at this time, which means there may be a scheduling conflict. Please copy your booking details below and email them to us. We'll check for conflicts and confirm your appointment as soon as possible."
+                    : "Our online booking system is temporarily unavailable. Please copy your booking details below and send them to us via email. We'll confirm your appointment as soon as possible."
+                }
               />
 
               <div className="flex justify-center pt-4">
