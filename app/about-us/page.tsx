@@ -13,18 +13,32 @@ export default function AboutPage() {
       {/* Hero Section */}
       <section className="bg-primary text-secondary py-16 px-4">
         <div className="mx-auto max-w-7xl text-center">
-          <h1 className="text-4xl md:text-5xl font-serif font-bold mb-4 text-accent">
+          <h1 className="text-4xl md:text-5xl font-serif font-bold mb-6 text-accent">
             Who is <span className="font-script">A Thyme To Heal?</span>
           </h1>
+          <p className="text-lg md:text-xl leading-relaxed text-secondary max-w-4xl mx-auto">
+            We&apos;re a mother-daughter team who have both walked long seasons of pain, confusion, and feeling like no one was listening. In those seasons, we discovered something that gave us hope again, a grounded way of healing that blends nature&apos;s rhythms with science‑informed support. Now our passion is helping women who feel unseen, exhausted, or overwhelmed find a steadier path back to themselves.
+          </p>
         </div>
       </section>
 
-      {/* Introduction */}
+      {/* About Us Video Section */}
       <section className="py-16 px-4">
-        <div className="mx-auto max-w-4xl text-center">
-          <p className="text-lg md:text-xl leading-relaxed text-brown">
-            We&apos;re a mother-daughter team who have both walked long seasons of pain, confusion, and feeling like no one was listening. In those seasons, we discovered something that gave us hope again, a grounded way of healing that blends nature&apos;s rhythms with science‑informed support. Now our passion is helping women who feel unseen, exhausted, or overwhelmed find a steadier path back to themselves.
-          </p>
+        <div className="mx-auto max-w-3xl">
+          <div className="relative rounded-lg overflow-hidden shadow-xl">
+            <video
+              autoPlay
+              muted
+              loop
+              playsInline
+              controls
+              className="w-full"
+              poster="/images/Background2.avif"
+            >
+              <source src="/Website About Us Video With Audio.mp4" type="video/mp4" />
+              Your browser does not support the video tag.
+            </video>
+          </div>
         </div>
       </section>
 
