@@ -56,16 +56,33 @@ export default function Home() {
         </div>
       </section>
 
-      {/* WHO We Serve Section */}
-      <section className="py-16 px-4 bg-sage/10">
-        <div className="mx-auto max-w-4xl text-center">
-          <h2 className="text-3xl md:text-4xl font-serif font-bold mb-6 text-primary">
+      {/* WHO We Serve Section with Background Video */}
+      <section className="relative py-16 px-4 overflow-hidden">
+        {/* Background Video */}
+        <video
+          autoPlay
+          loop
+          muted
+          playsInline
+          className="absolute top-0 left-0 w-full h-full object-cover"
+          poster="/images/Background1.avif"
+        >
+          <source src="/banner-video.webm" type="video/webm" />
+          <source src="/banner-video.mp4" type="video/mp4" />
+        </video>
+
+        {/* Dark overlay for text readability */}
+        <div className="absolute inset-0 bg-black/50"></div>
+
+        {/* Content */}
+        <div className="relative z-10 mx-auto max-w-4xl text-center">
+          <h2 className="text-3xl md:text-4xl font-serif font-bold mb-6 text-white">
             Who This Is For
           </h2>
-          <p className="text-lg md:text-xl text-brown leading-relaxed mb-6">
+          <p className="text-lg md:text-xl text-white/95 leading-relaxed mb-6">
             For the woman who feels overwhelmed, exhausted, or unsure where to begin, A Thyme to Heal offers compassionate guidance rooted in nature and science to help you create the life of your dreams.
           </p>
-          <p className="text-lg md:text-xl text-brown leading-relaxed font-semibold">
+          <p className="text-lg md:text-xl text-white/95 leading-relaxed font-semibold">
             Real support for your body and spirit, rooted in what&apos;s natural and proven. We guide you gently back to balance so you can feel more vibrant, grounded, and in control of your health journey.
           </p>
         </div>

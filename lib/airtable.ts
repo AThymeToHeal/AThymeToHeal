@@ -3,9 +3,31 @@ import Airtable from 'airtable';
 // Lazy initialization of Airtable - only runs when actually needed
 let _base: ReturnType<Airtable['base']> | null = null;
 
-// In-memory cache for advisor schedules (weekly schedules are static)
-const SCHEDULE_CACHE = new Map<string, { data: string[]; timestamp: number }>();
-const CACHE_TTL = 24 * 60 * 60 * 1000; // 24 hours
+// HARDCODED ADVISOR SCHEDULES - No API calls needed!
+// Schedule format: DayOfWeek -> { start: 'HH:MM', end: 'HH:MM' }
+const ADVISOR_SCHEDULES: Record<
+  ConsultantType,
+  Record<string, { start: string; end: string; isActive: boolean } | null>
+> = {
+  'Heidi Lynn': {
+    Monday: { start: '09:00', end: '17:00', isActive: true },
+    Tuesday: { start: '09:00', end: '17:00', isActive: true },
+    Wednesday: { start: '09:00', end: '17:00', isActive: true },
+    Thursday: { start: '09:00', end: '17:00', isActive: true },
+    Friday: { start: '09:00', end: '17:00', isActive: true },
+    Saturday: null, // Not available
+    Sunday: null, // Not available
+  },
+  'Illiana': {
+    Monday: { start: '09:00', end: '17:00', isActive: true },
+    Tuesday: { start: '09:00', end: '17:00', isActive: true },
+    Wednesday: { start: '09:00', end: '17:00', isActive: true },
+    Thursday: { start: '09:00', end: '17:00', isActive: true },
+    Friday: { start: '09:00', end: '17:00', isActive: true },
+    Saturday: null, // Not available
+    Sunday: null, // Not available
+  },
+};
 
 function getBase() {
   if (_base) return _base;
@@ -825,87 +847,109 @@ function generateTimeSlotsFromRange(startTime: string, endTime: string): string[
 /**
  * Get advisor's recurring weekly availability for a specific day
  * Returns array of available 30-minute time slots in HH:MM format
- * NEW: Generates slots dynamically from StartTime/EndTime schedule
+ * Tries Airtable first, falls back to hardcoded schedules if API fails
  */
 export async function getAdvisorAvailability(
   consultant: ConsultantType,
   dayOfWeek: string
 ): Promise<string[]> {
   try {
-    // Check cache first (24-hour TTL for static weekly schedules)
-    const cacheKey = `${consultant}:${dayOfWeek}`;
-    const cached = SCHEDULE_CACHE.get(cacheKey);
-
-    if (cached && Date.now() - cached.timestamp < CACHE_TTL) {
-      return cached.data;
-    }
-
-    // Fetch from Airtable if not cached or expired
+    // Try fetching from Airtable first
     const records = await getBase()(TABLES.ADVISOR_AVAILABILITY)
       .select({
         filterByFormula: `AND({Consultant} = '${consultant}', {DayOfWeek} = '${dayOfWeek}', {IsActive})`,
       })
       .all();
 
-    // Should only be one record per advisor per day
-    if (records.length === 0) {
-      // Cache empty result to avoid repeated failed lookups
-      SCHEDULE_CACHE.set(cacheKey, { data: [], timestamp: Date.now() });
+    // If we got data from Airtable, use it
+    if (records.length > 0) {
+      const record = records[0];
+      const startTime = record.get('StartTime') as string;
+      const endTime = record.get('EndTime') as string;
+
+      if (startTime && endTime) {
+        return generateTimeSlotsFromRange(startTime, endTime);
+      }
+    }
+
+    // Fallback to hardcoded schedule if Airtable fails or returns no data
+    console.warn(`Using hardcoded fallback schedule for ${consultant} on ${dayOfWeek}`);
+    const schedule = ADVISOR_SCHEDULES[consultant]?.[dayOfWeek];
+
+    if (!schedule || !schedule.isActive) {
       return [];
     }
 
-    const record = records[0];
-    const startTime = record.get('StartTime') as string;
-    const endTime = record.get('EndTime') as string;
-
-    if (!startTime || !endTime) {
-      console.warn(`Missing StartTime or EndTime for ${consultant} on ${dayOfWeek}`);
-      return [];
-    }
-
-    // Generate 30-minute time slots from the schedule
-    const schedule = generateTimeSlotsFromRange(startTime, endTime);
-
-    // Store in cache with timestamp
-    SCHEDULE_CACHE.set(cacheKey, { data: schedule, timestamp: Date.now() });
-
-    return schedule;
+    return generateTimeSlotsFromRange(schedule.start, schedule.end);
   } catch (error) {
-    console.error('Error fetching advisor availability:', error);
-    // Return empty array - fallback logic will handle this
-    return [];
+    // API error - use hardcoded fallback
+    console.error('Airtable API error, using hardcoded fallback:', error);
+    const schedule = ADVISOR_SCHEDULES[consultant]?.[dayOfWeek];
+
+    if (!schedule || !schedule.isActive) {
+      return [];
+    }
+
+    return generateTimeSlotsFromRange(schedule.start, schedule.end);
   }
 }
 
 /**
  * Check if any advisor has availability on a specific day of the week
  * Returns true if at least one advisor is scheduled for that day
+ * Tries Airtable first, falls back to hardcoded schedules if API fails
  */
 export async function hasAnyAdvisorAvailability(dayOfWeek: string): Promise<boolean> {
   try {
+    // Try Airtable first
     const records = await getBase()(TABLES.ADVISOR_AVAILABILITY)
       .select({
         filterByFormula: `AND({DayOfWeek} = '${dayOfWeek}', {IsActive})`,
-        maxRecords: 1, // We only need to know if at least one exists
+        maxRecords: 1,
       })
       .all();
 
-    return records.length > 0;
+    if (records.length > 0) {
+      return true;
+    }
+
+    // Fallback to hardcoded schedules
+    console.warn(`Using hardcoded fallback for day availability check: ${dayOfWeek}`);
+    const consultants: ConsultantType[] = ['Heidi Lynn', 'Illiana'];
+
+    for (const consultant of consultants) {
+      const schedule = ADVISOR_SCHEDULES[consultant]?.[dayOfWeek];
+      if (schedule && schedule.isActive) {
+        return true;
+      }
+    }
+
+    return false;
   } catch (error) {
-    console.error('Error checking advisor availability for day:', error);
-    // Default to allowing the day if there's an error
-    return true;
+    console.error('Airtable API error, using hardcoded fallback:', error);
+    const consultants: ConsultantType[] = ['Heidi Lynn', 'Illiana'];
+
+    for (const consultant of consultants) {
+      const schedule = ADVISOR_SCHEDULES[consultant]?.[dayOfWeek];
+      if (schedule && schedule.isActive) {
+        return true;
+      }
+    }
+
+    return false;
   }
 }
 
 /**
  * Check if a specific consultant has availability on a specific day of week
+ * Tries Airtable first, falls back to hardcoded schedules if API fails
  */
 export async function hasConsultantAvailability(
   consultant: ConsultantType,
   dayOfWeek: string
 ): Promise<boolean> {
   try {
+    // Try Airtable first
     const records = await getBase()(TABLES.ADVISOR_AVAILABILITY)
       .select({
         filterByFormula: `AND({Consultant} = '${consultant}', {DayOfWeek} = '${dayOfWeek}', {IsActive})`,
@@ -913,11 +957,18 @@ export async function hasConsultantAvailability(
       })
       .all();
 
-    return records.length > 0;
+    if (records.length > 0) {
+      return true;
+    }
+
+    // Fallback to hardcoded schedule
+    console.warn(`Using hardcoded fallback for ${consultant} on ${dayOfWeek}`);
+    const schedule = ADVISOR_SCHEDULES[consultant]?.[dayOfWeek];
+    return !!(schedule && schedule.isActive);
   } catch (error) {
-    console.error(`Error checking availability for ${consultant} on ${dayOfWeek}:`, error);
-    // Default to allowing the day if there's an error
-    return true;
+    console.error(`Airtable API error, using hardcoded fallback for ${consultant} on ${dayOfWeek}:`, error);
+    const schedule = ADVISOR_SCHEDULES[consultant]?.[dayOfWeek];
+    return !!(schedule && schedule.isActive);
   }
 }
 

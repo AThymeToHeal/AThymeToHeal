@@ -19,6 +19,7 @@ import type {
   ConsultantType,
 } from '@/lib/airtable';
 import { SERVICES } from '@/lib/airtable';
+import MaintenanceBooking from './MaintenanceBooking';
 
 interface BookingModalProps {
   isOpen: boolean;
@@ -28,7 +29,7 @@ interface BookingModalProps {
   availableConsultants?: ConsultantType[];
 }
 
-type BookingStep = 'selection' | 'calendar' | 'timeSlots' | 'contactInfo' | 'success';
+type BookingStep = 'selection' | 'calendar' | 'timeSlots' | 'contactInfo' | 'success' | 'maintenance';
 
 export default function BookingModal({
   isOpen,
@@ -87,6 +88,11 @@ export default function BookingModal({
   const [consent, setConsent] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [formError, setFormError] = useState<string | null>(null);
+
+  // Maintenance mode detection
+  const [isMaintenanceMode, setIsMaintenanceMode] = useState(
+    process.env.NEXT_PUBLIC_BOOKING_MAINTENANCE_MODE === 'true'
+  );
 
   // Helper function to check if a date's day of week has any advisor availability
   const isDayUnavailable = useCallback((date: Date): boolean => {
@@ -439,6 +445,12 @@ export default function BookingModal({
     e.preventDefault();
     setFormError(null);
 
+    // Check if maintenance mode is enabled
+    if (isMaintenanceMode) {
+      setStep('maintenance');
+      return;
+    }
+
     if (!selectedDate || !selectedTimeSlot || !userTimezone || !selectedConsultant || !selectedServiceType) {
       setFormError('Please complete all booking selections');
       return;
@@ -509,6 +521,19 @@ export default function BookingModal({
 
       if (!bookingResponse.ok) {
         const error = await bookingResponse.json();
+        // Check for API rate limit or maintenance errors
+        if (
+          bookingResponse.status === 429 ||
+          bookingResponse.status === 503 ||
+          error.error?.includes('rate limit') ||
+          error.error?.includes('API') ||
+          error.error?.includes('Airtable')
+        ) {
+          // Switch to maintenance mode
+          setIsMaintenanceMode(true);
+          setStep('maintenance');
+          return;
+        }
         throw new Error(error.error || 'Failed to create booking');
       }
 
@@ -545,11 +570,27 @@ export default function BookingModal({
       localStorage.removeItem(cacheKey);
     } catch (error) {
       console.error('Error submitting booking:', error);
-      setFormError(
-        error instanceof Error
-          ? error.message
-          : 'Failed to complete booking. Please try again or contact us directly.'
-      );
+
+      // Check if error is API-related (rate limits, network issues, etc.)
+      const errorMessage = error instanceof Error ? error.message : String(error);
+      const isAPIError =
+        errorMessage.includes('rate limit') ||
+        errorMessage.includes('API') ||
+        errorMessage.includes('Airtable') ||
+        errorMessage.includes('429') ||
+        errorMessage.includes('fetch');
+
+      if (isAPIError) {
+        // Switch to maintenance mode for API errors
+        setIsMaintenanceMode(true);
+        setStep('maintenance');
+      } else {
+        setFormError(
+          error instanceof Error
+            ? error.message
+            : 'Failed to complete booking. Please try again or contact us directly.'
+        );
+      }
     } finally {
       setIsSubmitting(false);
     }
@@ -660,6 +701,7 @@ export default function BookingModal({
               {step === 'timeSlots' && 'Choose Your Time'}
               {step === 'contactInfo' && 'Your Information'}
               {step === 'success' && 'Booking Confirmed!'}
+              {step === 'maintenance' && 'Booking Temporarily Unavailable'}
             </h2>
           </div>
           <button
@@ -1220,6 +1262,42 @@ export default function BookingModal({
               >
                 Reset Booking
               </button>
+            </div>
+          )}
+
+          {/* Maintenance Mode Step */}
+          {step === 'maintenance' && selectedDate && selectedTimeSlot && selectedConsultant && selectedServiceType && (
+            <div className="space-y-6">
+              <MaintenanceBooking
+                consultant={selectedConsultant}
+                serviceType={selectedServiceType}
+                selectedDate={formatDateForDisplay(selectedDate)}
+                timeSlot={selectedTimeSlot}
+                userLocalTime={`${formatTimeForDisplay(
+                  convertFromMST(getDateString(selectedDate), selectedTimeSlot.start, userTimezone)
+                )} - ${formatTimeForDisplay(
+                  convertFromMST(getDateString(selectedDate), selectedTimeSlot.end, userTimezone)
+                )}`}
+                userTimezone={getTimezoneFriendlyName(userTimezone)}
+                firstName={firstName}
+                lastName={lastName}
+                email={email}
+                phone={phone}
+                healthGoals={healthGoals}
+                dietaryRestrictions={dietaryRestrictions}
+                currentMedications={currentMedications}
+                healthConditions={healthConditions}
+                preferredContactMethod={preferredContactMethod}
+              />
+
+              <div className="flex justify-center pt-4">
+                <button
+                  onClick={handleClose}
+                  className="px-6 py-2 text-brown hover:text-primary transition-colors underline"
+                >
+                  Close
+                </button>
+              </div>
             </div>
           )}
         </div>
