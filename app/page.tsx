@@ -8,22 +8,22 @@ export default function Home() {
     {
       title: '1:1 Consultations',
       description: 'Explore your health and possible paths forward in personalized one-on-one sessions',
-      backgroundImage: '/images/oil-in-hand-image.avif',
+      backgroundImage: '/home/oil-in-hand-image.avif',
     },
     {
       title: 'Essential Oil Guidance',
       description: 'Not sure which oils are ideal for you? We offer 1:1 calls where we use muscle testing and learn more about you to best identify which oils best support you',
-      backgroundImage: '/images/Bowl-of-greens-image.webp',
+      backgroundImage: '/home/Bowl-of-greens-image.webp',
     },
     {
       title: 'Essential Emotions Sessions',
       description: 'Helping you identify and heal the roots of emotional pain',
-      backgroundImage: '/images/Background2.avif',
+      backgroundImage: '/home/essential-emotions.avif',
     },
     {
       title: 'Educational Workshops',
       description: 'Want to learn more about specific health related topics? We host educational classes monthly',
-      backgroundImage: '/images/Tablets-image.webp',
+      backgroundImage: '/home/Tablets-image.webp',
     },
   ];
 
@@ -65,10 +65,10 @@ export default function Home() {
           muted
           playsInline
           className="absolute top-0 left-0 w-full h-full object-cover"
-          poster="/images/Background1.avif"
+          poster="/home/main-background.avif"
         >
-          <source src="/banner-video.webm" type="video/webm" />
-          <source src="/banner-video.mp4" type="video/mp4" />
+          <source src="/home/banner-video.webm" type="video/webm" />
+          <source src="/home/banner-video.mp4" type="video/mp4" />
         </video>
 
         {/* Dark overlay for text readability */}
@@ -179,7 +179,7 @@ export default function Home() {
       <section
         className="relative py-16 px-4"
         style={{
-          backgroundImage: 'url(/images/Background1.avif)',
+          backgroundImage: 'url(/home/main-background.avif)',
           backgroundSize: 'cover',
           backgroundPosition: 'center',
           backgroundAttachment: 'fixed',

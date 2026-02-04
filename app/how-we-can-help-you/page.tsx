@@ -110,21 +110,41 @@ export default function ServicesPage() {
       </section>
 
       {/* Hippocrates Quote */}
-      <section className="py-12 px-4 bg-sage/10">
-        <div className="mx-auto max-w-3xl">
-          <blockquote className="text-center">
-            <p className="text-lg md:text-xl text-brown italic mb-4">
-              &ldquo;If someone wishes for good health, one must first ask oneself if he or she is ready to do away with the reasons for their illness. Only then is it possible to help them.&rdquo;
-            </p>
-            <footer className="text-brown font-semibold">
-              — Hippocrates
-            </footer>
-          </blockquote>
+      <section className="relative py-12 px-4 bg-sage/10 overflow-hidden">
+
+        <div className="relative z-10 mx-auto max-w-5xl">
+          <div className="relative">
+            {/* Flowers Bound on left side - hidden on mobile, visible on larger screens */}
+            <div className="hidden lg:block absolute left-0 top-1/2 -translate-y-1/2 -translate-x-full w-64 h-64">
+              <img
+                src="/how-we-can-help-you/Flowers%20Bound.webp"
+                alt=""
+                className="w-full h-full object-contain"
+              />
+            </div>
+            {/* Flowers Bound on right side - hidden on mobile, visible on larger screens */}
+            <div className="hidden lg:block absolute right-0 top-1/2 -translate-y-1/2 translate-x-full w-64 h-64 scale-x-[-1]">
+              <img
+                src="/how-we-can-help-you/Flowers%20Bound.webp"
+                alt=""
+                className="w-full h-full object-contain"
+              />
+            </div>
+
+            <blockquote className="text-center">
+              <p className="text-lg md:text-xl text-brown italic mb-4">
+                &ldquo;If someone wishes for good health, one must first ask oneself if he or she is ready to do away with the reasons for their illness. Only then is it possible to help them.&rdquo;
+              </p>
+              <footer className="text-brown font-semibold">
+                — Hippocrates
+              </footer>
+            </blockquote>
+          </div>
         </div>
       </section>
 
       {/* Intro Section */}
-      <section className="py-12 px-4">
+      <section className="py-12 px-4 bg-secondary">
         <div className="mx-auto max-w-3xl text-center">
           <p className="text-lg md:text-xl text-brown leading-relaxed">
             If you&apos;ve ever felt stuck, exhausted, or unsure where to begin with your health, you&apos;re not alone. We meet you exactly where you are and walk with you step-by-step. Our approach blends nature&apos;s wisdom with what modern science understands about the human body, so you feel supported, seen, and empowered to make the changes that matter most.

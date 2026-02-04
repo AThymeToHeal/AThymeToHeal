@@ -25,8 +25,17 @@ export default function ContactPage() {
       </section>
 
       {/* Contact Content */}
-      <section className="py-16 px-4">
-        <div className="mx-auto max-w-7xl">
+      <section className="py-16 px-4 relative overflow-hidden">
+        {/* Decorative nature image - bottom right, hidden on mobile */}
+        <div className="hidden lg:block absolute bottom-0 right-0 w-[600px] h-[600px] pointer-events-none">
+          <img
+            src="/how-we-can-help-you/Forest%20Upward%20View.webp"
+            alt=""
+            className="w-full h-full object-cover"
+          />
+        </div>
+
+        <div className="mx-auto max-w-7xl relative z-10">
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-12">
             {/* Contact Form */}
             <div>
