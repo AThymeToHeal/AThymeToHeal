@@ -48,8 +48,9 @@ export default function AboutPage() {
         style={{
           backgroundImage: 'url("/how-we-can-help-you/Forest And Sun.webp")',
           backgroundSize: 'cover',
-          backgroundPosition: 'center bottom',
-          backgroundAttachment: 'scroll',
+          backgroundPosition: '50% 30%',
+          backgroundAttachment: 'fixed',
+          willChange: 'transform',
         }}
       >
         {/* Dark overlay for text readability */}
