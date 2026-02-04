@@ -44,13 +44,10 @@ export default function AboutPage() {
 
       {/* Combined Coach Profiles Section with Forest And Sun Background */}
       <section
-        className="relative py-16 px-4 overflow-hidden"
+        className="relative py-16 px-4 overflow-hidden bg-cover bg-center md:bg-fixed"
         style={{
           backgroundImage: 'url("/how-we-can-help-you/Forest And Sun.webp")',
-          backgroundSize: 'cover',
           backgroundPosition: '50% 30%',
-          backgroundAttachment: 'fixed',
-          willChange: 'transform',
         }}
       >
         {/* Dark overlay for text readability */}
