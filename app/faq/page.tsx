@@ -7,22 +7,10 @@ export const metadata: Metadata = {
   description: 'Find answers to common questions about our herbal remedies, consultations, products, and services.',
 };
 
+// Import FAQs directly - no API call needed during build
 async function getFAQs() {
-  try {
-    const res = await fetch(`${process.env.NEXT_PUBLIC_SITE_URL || 'http://localhost:3000'}/api/faqs`, {
-      next: { revalidate: 3600 }, // Cache for 1 hour (ISR)
-    });
-
-    if (!res.ok) {
-      throw new Error('Failed to fetch FAQs');
-    }
-
-    return await res.json();
-  } catch (error) {
-    console.error('Error fetching FAQs:', error);
-    // Return fallback FAQs if Airtable fetch fails
-    return fallbackFAQs;
-  }
+  // Return hardcoded FAQs directly (same data as API route)
+  return fallbackFAQs;
 }
 
 // Fallback FAQs (in case Airtable is not set up yet)
