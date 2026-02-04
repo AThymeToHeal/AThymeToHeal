@@ -1,25 +1,33 @@
 import { NextResponse } from 'next/server';
-import { getTestimonials, createTestimonial, type Testimonial } from '@/lib/airtable';
+import { createTestimonial, type Testimonial } from '@/lib/airtable';
 
-// Cache testimonials for 30 minutes
-export const revalidate = 1800;
+// Cache testimonials for 24 hours
+export const revalidate = 86400;
+
+// HARDCODED TESTIMONIALS - Zero API calls for reads!
+const HARDCODED_TESTIMONIALS: Testimonial[] = [
+  {
+    name: 'Abby',
+    text: 'The passion for health and wellbeing that Illiana and Heidi share is so contagious! They are both so patient and gracious to explain the step by step processes that have worked wonders in their own life as well as countless others.',
+  },
+  {
+    name: 'Anna',
+    text: 'Illiana and Heidi are the most compassionate and caring humans. They have helped guide me through my health issues, which have gotten so debilitating I\'m on medical leave, and with their assistance, I am finally starting to feel like I can live again. They never make me feel judged or guilty for my choices, only supported me as appropriate and provided education if something was not a good choice. Through the essential emotions sessions with Illiana, I have started processing things that I have never even figured out in regular therapy. I cannot recommend working with these two enough!',
+  },
+  {
+    name: 'Heather',
+    text: 'Since using the supplements Heidi recommended, I have felt an overall improvement in my health. I\'m feeling more vibrant and have more energy. I also feel that the supplements have helped me with menopause symptoms and have increased the vitality of my hair, nails, and skin.',
+  },
+];
 
 export async function GET() {
-  try {
-    const testimonials = await getTestimonials();
-    return NextResponse.json(testimonials, {
-      status: 200,
-      headers: {
-        'Cache-Control': 'public, s-maxage=1800, stale-while-revalidate=900',
-      },
-    });
-  } catch (error) {
-    console.error('Error in testimonials GET API:', error);
-    return NextResponse.json(
-      { error: 'Failed to fetch testimonials. Please try again.' },
-      { status: 500 }
-    );
-  }
+  // Return hardcoded testimonials - zero API calls!
+  return NextResponse.json(HARDCODED_TESTIMONIALS, {
+    status: 200,
+    headers: {
+      'Cache-Control': 'public, s-maxage=86400, stale-while-revalidate=43200',
+    },
+  });
 }
 
 export async function POST(request: Request) {

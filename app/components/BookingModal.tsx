@@ -129,13 +129,32 @@ export default function BookingModal({
     }
   }, [consultantFilter, selectedConsultant]);
 
-  // Fetch available days of week from Airtable schedules
+  // Fetch available days of week from Airtable schedules with caching
   useEffect(() => {
     if (!isOpen) return;
 
     const fetchAvailableDays = async () => {
       setIsLoadingAvailableDays(true);
       try {
+        const cacheKey = `available_days_${consultantFilter || 'all'}`;
+
+        // Check localStorage cache (24 hour expiry - schedules rarely change)
+        try {
+          const cached = localStorage.getItem(cacheKey);
+          if (cached) {
+            const { data, timestamp } = JSON.parse(cached);
+            const isStale = Date.now() - timestamp > 24 * 60 * 60 * 1000; // 24 hours
+
+            if (!isStale) {
+              setAvailableDaysOfWeek(new Set(data));
+              setIsLoadingAvailableDays(false);
+              return;
+            }
+          }
+        } catch (cacheError) {
+          // Ignore cache errors
+        }
+
         // If only one consultant is available, filter by that consultant
         const url = consultantFilter
           ? `/api/available-days?consultant=${encodeURIComponent(consultantFilter)}`
@@ -145,6 +164,16 @@ export default function BookingModal({
         if (response.ok) {
           const data = await response.json();
           setAvailableDaysOfWeek(new Set(data.availableDays));
+
+          // Cache the result
+          try {
+            localStorage.setItem(cacheKey, JSON.stringify({
+              data: data.availableDays,
+              timestamp: Date.now()
+            }));
+          } catch (storageError) {
+            // Ignore storage errors
+          }
         } else {
           console.error('Failed to fetch available days');
           // Default to all days if fetch fails
@@ -398,7 +427,7 @@ export default function BookingModal({
     await loadAvailableSlots(date);
   };
 
-  // Load available time slots
+  // Load available time slots with localStorage caching
   const loadAvailableSlots = async (date: Date, retryCount = 0) => {
     if (!selectedServiceType || !selectedConsultant) {
       console.error('Service type and consultant must be selected');
@@ -409,6 +438,26 @@ export default function BookingModal({
 
     try {
       const dateString = getDateString(date);
+      const cacheKey = `availability_${dateString}_${selectedServiceType}_${selectedConsultant}`;
+
+      // Check localStorage cache (5 minute expiry)
+      try {
+        const cached = localStorage.getItem(cacheKey);
+        if (cached) {
+          const { data, timestamp } = JSON.parse(cached);
+          const isStale = Date.now() - timestamp > 5 * 60 * 1000; // 5 minutes
+
+          if (!isStale) {
+            setAvailableSlots(data.slots);
+            setBookingDataUnavailable(data.dataUnavailable || false);
+            setIsLoadingSlots(false);
+            return;
+          }
+        }
+      } catch (cacheError) {
+        // Ignore cache errors, proceed with fetch
+      }
+
       const response = await fetch(
         `/api/availability?date=${dateString}&serviceType=${encodeURIComponent(selectedServiceType)}&consultant=${encodeURIComponent(selectedConsultant)}`
       );
@@ -429,6 +478,16 @@ export default function BookingModal({
 
       const slots: TimeSlot[] = await response.json();
       setAvailableSlots(slots);
+
+      // Cache the result
+      try {
+        localStorage.setItem(cacheKey, JSON.stringify({
+          data: { slots, dataUnavailable },
+          timestamp: Date.now()
+        }));
+      } catch (storageError) {
+        // Ignore storage errors (quota exceeded, private mode, etc.)
+      }
     } catch (error) {
       if (retryCount < 2) {
         setIsLoadingSlots(false);
