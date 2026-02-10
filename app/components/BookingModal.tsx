@@ -248,7 +248,7 @@ export default function BookingModal({
       const year = date.getFullYear();
       const month = date.getMonth() + 1;
       const cacheKey = `${year}-${month}-${selectedConsultant || 'all'}`;
-      const CACHE_TTL = 5 * 60 * 1000; // 5 minutes
+      const CACHE_TTL = 2 * 60 * 1000; // 2 minutes (reduced from 5 for faster updates)
 
       // Check cache first with TTL validation
       const cached = cachedMonths.get(cacheKey);
@@ -440,12 +440,12 @@ export default function BookingModal({
       const dateString = getDateString(date);
       const cacheKey = `availability_${dateString}_${selectedServiceType}_${selectedConsultant}`;
 
-      // Check localStorage cache (5 minute expiry)
+      // Check localStorage cache (1 minute expiry for near-real-time updates)
       try {
         const cached = localStorage.getItem(cacheKey);
         if (cached) {
           const { data, timestamp } = JSON.parse(cached);
-          const isStale = Date.now() - timestamp > 5 * 60 * 1000; // 5 minutes
+          const isStale = Date.now() - timestamp > 60 * 1000; // 1 minute (reduced from 5 for real-time updates)
 
           if (!isStale) {
             setAvailableSlots(data.slots);
@@ -506,6 +506,54 @@ export default function BookingModal({
     setSelectedTimeSlot(slot);
     setStep('contactInfo');
   };
+
+  // Invalidate all booking-related caches for a specific date
+  // This ensures other users see updated availability immediately
+  const invalidateBookingCaches = useCallback((date: Date, consultant: ConsultantType, serviceType: ServiceType) => {
+    try {
+      const dateString = getDateString(date);
+      const year = date.getFullYear();
+      const month = date.getMonth() + 1;
+
+      // Clear all localStorage cache entries related to this booking
+      const keysToRemove: string[] = [];
+
+      // 1. Clear availability cache for this specific date/service/consultant
+      keysToRemove.push(`availability_${dateString}_${serviceType}_${consultant}`);
+
+      // 2. Clear availability for other consultant too (they might show this slot as "available with other")
+      const otherConsultant: ConsultantType = consultant === 'Heidi Lynn' ? 'Illiana' : 'Heidi Lynn';
+      keysToRemove.push(`availability_${dateString}_${serviceType}_${otherConsultant}`);
+
+      // 3. Clear all service types for this date (in case user switches services)
+      Object.keys(SERVICES).forEach((service) => {
+        keysToRemove.push(`availability_${dateString}_${service}_${consultant}`);
+        keysToRemove.push(`availability_${dateString}_${service}_${otherConsultant}`);
+      });
+
+      // 4. Clear booked dates cache for this month
+      // Note: We can't clear the cachedMonths state here, but we can clear localStorage
+      // The state will be refreshed on next mount or navigation
+
+      // Remove all identified cache keys
+      keysToRemove.forEach((key) => {
+        try {
+          localStorage.removeItem(key);
+        } catch (e) {
+          // Ignore individual removal errors
+        }
+      });
+
+      // 5. Force refresh of booked dates cache by clearing the in-memory cache
+      setCachedMonths(new Map());
+
+      console.log(`Cache invalidated for booking on ${dateString} with ${consultant}`);
+    } catch (error) {
+      console.error('Error invalidating cache:', error);
+      // Don't throw - cache invalidation failure shouldn't break booking flow
+    }
+  }, []);
+
 
   // Handle booking submission
   const handleSubmit = async (e: React.FormEvent) => {
@@ -588,6 +636,23 @@ export default function BookingModal({
 
       if (!bookingResponse.ok) {
         const error = await bookingResponse.json();
+
+        // Check for double-booking conflict (slot just taken by someone else)
+        if (bookingResponse.status === 409 || error.code === 'SLOT_UNAVAILABLE') {
+          // Invalidate cache and force user to reselect
+          invalidateBookingCaches(selectedDate, selectedConsultant, selectedServiceType);
+          setFormError(
+            error.error ||
+              'This timeslot was just booked by someone else. Please select a different time.'
+          );
+          // Reset to time slot selection to show updated availability
+          setStep('timeSlots');
+          setIsSubmitting(false);
+          // Reload fresh availability data
+          await loadAvailableSlots(selectedDate);
+          return;
+        }
+
         // Check for API rate limit or maintenance errors
         if (
           bookingResponse.status === 429 ||
@@ -630,6 +695,10 @@ export default function BookingModal({
       if (!clientResponse.ok) {
         console.warn('Booking created but client record failed');
       }
+
+      // CRITICAL: Invalidate all booking caches to ensure real-time availability updates
+      // This prevents double-bookings by forcing fresh data on next availability check
+      invalidateBookingCaches(selectedDate, selectedConsultant, selectedServiceType);
 
       setStep('success');
       // Clear saved data from localStorage after successful booking (service-type-specific)

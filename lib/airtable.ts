@@ -584,6 +584,14 @@ export async function createOrUpdateClient(data: ClientFormData) {
 /**
  * Get all bookings for a specific date, optionally filtered by consultant
  * Returns array of objects with timeSlot and consultant information
+ *
+ * CRITICAL FOR DOUBLE-BOOKING PREVENTION:
+ * This function is called by:
+ * 1. Availability checker - to filter out booked slots
+ * 2. Booking API - to verify slot is still available before creating booking
+ *
+ * IMPORTANT: Always throws BOOKING_DATA_UNAVAILABLE error if data fetch fails
+ * to prevent showing all slots as available when we can't verify existing bookings.
  */
 export async function getBookingsForDate(
   date: string,
