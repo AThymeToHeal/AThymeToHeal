@@ -1,4 +1,5 @@
 import Airtable from 'airtable';
+import { serverCacheGet, serverCacheSet, SERVER_CACHE_TTL } from './serverCache';
 
 // Lazy initialization of Airtable - only runs when actually needed
 let _base: ReturnType<Airtable['base']> | null = null;
@@ -595,8 +596,16 @@ export async function createOrUpdateClient(data: ClientFormData) {
  */
 export async function getBookingsForDate(
   date: string,
-  consultant?: ConsultantType
+  consultant?: ConsultantType,
+  bypassCache?: boolean
 ): Promise<Array<{ timeSlot: string; consultant: ConsultantType }>> {
+  // Check server cache first (unless bypassed for double-booking verification)
+  const cacheKey = `bookings_${date}_${consultant || 'all'}`;
+  if (!bypassCache) {
+    const cached = serverCacheGet<Array<{ timeSlot: string; consultant: ConsultantType }>>(cacheKey);
+    if (cached) return cached;
+  }
+
   try {
     const startOfDay = mstToUtcIso(date, '00:00');
     const endOfDay = mstToUtcIso(date, '23:59');
@@ -622,7 +631,7 @@ export async function getBookingsForDate(
       })
       .all();
 
-    return records.map((record) => {
+    const result = records.map((record) => {
       const dateTime = record.get('dateAndTime') as string;
       const utcDate = new Date(dateTime);
 
@@ -647,6 +656,10 @@ export async function getBookingsForDate(
         consultant: consultantName,
       };
     });
+
+    // Cache the result
+    serverCacheSet(cacheKey, result, SERVER_CACHE_TTL.BOOKINGS);
+    return result;
   } catch (error) {
     console.error('Error fetching bookings for date:', error);
     // CRITICAL: Don't return empty array - this would make all slots appear available
@@ -664,6 +677,10 @@ export async function getFullyBookedDates(
   month: number,
   consultant?: ConsultantType
 ): Promise<string[]> {
+  const cacheKey = `fullybooked_${year}_${month}_${consultant || 'all'}`;
+  const cached = serverCacheGet<string[]>(cacheKey);
+  if (cached) return cached;
+
   try {
     const startDate = new Date(year, month - 1, 1);
     const endDate = new Date(year, month, 0);
@@ -698,9 +715,12 @@ export async function getFullyBookedDates(
     });
 
     // Return dates with 8 or more bookings (fully booked)
-    return Object.entries(dateCount)
+    const result = Object.entries(dateCount)
       .filter(([_, count]) => count >= 8)
       .map(([date]) => date);
+
+    serverCacheSet(cacheKey, result, SERVER_CACHE_TTL.FULLY_BOOKED);
+    return result;
   } catch (error) {
     console.error('Error fetching fully booked dates:', error);
     return [];
@@ -857,129 +877,49 @@ function generateTimeSlotsFromRange(startTime: string, endTime: string): string[
 /**
  * Get advisor's recurring weekly availability for a specific day
  * Returns array of available 30-minute time slots in HH:MM format
- * Tries Airtable first, falls back to hardcoded schedules if API fails
+ * Uses hardcoded ADVISOR_SCHEDULES directly — zero Airtable calls
  */
-export async function getAdvisorAvailability(
+export function getAdvisorAvailability(
   consultant: ConsultantType,
   dayOfWeek: string
-): Promise<string[]> {
-  try {
-    // Try fetching from Airtable first
-    const records = await getBase()(TABLES.ADVISOR_AVAILABILITY)
-      .select({
-        filterByFormula: `AND({Consultant} = '${consultant}', {DayOfWeek} = '${dayOfWeek}', {IsActive})`,
-      })
-      .all();
+): string[] {
+  const schedule = ADVISOR_SCHEDULES[consultant]?.[dayOfWeek];
 
-    // If we got data from Airtable, use it
-    if (records.length > 0) {
-      const record = records[0];
-      const startTime = record.get('StartTime') as string;
-      const endTime = record.get('EndTime') as string;
-
-      if (startTime && endTime) {
-        return generateTimeSlotsFromRange(startTime, endTime);
-      }
-    }
-
-    // Fallback to hardcoded schedule if Airtable fails or returns no data
-    console.warn(`Using hardcoded fallback schedule for ${consultant} on ${dayOfWeek}`);
-    const schedule = ADVISOR_SCHEDULES[consultant]?.[dayOfWeek];
-
-    if (!schedule || !schedule.isActive) {
-      return [];
-    }
-
-    return generateTimeSlotsFromRange(schedule.start, schedule.end);
-  } catch (error) {
-    // API error - use hardcoded fallback
-    console.error('Airtable API error, using hardcoded fallback:', error);
-    const schedule = ADVISOR_SCHEDULES[consultant]?.[dayOfWeek];
-
-    if (!schedule || !schedule.isActive) {
-      return [];
-    }
-
-    return generateTimeSlotsFromRange(schedule.start, schedule.end);
+  if (!schedule || !schedule.isActive) {
+    return [];
   }
+
+  return generateTimeSlotsFromRange(schedule.start, schedule.end);
 }
 
 /**
  * Check if any advisor has availability on a specific day of the week
  * Returns true if at least one advisor is scheduled for that day
- * Tries Airtable first, falls back to hardcoded schedules if API fails
+ * Uses hardcoded ADVISOR_SCHEDULES directly — zero Airtable calls
  */
-export async function hasAnyAdvisorAvailability(dayOfWeek: string): Promise<boolean> {
-  try {
-    // Try Airtable first
-    const records = await getBase()(TABLES.ADVISOR_AVAILABILITY)
-      .select({
-        filterByFormula: `AND({DayOfWeek} = '${dayOfWeek}', {IsActive})`,
-        maxRecords: 1,
-      })
-      .all();
+export function hasAnyAdvisorAvailability(dayOfWeek: string): boolean {
+  const consultants: ConsultantType[] = ['Heidi Lynn', 'Illiana'];
 
-    if (records.length > 0) {
+  for (const consultant of consultants) {
+    const schedule = ADVISOR_SCHEDULES[consultant]?.[dayOfWeek];
+    if (schedule && schedule.isActive) {
       return true;
     }
-
-    // Fallback to hardcoded schedules
-    console.warn(`Using hardcoded fallback for day availability check: ${dayOfWeek}`);
-    const consultants: ConsultantType[] = ['Heidi Lynn', 'Illiana'];
-
-    for (const consultant of consultants) {
-      const schedule = ADVISOR_SCHEDULES[consultant]?.[dayOfWeek];
-      if (schedule && schedule.isActive) {
-        return true;
-      }
-    }
-
-    return false;
-  } catch (error) {
-    console.error('Airtable API error, using hardcoded fallback:', error);
-    const consultants: ConsultantType[] = ['Heidi Lynn', 'Illiana'];
-
-    for (const consultant of consultants) {
-      const schedule = ADVISOR_SCHEDULES[consultant]?.[dayOfWeek];
-      if (schedule && schedule.isActive) {
-        return true;
-      }
-    }
-
-    return false;
   }
+
+  return false;
 }
 
 /**
  * Check if a specific consultant has availability on a specific day of week
- * Tries Airtable first, falls back to hardcoded schedules if API fails
+ * Uses hardcoded ADVISOR_SCHEDULES directly — zero Airtable calls
  */
-export async function hasConsultantAvailability(
+export function hasConsultantAvailability(
   consultant: ConsultantType,
   dayOfWeek: string
-): Promise<boolean> {
-  try {
-    // Try Airtable first
-    const records = await getBase()(TABLES.ADVISOR_AVAILABILITY)
-      .select({
-        filterByFormula: `AND({Consultant} = '${consultant}', {DayOfWeek} = '${dayOfWeek}', {IsActive})`,
-        maxRecords: 1,
-      })
-      .all();
-
-    if (records.length > 0) {
-      return true;
-    }
-
-    // Fallback to hardcoded schedule
-    console.warn(`Using hardcoded fallback for ${consultant} on ${dayOfWeek}`);
-    const schedule = ADVISOR_SCHEDULES[consultant]?.[dayOfWeek];
-    return !!(schedule && schedule.isActive);
-  } catch (error) {
-    console.error(`Airtable API error, using hardcoded fallback for ${consultant} on ${dayOfWeek}:`, error);
-    const schedule = ADVISOR_SCHEDULES[consultant]?.[dayOfWeek];
-    return !!(schedule && schedule.isActive);
-  }
+): boolean {
+  const schedule = ADVISOR_SCHEDULES[consultant]?.[dayOfWeek];
+  return !!(schedule && schedule.isActive);
 }
 
 /**
@@ -1023,6 +963,64 @@ export async function getAdvisorDaysOff(
     console.error('Error fetching advisor days off:', error);
     // Return no days off on error - safer to show availability
     return { isFullDayOff: false, partialTimeOffRanges: [] };
+  }
+}
+
+/**
+ * Get all days off for a specific date (both consultants in one query)
+ * Single Airtable call replaces 2 separate per-consultant queries
+ * Server-cached for 15 minutes since days off rarely change intra-day
+ */
+export async function getDaysOffForDate(
+  date: string
+): Promise<Record<ConsultantType, AdvisorDaysOffResult>> {
+  const cacheKey = `daysoff_${date}`;
+  const cached = serverCacheGet<Record<ConsultantType, AdvisorDaysOffResult>>(cacheKey);
+  if (cached) return cached;
+
+  const defaultResult: Record<ConsultantType, AdvisorDaysOffResult> = {
+    'Heidi Lynn': { isFullDayOff: false, partialTimeOffRanges: [] },
+    'Illiana': { isFullDayOff: false, partialTimeOffRanges: [] },
+  };
+
+  try {
+    const records = await getBase()(TABLES.ADVISOR_DAYS_OFF)
+      .select({
+        filterByFormula: `{Date} = '${date}'`,
+      })
+      .all();
+
+    if (records.length === 0) {
+      serverCacheSet(cacheKey, defaultResult, SERVER_CACHE_TTL.DAYS_OFF);
+      return defaultResult;
+    }
+
+    const result: Record<ConsultantType, AdvisorDaysOffResult> = {
+      'Heidi Lynn': { isFullDayOff: false, partialTimeOffRanges: [] },
+      'Illiana': { isFullDayOff: false, partialTimeOffRanges: [] },
+    };
+
+    for (const record of records) {
+      const consultant = record.get('Consultant') as ConsultantType;
+      if (!result[consultant]) continue;
+
+      if (record.get('AllDay') === true) {
+        result[consultant].isFullDayOff = true;
+        result[consultant].partialTimeOffRanges = [];
+      } else if (!result[consultant].isFullDayOff) {
+        const start = record.get('StartTime') as string;
+        const end = record.get('EndTime') as string;
+        if (start && end) {
+          result[consultant].partialTimeOffRanges.push({ start, end });
+        }
+      }
+    }
+
+    serverCacheSet(cacheKey, result, SERVER_CACHE_TTL.DAYS_OFF);
+    return result;
+  } catch (error) {
+    console.error('Error fetching days off for date:', error);
+    return defaultResult;
   }
 }
 
@@ -1075,8 +1073,8 @@ export async function isAdvisorAvailable(
     // Get day of week
     const dayOfWeek = getDayOfWeek(date);
 
-    // 2. Get advisor's weekly schedule
-    const weeklySchedule = await getAdvisorAvailability(consultant, dayOfWeek);
+    // 2. Get advisor's weekly schedule (synchronous, uses hardcoded data)
+    const weeklySchedule = getAdvisorAvailability(consultant, dayOfWeek);
 
     // If empty, use fallback 9-5 schedule (09:00-16:30 in 30-min blocks)
     const availableSlots = weeklySchedule.length > 0 ? weeklySchedule : generateFallbackSchedule();
@@ -1181,14 +1179,11 @@ export async function getAvailabilityForBothAdvisors(
     // Get day of week
     const dayOfWeek = getDayOfWeek(date);
 
-    // Get selected advisor's schedule (always needed)
-    // Only get other advisor's schedule if they offer this service
-    const [selectedSchedule, otherSchedule] = await Promise.all([
-      getAdvisorAvailability(selectedConsultant, dayOfWeek),
-      otherConsultantOffersService
-        ? getAdvisorAvailability(otherConsultant, dayOfWeek)
-        : Promise.resolve([]), // Empty schedule if they don't offer this service
-    ]);
+    // Get schedules directly from hardcoded data (zero Airtable calls)
+    const selectedSchedule = getAdvisorAvailability(selectedConsultant, dayOfWeek);
+    const otherSchedule = otherConsultantOffersService
+      ? getAdvisorAvailability(otherConsultant, dayOfWeek)
+      : [];
 
     // Use fallback if needed for selected consultant
     const selectedAvailableBlocks =
@@ -1199,14 +1194,12 @@ export async function getAvailabilityForBothAdvisors(
       ? (otherSchedule.length > 0 ? otherSchedule : generateFallbackSchedule())
       : []; // Empty array if they don't offer this service
 
-    // Get days off for selected advisor
-    // Only get other advisor's days off if they offer this service
-    const [selectedDaysOff, otherDaysOff] = await Promise.all([
-      getAdvisorDaysOff(selectedConsultant, date),
-      otherConsultantOffersService
-        ? getAdvisorDaysOff(otherConsultant, date)
-        : Promise.resolve({ isFullDayOff: true, partialTimeOffRanges: [] }), // Full day off if they don't offer service
-    ]);
+    // Get days off for both advisors in a single batched query (1 Airtable call instead of 2)
+    const allDaysOff = await getDaysOffForDate(date);
+    const selectedDaysOff = allDaysOff[selectedConsultant];
+    const otherDaysOff = otherConsultantOffersService
+      ? allDaysOff[otherConsultant]
+      : { isFullDayOff: true, partialTimeOffRanges: [] };
 
     // Get existing bookings for both advisors
     // If booking data is unavailable (API failure), allow booking but flag for manual verification

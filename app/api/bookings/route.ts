@@ -1,5 +1,6 @@
 import { NextResponse } from 'next/server';
 import { createConsultation, getBookingsForDate, type Consultation, type ConsultantType } from '@/lib/airtable';
+import { invalidateServerCache } from '@/lib/serverCache';
 
 export async function POST(request: Request) {
   try {
@@ -40,7 +41,8 @@ export async function POST(request: Request) {
     try {
       const existingBookings = await getBookingsForDate(
         body.dateBooked,
-        body.consultant as ConsultantType
+        body.consultant as ConsultantType,
+        true // bypassCache: always fresh for double-booking verification
       );
 
       const isSlotTaken = existingBookings.some(
@@ -79,6 +81,10 @@ export async function POST(request: Request) {
     };
 
     const result = await createConsultation(consultation);
+
+    // Invalidate server-side caches so other users see updated availability
+    invalidateServerCache('bookings_');
+    invalidateServerCache('fullybooked_');
 
     return NextResponse.json(result, { status: 200 });
   } catch (error) {

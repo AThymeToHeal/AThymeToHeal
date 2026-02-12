@@ -445,7 +445,7 @@ export default function BookingModal({
         const cached = localStorage.getItem(cacheKey);
         if (cached) {
           const { data, timestamp } = JSON.parse(cached);
-          const isStale = Date.now() - timestamp > 60 * 1000; // 1 minute (reduced from 5 for real-time updates)
+          const isStale = Date.now() - timestamp > 120 * 1000; // 2 minutes - server cache provides shared freshness
 
           if (!isStale) {
             setAvailableSlots(data.slots);

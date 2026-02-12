@@ -14,7 +14,7 @@ import type { ConsultantType, ServiceType } from './airtable';
 
 // Cache TTL constants (in milliseconds)
 export const CACHE_TTL = {
-  AVAILABILITY: 60 * 1000, // 1 minute - critical for preventing double-bookings
+  AVAILABILITY: 120 * 1000, // 2 minutes - server cache provides shared freshness, booking POST always does fresh check
   BOOKED_DATES: 2 * 60 * 1000, // 2 minutes - calendar indicators
   AVAILABLE_DAYS: 24 * 60 * 60 * 1000, // 24 hours - weekly schedules rarely change
 } as const;
