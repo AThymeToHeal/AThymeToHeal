@@ -12,7 +12,7 @@ export default function ServicesPage() {
     {
       title: 'Health Consult',
       description: 'A consultation with one of our wellness guides to start you on your health journey.',
-      duration: '30 minutes',
+      duration: '1 hr',
       price: '30',
       note: 'Services offered by both our wellness guides',
     },

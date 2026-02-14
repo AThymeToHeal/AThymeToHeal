@@ -6,14 +6,14 @@ import TestimonialsCarousel from './components/TestimonialsCarousel';
 export default function Home() {
   const services = [
     {
-      title: '1:1 Consultations',
-      description: 'Explore your health and possible paths forward in personalized one-on-one sessions',
-      backgroundImage: '/home/oil-in-hand-image.avif',
+      title: 'Health Consults',
+      description: 'A personalized consultation with one of our wellness guides to start you on your health journey',
+      backgroundImage: '/home/Bowl-of-greens-image.webp',
     },
     {
-      title: 'Essential Oil Guidance',
-      description: 'Not sure which oils are ideal for you? We offer 1:1 calls where we use muscle testing and learn more about you to best identify which oils best support you',
-      backgroundImage: '/home/Bowl-of-greens-image.webp',
+      title: 'Symphony of Cells',
+      description: 'A technique using essential oils applied on the spine and feet, targeting different body systems and related conditions',
+      backgroundImage: '/home/natural-beauty-image.avif',
     },
     {
       title: 'Essential Emotions Sessions',
@@ -21,8 +21,8 @@ export default function Home() {
       backgroundImage: '/home/essential-emotions.avif',
     },
     {
-      title: 'Educational Workshops',
-      description: 'Want to learn more about specific health related topics? We host educational classes monthly',
+      title: 'Business Consults',
+      description: 'Turn your health journey into a thriving business with personalized guidance and mentorship',
       backgroundImage: '/home/Tablets-image.webp',
     },
   ];

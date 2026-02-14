@@ -6,29 +6,39 @@ let _base: ReturnType<Airtable['base']> | null = null;
 
 // HARDCODED ADVISOR SCHEDULES - No API calls needed!
 // Schedule format: DayOfWeek -> { start: 'HH:MM', end: 'HH:MM' }
+// Available days: Tuesday, Wednesday, Thursday, Saturday
+// Heidi Lynn: 1 PM - 6 PM MT (weekdays), 10 AM - 4 PM MT (Saturday)
+// Illiana: 9 AM - 1 PM MT (weekdays), 10 AM - 4 PM MT (Saturday)
 const ADVISOR_SCHEDULES: Record<
   ConsultantType,
   Record<string, { start: string; end: string; isActive: boolean } | null>
 > = {
   'Heidi Lynn': {
-    Monday: { start: '09:00', end: '17:00', isActive: true },
-    Tuesday: { start: '09:00', end: '17:00', isActive: true },
-    Wednesday: { start: '09:00', end: '17:00', isActive: true },
-    Thursday: { start: '09:00', end: '17:00', isActive: true },
-    Friday: { start: '09:00', end: '17:00', isActive: true },
-    Saturday: null, // Not available
-    Sunday: null, // Not available
+    Monday: null,
+    Tuesday: { start: '13:00', end: '18:00', isActive: true },
+    Wednesday: { start: '13:00', end: '18:00', isActive: true },
+    Thursday: { start: '13:00', end: '18:00', isActive: true },
+    Friday: null,
+    Saturday: { start: '10:00', end: '16:00', isActive: true },
+    Sunday: null,
   },
   'Illiana': {
-    Monday: { start: '09:00', end: '17:00', isActive: true },
-    Tuesday: { start: '09:00', end: '17:00', isActive: true },
-    Wednesday: { start: '09:00', end: '17:00', isActive: true },
-    Thursday: { start: '09:00', end: '17:00', isActive: true },
-    Friday: { start: '09:00', end: '17:00', isActive: true },
-    Saturday: null, // Not available
-    Sunday: null, // Not available
+    Monday: null,
+    Tuesday: { start: '09:00', end: '13:00', isActive: true },
+    Wednesday: { start: '09:00', end: '13:00', isActive: true },
+    Thursday: { start: '09:00', end: '13:00', isActive: true },
+    Friday: null,
+    Saturday: { start: '10:00', end: '16:00', isActive: true },
+    Sunday: null,
   },
 };
+
+// Booking constraints per consultant per day
+export const BOOKING_LIMITS = {
+  MAX_CLIENT_BOOKINGS_PER_DAY: 2,
+  MAX_BUSINESS_BOOKINGS_PER_DAY: 3,
+  BUFFER_MINUTES: 30, // 30-minute buffer between client appointments
+} as const;
 
 function getBase() {
   if (_base) return _base;
@@ -165,7 +175,7 @@ export interface ServiceConfig {
 export const SERVICES: Record<ServiceType, ServiceConfig> = {
   'Health Consult': {
     name: 'Health Consult',
-    duration: 30,
+    duration: 60,
     price: 30,
     description: 'A consultation to start you on your health journey',
   },
@@ -598,11 +608,11 @@ export async function getBookingsForDate(
   date: string,
   consultant?: ConsultantType,
   bypassCache?: boolean
-): Promise<Array<{ timeSlot: string; consultant: ConsultantType }>> {
+): Promise<Array<{ timeSlot: string; consultant: ConsultantType; duration: number; serviceType: string }>> {
   // Check server cache first (unless bypassed for double-booking verification)
   const cacheKey = `bookings_${date}_${consultant || 'all'}`;
   if (!bypassCache) {
-    const cached = serverCacheGet<Array<{ timeSlot: string; consultant: ConsultantType }>>(cacheKey);
+    const cached = serverCacheGet<Array<{ timeSlot: string; consultant: ConsultantType; duration: number; serviceType: string }>>(cacheKey);
     if (cached) return cached;
   }
 
@@ -616,56 +626,76 @@ export async function getBookingsForDate(
     )`;
 
     // Add consultant filter if specified
+    // Also include bookings with no consultant (manual entries block everyone)
     if (consultant) {
       filterFormula = `AND(
         IS_AFTER({dateAndTime}, '${startOfDay}'),
         IS_BEFORE({dateAndTime}, '${endOfDay}'),
-        {Consultant} = '${consultant}'
+        OR({Consultant} = '${consultant}', {Consultant} = '')
       )`;
     }
 
     const records = await getBase()(TABLES.BOOKED)
       .select({
         filterByFormula: filterFormula,
-        fields: ['dateAndTime', 'Consultant'],
+        fields: ['dateAndTime', 'Consultant', 'Duration', 'ServiceType'],
       })
       .all();
 
-    const result = records.map((record) => {
-      const dateTime = record.get('dateAndTime') as string;
-      const utcDate = new Date(dateTime);
+    const result = records
+      .filter((record) => {
+        // Skip records with no dateAndTime (incomplete manual entries)
+        const dateTime = record.get('dateAndTime') as string;
+        return dateTime && !isNaN(new Date(dateTime).getTime());
+      })
+      .map((record) => {
+        const dateTime = record.get('dateAndTime') as string;
+        const utcDate = new Date(dateTime);
 
-      // Convert UTC to Mountain Time using Intl (handles DST automatically)
-      // MDT = UTC-6 (March-November), MST = UTC-7 (November-March)
-      const formatter = new Intl.DateTimeFormat('en-US', {
-        timeZone: 'America/Denver',
-        hour: '2-digit',
-        minute: '2-digit',
-        hour12: false,
+        // Convert UTC to Mountain Time using Intl (handles DST automatically)
+        const formatter = new Intl.DateTimeFormat('en-US', {
+          timeZone: 'America/Denver',
+          hour: '2-digit',
+          minute: '2-digit',
+          hour12: false,
+        });
+
+        const parts = formatter.formatToParts(utcDate);
+        const hours = parts.find(p => p.type === 'hour')?.value || '00';
+        const minutes = parts.find(p => p.type === 'minute')?.value || '00';
+        const timeSlot = `${hours}:${minutes}`;
+
+        const consultantName = record.get('Consultant') as ConsultantType;
+        const duration = (record.get('Duration') as number) || 30;
+        const serviceType = (record.get('ServiceType') as string) || '';
+
+        return { timeSlot, consultant: consultantName, duration, serviceType };
       });
 
-      const parts = formatter.formatToParts(utcDate);
-      const hours = parts.find(p => p.type === 'hour')?.value || '00';
-      const minutes = parts.find(p => p.type === 'minute')?.value || '00';
-      const timeSlot = `${hours}:${minutes}`;
-
-      const consultantName = record.get('Consultant') as ConsultantType;
-
-      return {
-        timeSlot,
-        consultant: consultantName,
-      };
-    });
-
-    // Cache the result
     serverCacheSet(cacheKey, result, SERVER_CACHE_TTL.BOOKINGS);
     return result;
   } catch (error) {
     console.error('Error fetching bookings for date:', error);
-    // CRITICAL: Don't return empty array - this would make all slots appear available
-    // and could allow double booking! Throw error to signal data unavailable.
     throw new Error('BOOKING_DATA_UNAVAILABLE');
   }
+}
+
+/**
+ * Get all 30-min blocks blocked by a booking, including the buffer period after.
+ * E.g., a 60-min booking at "10:00" with 30-min buffer blocks ["10:00", "10:30", "11:00"]
+ */
+export function getBlockedSlotsWithBuffer(startTime: string, duration: number): string[] {
+  const totalMinutes = duration + BOOKING_LIMITS.BUFFER_MINUTES;
+  const blocks: string[] = [];
+  const blocksNeeded = Math.ceil(totalMinutes / 30);
+  let currentMinutes = timeToMinutes(startTime);
+
+  for (let i = 0; i < blocksNeeded; i++) {
+    blocks.push(minutesToTime(currentMinutes));
+    currentMinutes += 30;
+  }
+
+  return blocks;
 }
 
 /**
@@ -1076,8 +1106,8 @@ export async function isAdvisorAvailable(
     // 2. Get advisor's weekly schedule (synchronous, uses hardcoded data)
     const weeklySchedule = getAdvisorAvailability(consultant, dayOfWeek);
 
-    // If empty, use fallback 9-5 schedule (09:00-16:30 in 30-min blocks)
-    const availableSlots = weeklySchedule.length > 0 ? weeklySchedule : generateFallbackSchedule();
+    // No schedule = not available on this day
+    const availableSlots = weeklySchedule;
 
     // 3. Check if time slot is in weekly schedule
     if (!availableSlots.includes(timeSlot)) {
@@ -1185,14 +1215,11 @@ export async function getAvailabilityForBothAdvisors(
       ? getAdvisorAvailability(otherConsultant, dayOfWeek)
       : [];
 
-    // Use fallback if needed for selected consultant
-    const selectedAvailableBlocks =
-      selectedSchedule.length > 0 ? selectedSchedule : generateFallbackSchedule();
+    // No schedule = not available (no fallback to 24-hour schedule)
+    const selectedAvailableBlocks = selectedSchedule;
 
-    // For other consultant: only use their schedule/fallback if they offer this service
-    const otherAvailableBlocks = otherConsultantOffersService
-      ? (otherSchedule.length > 0 ? otherSchedule : generateFallbackSchedule())
-      : []; // Empty array if they don't offer this service
+    // For other consultant: only use their schedule if they offer this service
+    const otherAvailableBlocks = otherConsultantOffersService ? otherSchedule : [];
 
     // Get days off for both advisors in a single batched query (1 Airtable call instead of 2)
     const allDaysOff = await getDaysOffForDate(date);
@@ -1203,7 +1230,7 @@ export async function getAvailabilityForBothAdvisors(
 
     // Get existing bookings for both advisors
     // If booking data is unavailable (API failure), allow booking but flag for manual verification
-    let bookings: Array<{ timeSlot: string; consultant: ConsultantType }> = [];
+    let bookings: Array<{ timeSlot: string; consultant: ConsultantType; duration: number; serviceType: string }> = [];
     let bookingDataUnavailable = false;
 
     try {
@@ -1213,18 +1240,44 @@ export async function getAvailabilityForBothAdvisors(
       if (errorMessage.includes('BOOKING_DATA_UNAVAILABLE')) {
         console.warn('Booking data unavailable - allowing booking with manual verification flag');
         bookingDataUnavailable = true;
-        // bookings stays as empty array - all slots will appear available
       } else {
-        throw error; // Re-throw other errors
+        throw error;
       }
     }
 
-    const selectedBookedSlots = bookings
-      .filter((b) => b.consultant === selectedConsultant)
-      .map((b) => b.timeSlot);
-    const otherBookedSlots = bookings
-      .filter((b) => b.consultant === otherConsultant)
-      .map((b) => b.timeSlot);
+    // Build blocked slot lists with duration + buffer awareness
+    // Each booking blocks its duration PLUS a 30-min buffer after
+    const selectedBlockedSlots: string[] = [];
+    const otherBlockedSlots: string[] = [];
+
+    for (const booking of bookings) {
+      const blocked = getBlockedSlotsWithBuffer(booking.timeSlot, booking.duration);
+      if (!booking.consultant) {
+        // No consultant assigned (manual entry) - block both
+        selectedBlockedSlots.push(...blocked);
+        otherBlockedSlots.push(...blocked);
+      } else if (booking.consultant === selectedConsultant) {
+        selectedBlockedSlots.push(...blocked);
+      } else if (booking.consultant === otherConsultant) {
+        otherBlockedSlots.push(...blocked);
+      }
+    }
+
+    // Check daily booking limits per consultant
+    const isBusinessService = serviceType === 'Business Consultation';
+    const selectedBookings = bookings.filter((b) => b.consultant === selectedConsultant || !b.consultant);
+    const selectedClientCount = selectedBookings.filter((b) => b.serviceType !== 'Business Consultation').length;
+    const selectedBusinessCount = selectedBookings.filter((b) => b.serviceType === 'Business Consultation').length;
+    const selectedLimitReached = isBusinessService
+      ? selectedBusinessCount >= BOOKING_LIMITS.MAX_BUSINESS_BOOKINGS_PER_DAY
+      : selectedClientCount >= BOOKING_LIMITS.MAX_CLIENT_BOOKINGS_PER_DAY;
+
+    const otherBookings = bookings.filter((b) => b.consultant === otherConsultant || !b.consultant);
+    const otherClientCount = otherBookings.filter((b) => b.serviceType !== 'Business Consultation').length;
+    const otherBusinessCount = otherBookings.filter((b) => b.serviceType === 'Business Consultation').length;
+    const otherLimitReached = isBusinessService
+      ? otherBusinessCount >= BOOKING_LIMITS.MAX_BUSINESS_BOOKINGS_PER_DAY
+      : otherClientCount >= BOOKING_LIMITS.MAX_CLIENT_BOOKINGS_PER_DAY;
 
     // Generate time slots based on service duration
     const allPossibleSlots = generateTimeSlots(serviceDuration);
@@ -1234,10 +1287,9 @@ export async function getAvailabilityForBothAdvisors(
 
     // Calculate minimum booking time (8 hours from now in MST)
     const now = new Date();
-    const mstOffset = isDST(now) ? -6 : -7; // MDT is UTC-6, MST is UTC-7
+    const mstOffset = isDST(now) ? -6 : -7;
     const mstNow = new Date(now.getTime() + mstOffset * 60 * 60 * 1000);
     const minimumBookingTime = new Date(mstNow.getTime() + 8 * 60 * 60 * 1000);
-    const minimumTimeString = `${minimumBookingTime.getUTCHours().toString().padStart(2, '0')}:${minimumBookingTime.getUTCMinutes().toString().padStart(2, '0')}`;
 
     for (const slot of allPossibleSlots) {
       const slotTime = slot.start;
@@ -1247,17 +1299,16 @@ export async function getAvailabilityForBothAdvisors(
       const isTooSoon = slotDate < minimumBookingTime;
 
       // Check selected advisor availability
-      const selectedHasBlocks = hasConsecutiveBlocks(
-        slotTime,
-        serviceDuration,
-        selectedAvailableBlocks
-      );
+      const selectedHasBlocks = hasConsecutiveBlocks(slotTime, serviceDuration, selectedAvailableBlocks);
       const selectedNotDayOff =
         !selectedDaysOff.isFullDayOff &&
         !selectedDaysOff.partialTimeOffRanges.some((range) =>
           isTimeInRange(slotTime, range.start, range.end)
         );
-      const selectedNotBooked = !selectedBookedSlots.includes(slotTime);
+      // Duration + buffer aware: all required blocks for this booking must be free
+      const requiredBlocks = getBlockedSlotsWithBuffer(slotTime, serviceDuration);
+      const selectedNotBooked = !selectedLimitReached &&
+        requiredBlocks.every((block) => !selectedBlockedSlots.includes(block));
       const selectedAvailable =
         selectedHasBlocks && selectedNotDayOff && selectedNotBooked && !isTooSoon;
 
@@ -1268,7 +1319,8 @@ export async function getAvailabilityForBothAdvisors(
         !otherDaysOff.partialTimeOffRanges.some((range) =>
           isTimeInRange(slotTime, range.start, range.end)
         );
-      const otherNotBooked = !otherBookedSlots.includes(slotTime);
+      const otherNotBooked = !otherLimitReached &&
+        requiredBlocks.every((block) => !otherBlockedSlots.includes(block));
       const otherAvailable = otherHasBlocks && otherNotDayOff && otherNotBooked && !isTooSoon;
 
       // Add to selected advisor slots if they're available
@@ -1279,7 +1331,6 @@ export async function getAvailabilityForBothAdvisors(
           available: true,
         });
       } else if (otherAvailable) {
-        // Add to selected advisor slots as "available with other"
         selectedAdvisorSlots.push({
           start: slot.start,
           end: slot.end,

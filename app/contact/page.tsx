@@ -125,23 +125,6 @@ export default function ContactPage() {
         </div>
       </section>
 
-      {/* FAQ CTA */}
-      <section className="py-12 px-4 bg-secondary">
-        <div className="mx-auto max-w-4xl text-center">
-          <h2 className="text-2xl md:text-3xl font-serif font-bold mb-4 text-primary">
-            Have Questions?
-          </h2>
-          <p className="text-lg mb-6 text-brown">
-            Check out our FAQ page for answers to common questions.
-          </p>
-          <a
-            href="/faq"
-            className="inline-block px-6 py-3 bg-primary text-secondary font-semibold rounded-md hover:bg-primary/90 transition-colors"
-          >
-            View FAQ
-          </a>
-        </div>
-      </section>
     </div>
   );
 }

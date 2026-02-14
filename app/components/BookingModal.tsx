@@ -427,37 +427,47 @@ export default function BookingModal({
     await loadAvailableSlots(date);
   };
 
-  // Load available time slots with localStorage caching
+  // Load available time slots with stale-while-revalidate caching
+  // Shows cached data instantly, then refreshes in background if stale (>30s)
   const loadAvailableSlots = async (date: Date, retryCount = 0) => {
     if (!selectedServiceType || !selectedConsultant) {
       console.error('Service type and consultant must be selected');
       return;
     }
 
-    setIsLoadingSlots(true);
+    const dateString = getDateString(date);
+    const cacheKey = `availability_${dateString}_${selectedServiceType}_${selectedConsultant}`;
+
+    // Stale-while-revalidate: show cached data immediately, refetch if stale
+    let hasCachedData = false;
+    let cacheIsFresh = false;
+    try {
+      const cached = localStorage.getItem(cacheKey);
+      if (cached) {
+        const { data, timestamp } = JSON.parse(cached);
+        // Show cached data immediately (no loading spinner)
+        setAvailableSlots(data.slots);
+        setBookingDataUnavailable(data.dataUnavailable || false);
+        hasCachedData = true;
+        // If cache is very fresh (<30s), skip refetch entirely
+        cacheIsFresh = Date.now() - timestamp < 30 * 1000;
+      }
+    } catch (cacheError) {
+      // Ignore cache errors, proceed with fetch
+    }
+
+    // If cache is fresh enough, no need to refetch
+    if (cacheIsFresh) {
+      setIsLoadingSlots(false);
+      return;
+    }
+
+    // Only show loading spinner if we have no cached data to display
+    if (!hasCachedData) {
+      setIsLoadingSlots(true);
+    }
 
     try {
-      const dateString = getDateString(date);
-      const cacheKey = `availability_${dateString}_${selectedServiceType}_${selectedConsultant}`;
-
-      // Check localStorage cache (1 minute expiry for near-real-time updates)
-      try {
-        const cached = localStorage.getItem(cacheKey);
-        if (cached) {
-          const { data, timestamp } = JSON.parse(cached);
-          const isStale = Date.now() - timestamp > 120 * 1000; // 2 minutes - server cache provides shared freshness
-
-          if (!isStale) {
-            setAvailableSlots(data.slots);
-            setBookingDataUnavailable(data.dataUnavailable || false);
-            setIsLoadingSlots(false);
-            return;
-          }
-        }
-      } catch (cacheError) {
-        // Ignore cache errors, proceed with fetch
-      }
-
       const response = await fetch(
         `/api/availability?date=${dateString}&serviceType=${encodeURIComponent(selectedServiceType)}&consultant=${encodeURIComponent(selectedConsultant)}`
       );
@@ -468,7 +478,7 @@ export default function BookingModal({
           return;
         }
         console.warn('Failed to fetch availability after retries');
-        setAvailableSlots([]);
+        if (!hasCachedData) setAvailableSlots([]);
         return;
       }
 
@@ -479,7 +489,7 @@ export default function BookingModal({
       const slots: TimeSlot[] = await response.json();
       setAvailableSlots(slots);
 
-      // Cache the result
+      // Update cache with fresh data
       try {
         localStorage.setItem(cacheKey, JSON.stringify({
           data: { slots, dataUnavailable },
@@ -495,7 +505,8 @@ export default function BookingModal({
         return;
       }
       console.warn('Error loading time slots:', error);
-      setAvailableSlots([]);
+      // Only clear slots if we have no cached fallback
+      if (!hasCachedData) setAvailableSlots([]);
     } finally {
       setIsLoadingSlots(false);
     }

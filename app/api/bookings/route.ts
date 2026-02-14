@@ -1,5 +1,5 @@
 import { NextResponse } from 'next/server';
-import { createConsultation, getBookingsForDate, type Consultation, type ConsultantType } from '@/lib/airtable';
+import { createConsultation, getBookingsForDate, getBlockedSlotsWithBuffer, SERVICES, BOOKING_LIMITS, type Consultation, type ConsultantType, type ServiceType } from '@/lib/airtable';
 import { invalidateServerCache } from '@/lib/serverCache';
 
 export async function POST(request: Request) {
@@ -38,6 +38,7 @@ export async function POST(request: Request) {
 
     // CRITICAL: Double-booking prevention check
     // Verify the timeslot is still available before creating the booking
+    // Checks: time overlap with buffer, and daily booking limits
     try {
       const existingBookings = await getBookingsForDate(
         body.dateBooked,
@@ -45,23 +46,39 @@ export async function POST(request: Request) {
         true // bypassCache: always fresh for double-booking verification
       );
 
-      const isSlotTaken = existingBookings.some(
-        (booking) => booking.timeSlot === body.timeSlotStart
-      );
+      // Build blocked slots from existing bookings (duration + 30-min buffer)
+      const blockedSlots: string[] = [];
+      for (const booking of existingBookings) {
+        blockedSlots.push(...getBlockedSlotsWithBuffer(booking.timeSlot, booking.duration));
+      }
 
-      if (isSlotTaken) {
+      // Check if new booking's required blocks (duration + buffer) overlap with any blocked slot
+      const newServiceConfig = SERVICES[body.serviceType as ServiceType];
+      const newDuration = newServiceConfig?.duration || 30;
+      const newRequiredBlocks = getBlockedSlotsWithBuffer(body.timeSlotStart, newDuration);
+      const hasOverlap = newRequiredBlocks.some((block) => blockedSlots.includes(block));
+
+      // Check daily booking limits
+      const isBusinessService = body.serviceType === 'Business Consultation';
+      const clientCount = existingBookings.filter((b) => b.serviceType !== 'Business Consultation').length;
+      const businessCount = existingBookings.filter((b) => b.serviceType === 'Business Consultation').length;
+      const limitReached = isBusinessService
+        ? businessCount >= BOOKING_LIMITS.MAX_BUSINESS_BOOKINGS_PER_DAY
+        : clientCount >= BOOKING_LIMITS.MAX_CLIENT_BOOKINGS_PER_DAY;
+
+      if (hasOverlap || limitReached) {
         return NextResponse.json(
           {
-            error: 'This timeslot was just booked by someone else. Please select a different time.',
+            error: limitReached
+              ? 'Daily booking limit reached for this consultant. Please select a different date.'
+              : 'This timeslot was just booked by someone else. Please select a different time.',
             code: 'SLOT_UNAVAILABLE',
           },
-          { status: 409 } // 409 Conflict
+          { status: 409 }
         );
       }
     } catch (verificationError) {
       console.error('Error verifying slot availability:', verificationError);
-      // If verification fails, log it but allow booking with manual verification flag
-      // This prevents blocking legitimate bookings due to API issues
       console.warn('Proceeding with booking despite verification failure - manual review required');
     }
 
