@@ -1,5 +1,5 @@
 import { NextResponse } from 'next/server';
-import { getFullyBookedDates, type ConsultantType } from '@/lib/airtable';
+import { getFullyBookedDates, type ConsultantType, type ServiceType } from '@/lib/airtable';
 
 export async function GET(request: Request) {
   try {
@@ -7,6 +7,7 @@ export async function GET(request: Request) {
     const year = searchParams.get('year');
     const month = searchParams.get('month');
     const consultant = searchParams.get('consultant') as ConsultantType | null;
+    const serviceType = searchParams.get('serviceType') as ServiceType | null;
 
     if (!year || !month) {
       return NextResponse.json(
@@ -22,7 +23,7 @@ export async function GET(request: Request) {
       return NextResponse.json({ error: 'Invalid year or month' }, { status: 400 });
     }
 
-    const fullyBookedDates = await getFullyBookedDates(yearNum, monthNum, consultant || undefined);
+    const fullyBookedDates = await getFullyBookedDates(yearNum, monthNum, consultant || undefined, serviceType || undefined);
 
     return NextResponse.json(fullyBookedDates, { status: 200 });
   } catch (error) {

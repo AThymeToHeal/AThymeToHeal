@@ -104,6 +104,42 @@ export default function BookingModal({
     return !availableDaysOfWeek.has(dayOfWeek);
   }, [availableDaysOfWeek]);
 
+  // Check if all remaining dates in the current month are fully booked
+  const isRestOfMonthBooked = useMemo(() => {
+    if (fullyBookedDates.size === 0 && !isLoadingBookedDates) {
+      // No booked dates loaded yet or none booked — not fully booked
+      return false;
+    }
+
+    const year = currentMonth.getFullYear();
+    const month = currentMonth.getMonth();
+    const lastDay = new Date(year, month + 1, 0).getDate();
+
+    let hasRemainingDate = false;
+
+    for (let day = 1; day <= lastDay; day++) {
+      const date = new Date(year, month, day);
+
+      // Skip past dates
+      if (isPast(date)) continue;
+
+      // Skip days when no consultant is available (e.g., Monday, Friday, Sunday)
+      if (isDayUnavailable(date)) continue;
+
+      // This is a valid remaining date — check if it's fully booked
+      const dateStr = getDateString(date);
+      if (!fullyBookedDates.has(dateStr)) {
+        // Found at least one available date
+        return false;
+      }
+
+      hasRemainingDate = true;
+    }
+
+    // If we found remaining dates and all were booked, the month is fully booked
+    return hasRemainingDate;
+  }, [fullyBookedDates, currentMonth, isLoadingBookedDates, isDayUnavailable]);
+
   // Helper function to get service-type-specific cache key
   const getCacheKey = useCallback(() => {
     // Determine the service type to use for cache key
@@ -247,7 +283,7 @@ export default function BookingModal({
     async (date: Date, retryCount = 0) => {
       const year = date.getFullYear();
       const month = date.getMonth() + 1;
-      const cacheKey = `${year}-${month}-${selectedConsultant || 'all'}`;
+      const cacheKey = `${year}-${month}-${selectedConsultant || 'all'}-${selectedServiceType || 'default'}`;
       const CACHE_TTL = 2 * 60 * 1000; // 2 minutes (reduced from 5 for faster updates)
 
       // Check cache first with TTL validation
@@ -263,7 +299,10 @@ export default function BookingModal({
         const consultantParam = selectedConsultant
           ? `&consultant=${encodeURIComponent(selectedConsultant)}`
           : '';
-        const response = await fetch(`/api/booked-dates?year=${year}&month=${month}${consultantParam}`);
+        const serviceTypeParam = selectedServiceType
+          ? `&serviceType=${encodeURIComponent(selectedServiceType)}`
+          : '';
+        const response = await fetch(`/api/booked-dates?year=${year}&month=${month}${consultantParam}${serviceTypeParam}`);
         if (!response.ok) {
           if (retryCount < 2) {
             setIsLoadingBookedDates(false);
@@ -290,7 +329,7 @@ export default function BookingModal({
         setIsLoadingBookedDates(false);
       }
     },
-    [cachedMonths, selectedConsultant]
+    [cachedMonths, selectedConsultant, selectedServiceType]
   );
 
   // Auto-save booking progress to localStorage (service-type-specific)
@@ -1030,12 +1069,12 @@ export default function BookingModal({
                       onClick={() => !isDisabled && handleDateSelect(date)}
                       disabled={isDisabled}
                       className={`aspect-square rounded-md flex items-center justify-center text-sm font-medium transition-colors ${
-                        isSelected
+                        isDisabled
+                          ? 'text-brown/30 cursor-not-allowed line-through'
+                          : isSelected
                           ? 'bg-primary text-secondary'
                           : isToday
                           ? 'border-2 border-primary text-primary'
-                          : isDisabled
-                          ? 'text-brown/30 cursor-not-allowed line-through'
                           : 'hover:bg-sage/20 text-brown'
                       }`}
                     >
@@ -1048,6 +1087,9 @@ export default function BookingModal({
               {isLoadingBookedDates && (
                 <p className="text-center text-brown text-sm">Loading availability...</p>
               )}
+
+
+
             </div>
           )}
 
@@ -1476,6 +1518,23 @@ export default function BookingModal({
           )}
         </div>
       </div>
+
+      {/* Toast notification for fully booked month — outside modal to avoid resizing */}
+      {isRestOfMonthBooked && !isLoadingBookedDates && step === 'calendar' && (
+        <div className="fixed top-4 left-1/2 -translate-x-1/2 z-[60] w-11/12 max-w-md animate-fade-in-down">
+          <div className="bg-white border border-orange shadow-lg rounded-lg px-4 py-3">
+            <p className="text-sm font-semibold text-primary">
+              All remaining dates this month are fully booked.
+            </p>
+            <p className="text-xs text-brown mt-1">
+              Try the next month, or{' '}
+              <a href="/contact" className="text-primary underline font-medium">
+                contact us directly
+              </a>.
+            </p>
+          </div>
+        </div>
+      )}
     </div>
   );
 }

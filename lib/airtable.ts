@@ -699,58 +699,153 @@ export function getBlockedSlotsWithBuffer(startTime: string, duration: number): 
 }
 
 /**
- * Get fully booked dates for a month (all slots taken)
- * Optionally filter by consultant to show their specific availability
+ * Get fully booked dates for a month based on per-consultant daily booking limits
+ * AND advisor days off. A date is "fully booked" when the consultant(s) have either:
+ *   - Hit their daily booking limit for the service type, OR
+ *   - Have a full day off scheduled
+ *
+ * Uses actual booking limits: 2 client bookings or 3 business bookings per consultant per day.
+ * Manual/blocked entries (empty consultant field) count against both consultants.
  */
 export async function getFullyBookedDates(
   year: number,
   month: number,
-  consultant?: ConsultantType
+  consultant?: ConsultantType,
+  serviceType?: ServiceType
 ): Promise<string[]> {
-  const cacheKey = `fullybooked_${year}_${month}_${consultant || 'all'}`;
+  const cacheKey = `fullybooked_${year}_${month}_${consultant || 'all'}_${serviceType || 'default'}`;
   const cached = serverCacheGet<string[]>(cacheKey);
   if (cached) return cached;
 
   try {
-    const startDate = new Date(year, month - 1, 1);
-    const endDate = new Date(year, month, 0);
+    const lastDay = new Date(year, month, 0).getDate();
 
-    let filterFormula = `AND(
-      IS_AFTER({dateAndTime}, '${startDate.toISOString()}'),
-      IS_BEFORE({dateAndTime}, '${endDate.toISOString()}')
-    )`;
+    // Use MST-aware date boundaries to include the full month
+    const firstDayStr = `${year}-${String(month).padStart(2, '0')}-01`;
+    const lastDayStr = `${year}-${String(month).padStart(2, '0')}-${String(lastDay).padStart(2, '0')}`;
+    const rangeStart = mstToUtcIso(firstDayStr, '00:00');
+    const rangeEnd = mstToUtcIso(lastDayStr, '23:59');
 
-    // Add consultant filter if specified
+    // Fetch bookings and days-off for the month in parallel
+    let bookingFilterFormula: string;
     if (consultant) {
-      filterFormula = `AND(
-        IS_AFTER({dateAndTime}, '${startDate.toISOString()}'),
-        IS_BEFORE({dateAndTime}, '${endDate.toISOString()}'),
-        {Consultant} = '${consultant}'
+      bookingFilterFormula = `AND(
+        IS_AFTER({dateAndTime}, '${rangeStart}'),
+        IS_BEFORE({dateAndTime}, '${rangeEnd}'),
+        OR({Consultant} = '${consultant}', {Consultant} = '')
+      )`;
+    } else {
+      bookingFilterFormula = `AND(
+        IS_AFTER({dateAndTime}, '${rangeStart}'),
+        IS_BEFORE({dateAndTime}, '${rangeEnd}')
       )`;
     }
 
-    const records = await getBase()(TABLES.BOOKED)
-      .select({
-        filterByFormula: filterFormula,
-        fields: ['dateAndTime'],
-      })
-      .all();
+    // Build days-off filter: match all dates in the month (YYYY-MM-DD format)
+    const daysOffDateFilters: string[] = [];
+    for (let day = 1; day <= lastDay; day++) {
+      const dateStr = `${year}-${String(month).padStart(2, '0')}-${String(day).padStart(2, '0')}`;
+      daysOffDateFilters.push(`{Date} = '${dateStr}'`);
+    }
+    let daysOffFilter = `OR(${daysOffDateFilters.join(', ')})`;
+    if (consultant) {
+      daysOffFilter = `AND({Consultant} = '${consultant}', ${daysOffFilter})`;
+    }
 
-    // Group by date and count
-    const dateCount: Record<string, number> = {};
-    records.forEach((record) => {
-      const dateTime = record.get('dateAndTime') as string;
-      const date = new Date(dateTime).toISOString().split('T')[0];
-      dateCount[date] = (dateCount[date] || 0) + 1;
+    const [bookingRecords, daysOffRecords] = await Promise.all([
+      getBase()(TABLES.BOOKED)
+        .select({
+          filterByFormula: bookingFilterFormula,
+          fields: ['dateAndTime', 'Consultant', 'ServiceType'],
+        })
+        .all(),
+      getBase()(TABLES.ADVISOR_DAYS_OFF)
+        .select({
+          filterByFormula: daysOffFilter,
+          fields: ['Date', 'Consultant', 'AllDay'],
+        })
+        .all(),
+    ]);
+
+    // Build set of dates where each consultant has a full day off
+    // Key: "YYYY-MM-DD|ConsultantName" → true if full day off
+    const fullDayOffSet = new Set<string>();
+    daysOffRecords.forEach((record) => {
+      const date = record.get('Date') as string;
+      const offConsultant = record.get('Consultant') as string;
+      const isAllDay = record.get('AllDay') === true;
+      if (isAllDay && date && offConsultant) {
+        fullDayOffSet.add(`${date}|${offConsultant}`);
+      }
     });
 
-    // Return dates with 8 or more bookings (fully booked)
-    const result = Object.entries(dateCount)
-      .filter(([_, count]) => count >= 8)
-      .map(([date]) => date);
+    // Determine which limit to check based on service type
+    const isBusinessService = serviceType === 'Business Consultation';
+    const limit = isBusinessService
+      ? BOOKING_LIMITS.MAX_BUSINESS_BOOKINGS_PER_DAY
+      : BOOKING_LIMITS.MAX_CLIENT_BOOKINGS_PER_DAY;
 
-    serverCacheSet(cacheKey, result, SERVER_CACHE_TTL.FULLY_BOOKED);
-    return result;
+    // Group bookings by date (Mountain Time)
+    const dateBuckets: Record<string, { consultant: string; serviceType: string }[]> = {};
+    bookingRecords.forEach((record) => {
+      const dateTime = record.get('dateAndTime') as string;
+      const bookingConsultant = (record.get('Consultant') as string) || '';
+      const bookingServiceType = (record.get('ServiceType') as string) || '';
+
+      // Convert UTC to Mountain Time for correct date grouping
+      const utcDate = new Date(dateTime);
+      const mtDate = new Date(utcDate.toLocaleString('en-US', { timeZone: 'America/Denver' }));
+      const dateStr = `${mtDate.getFullYear()}-${String(mtDate.getMonth() + 1).padStart(2, '0')}-${String(mtDate.getDate()).padStart(2, '0')}`;
+
+      if (!dateBuckets[dateStr]) dateBuckets[dateStr] = [];
+      dateBuckets[dateStr].push({ consultant: bookingConsultant, serviceType: bookingServiceType });
+    });
+
+    const fullyBookedDates: string[] = [];
+
+    // Check every active day in the month (not just days with bookings)
+    const dayNames = ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday'];
+    for (let day = 1; day <= lastDay; day++) {
+      const dateStr = `${year}-${String(month).padStart(2, '0')}-${String(day).padStart(2, '0')}`;
+      const date = new Date(year, month - 1, day);
+      const dayOfWeek = dayNames[date.getDay()];
+
+      // Skip days that aren't in any consultant's schedule
+      if (!hasAnyAdvisorAvailability(dayOfWeek)) continue;
+
+      const bookings = dateBuckets[dateStr] || [];
+
+      // Helper: check if a single consultant is unavailable on this date
+      const isConsultantUnavailable = (c: ConsultantType): boolean => {
+        // Check if consultant doesn't work this day of week
+        if (!hasConsultantAvailability(c, dayOfWeek)) return true;
+
+        // Check full day off
+        if (fullDayOffSet.has(`${dateStr}|${c}`)) return true;
+
+        // Check booking limit
+        const cBookings = bookings.filter((b) => b.consultant === c || b.consultant === '');
+        const count = isBusinessService
+          ? cBookings.filter((b) => b.serviceType === 'Business Consultation').length
+          : cBookings.filter((b) => b.serviceType !== 'Business Consultation').length;
+        return count >= limit;
+      };
+
+      if (consultant) {
+        if (isConsultantUnavailable(consultant)) {
+          fullyBookedDates.push(dateStr);
+        }
+      } else {
+        // All consultants mode: fully booked when ALL consultants are unavailable
+        const allConsultants: ConsultantType[] = ['Heidi Lynn', 'Illiana'];
+        if (allConsultants.every((c) => isConsultantUnavailable(c))) {
+          fullyBookedDates.push(dateStr);
+        }
+      }
+    }
+
+    serverCacheSet(cacheKey, fullyBookedDates, SERVER_CACHE_TTL.FULLY_BOOKED);
+    return fullyBookedDates;
   } catch (error) {
     console.error('Error fetching fully booked dates:', error);
     return [];
