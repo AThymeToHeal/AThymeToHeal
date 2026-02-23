@@ -33,6 +33,7 @@ export default function ServicesPage() {
   const bundles = [
     {
       title: 'Back to Basics Package',
+      serviceType: 'Tier 1 - Back to Basics' as ServiceType,
       duration: '6 weeks',
       price: '350',
       paymentOptions: 'Optional split: $175 upfront + $175 halfway',
@@ -52,6 +53,7 @@ export default function ServicesPage() {
     },
     {
       title: 'A Thyme to Heal Package',
+      serviceType: 'Tier 2 - A Thyme to Heal' as ServiceType,
       duration: '8 weeks',
       price: '699',
       paymentOptions: '',
@@ -74,6 +76,7 @@ export default function ServicesPage() {
     },
     {
       title: 'Deep Roots Healing Package',
+      serviceType: 'Tier 3 - Deep Roots Healing' as ServiceType,
       duration: '10 weeks',
       price: '2,000',
       paymentOptions: '',
@@ -272,7 +275,7 @@ export default function ServicesPage() {
 
                   {/* Book Button */}
                   <div className="text-center mt-auto">
-                    <Booking buttonText="Book Intake Consultation" defaultServiceType={bundle.title as ServiceType} />
+                    <Booking buttonText="Book Intake Consultation" defaultServiceType={bundle.serviceType} />
                   </div>
                 </div>
               </div>
