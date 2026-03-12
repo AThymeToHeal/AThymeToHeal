@@ -3,6 +3,137 @@
 import { useState, useEffect, useRef } from 'react';
 import TestimonialModal from './TestimonialModal';
 
+function SubmitTestimonialModal({ onClose }: { onClose: () => void }) {
+  const [name, setName] = useState('');
+  const [text, setText] = useState('');
+  const [rating, setRating] = useState(0);
+  const [hoveredRating, setHoveredRating] = useState(0);
+  const [status, setStatus] = useState<'idle' | 'loading' | 'success' | 'error'>('idle');
+  const [errorMsg, setErrorMsg] = useState('');
+
+  useEffect(() => {
+    const handleKey = (e: KeyboardEvent) => { if (e.key === 'Escape') onClose(); };
+    window.addEventListener('keydown', handleKey);
+    return () => window.removeEventListener('keydown', handleKey);
+  }, [onClose]);
+
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!rating) { setErrorMsg('Please select a star rating.'); return; }
+    setStatus('loading');
+    setErrorMsg('');
+    try {
+      const res = await fetch('/api/testimonials', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ name: name.trim(), text: text.trim(), rating }),
+      });
+      if (!res.ok) {
+        const data = await res.json();
+        throw new Error(data.error || 'Submission failed.');
+      }
+      setStatus('success');
+    } catch (err) {
+      setErrorMsg(err instanceof Error ? err.message : 'Something went wrong. Please try again.');
+      setStatus('error');
+    }
+  };
+
+  return (
+    <div
+      className="fixed inset-0 bg-black/60 z-50 flex items-center justify-center p-4"
+      onClick={(e) => { if (e.target === e.currentTarget) onClose(); }}
+    >
+      <div className="bg-white rounded-xl shadow-2xl w-full max-w-lg p-8 relative">
+        <button
+          onClick={onClose}
+          className="absolute top-4 right-4 text-brown/60 hover:text-brown transition-colors text-2xl leading-none"
+          aria-label="Close"
+        >
+          &times;
+        </button>
+
+        {status === 'success' ? (
+          <div className="text-center py-6">
+            <div className="text-5xl mb-4">🌿</div>
+            <h3 className="text-2xl font-semibold text-primary mb-2">Thank You!</h3>
+            <p className="text-brown/80">Your testimonial has been submitted and will be reviewed before being published.</p>
+            <button
+              onClick={onClose}
+              className="mt-6 bg-primary text-white px-6 py-2 rounded-full hover:bg-accent transition-colors"
+            >
+              Close
+            </button>
+          </div>
+        ) : (
+          <>
+            <h3 className="text-2xl font-semibold text-primary mb-6">Share Your Experience</h3>
+            <form onSubmit={handleSubmit} className="flex flex-col gap-5">
+              <div>
+                <label className="block text-sm font-medium text-brown mb-1" htmlFor="testimonial-name">Your Name</label>
+                <input
+                  id="testimonial-name"
+                  type="text"
+                  value={name}
+                  onChange={(e) => setName(e.target.value)}
+                  required
+                  maxLength={80}
+                  placeholder="e.g. Jane S."
+                  className="w-full border border-taupe rounded-lg px-4 py-2 text-brown focus:outline-none focus:ring-2 focus:ring-primary/40"
+                />
+              </div>
+
+              <div>
+                <label className="block text-sm font-medium text-brown mb-1" htmlFor="testimonial-text">Your Testimonial</label>
+                <textarea
+                  id="testimonial-text"
+                  value={text}
+                  onChange={(e) => setText(e.target.value)}
+                  required
+                  maxLength={1000}
+                  rows={5}
+                  placeholder="Tell us about your experience..."
+                  className="w-full border border-taupe rounded-lg px-4 py-2 text-brown focus:outline-none focus:ring-2 focus:ring-primary/40 resize-none"
+                />
+                <p className="text-xs text-brown/50 text-right mt-1">{text.length}/1000</p>
+              </div>
+
+              <div>
+                <label className="block text-sm font-medium text-brown mb-2">Rating</label>
+                <div className="flex gap-1">
+                  {[1, 2, 3, 4, 5].map((star) => (
+                    <button
+                      key={star}
+                      type="button"
+                      onClick={() => setRating(star)}
+                      onMouseEnter={() => setHoveredRating(star)}
+                      onMouseLeave={() => setHoveredRating(0)}
+                      className="text-3xl transition-colors focus:outline-none"
+                      aria-label={`${star} star${star !== 1 ? 's' : ''}`}
+                    >
+                      <span className={(hoveredRating || rating) >= star ? 'text-orange' : 'text-taupe'}>★</span>
+                    </button>
+                  ))}
+                </div>
+              </div>
+
+              {errorMsg && <p className="text-red-600 text-sm">{errorMsg}</p>}
+
+              <button
+                type="submit"
+                disabled={status === 'loading'}
+                className="bg-primary text-white px-6 py-3 rounded-full hover:bg-accent transition-colors font-medium disabled:opacity-60"
+              >
+                {status === 'loading' ? 'Submitting...' : 'Submit Testimonial'}
+              </button>
+            </form>
+          </>
+        )}
+      </div>
+    </div>
+  );
+}
+
 interface Testimonial {
   name: string;
   text: string;
@@ -26,6 +157,75 @@ const INITIAL_TESTIMONIALS: Testimonial[] = [
   },
 ];
 
+function AllReviewsModal({ testimonials, onClose }: { testimonials: Testimonial[]; onClose: () => void }) {
+  const rated = testimonials.filter((t) => t.rating && t.rating > 0);
+  const avgRating = rated.length > 0
+    ? rated.reduce((sum, t) => sum + (t.rating ?? 0), 0) / rated.length
+    : null;
+
+  useEffect(() => {
+    const handleKey = (e: KeyboardEvent) => { if (e.key === 'Escape') onClose(); };
+    window.addEventListener('keydown', handleKey);
+    return () => window.removeEventListener('keydown', handleKey);
+  }, [onClose]);
+
+  return (
+    <div
+      className="fixed inset-0 bg-black/60 z-50 flex items-center justify-center p-4"
+      onClick={(e) => { if (e.target === e.currentTarget) onClose(); }}
+    >
+      <div className="bg-white rounded-xl shadow-2xl w-full max-w-2xl max-h-[85vh] flex flex-col">
+        {/* Header */}
+        <div className="p-6 border-b border-taupe flex items-start justify-between flex-shrink-0">
+          <div>
+            <h3 className="text-2xl font-semibold text-primary mb-1">All Reviews</h3>
+            {avgRating !== null && (
+              <div className="flex items-center gap-2">
+                <span className="text-3xl font-bold text-primary">{avgRating.toFixed(1)}</span>
+                <div className="flex">
+                  {[1, 2, 3, 4, 5].map((star) => (
+                    <span
+                      key={star}
+                      className={`text-xl ${star <= Math.round(avgRating) ? 'text-orange' : 'text-taupe'}`}
+                    >
+                      ★
+                    </span>
+                  ))}
+                </div>
+                <span className="text-brown/60 text-sm">({rated.length} rating{rated.length !== 1 ? 's' : ''})</span>
+              </div>
+            )}
+          </div>
+          <button
+            onClick={onClose}
+            className="text-brown/50 hover:text-brown transition-colors text-2xl leading-none ml-4"
+            aria-label="Close"
+          >
+            &times;
+          </button>
+        </div>
+
+        {/* Scrollable list */}
+        <div className="overflow-y-auto p-6 flex flex-col gap-5">
+          {testimonials.map((t, i) => (
+            <div key={i} className="border border-taupe rounded-lg p-5">
+              {t.rating && t.rating > 0 && (
+                <div className="flex mb-2">
+                  {[...Array(t.rating)].map((_, j) => (
+                    <span key={j} className="text-orange text-lg">★</span>
+                  ))}
+                </div>
+              )}
+              <p className="text-brown italic mb-3">&ldquo;{t.text}&rdquo;</p>
+              <p className="font-semibold text-primary text-sm">— {t.name}</p>
+            </div>
+          ))}
+        </div>
+      </div>
+    </div>
+  );
+}
+
 export default function TestimonialsCarousel() {
   // Data state - initialize with hardcoded testimonials for instant display
   const [testimonials, setTestimonials] = useState<Testimonial[]>(INITIAL_TESTIMONIALS);
@@ -43,9 +243,15 @@ export default function TestimonialsCarousel() {
   const [currentIndex, setCurrentIndex] = useState(0);
   const testimonialsPerPage = 3;
 
-  // Modal state
+  // View testimonial modal state
   const [selectedTestimonial, setSelectedTestimonial] = useState<Testimonial | null>(null);
   const [isModalOpen, setIsModalOpen] = useState(false);
+
+  // Submit testimonial modal state
+  const [isSubmitModalOpen, setIsSubmitModalOpen] = useState(false);
+
+  // All reviews modal state
+  const [isAllReviewsOpen, setIsAllReviewsOpen] = useState(false);
 
   // Trigger animation for initial hardcoded testimonials on mount
   useEffect(() => {
@@ -111,13 +317,22 @@ export default function TestimonialsCarousel() {
   const endIndex = startIndex + testimonialsPerPage;
   const currentTestimonials = testimonials.slice(startIndex, endIndex);
 
-  // Carousel navigation
-  const handlePrevious = () => {
-    setCurrentIndex((prev) => (prev > 0 ? prev - 1 : totalPages - 1));
-  };
+  // Slide animation state: dir 1 = going forward (next), -1 = going back (prev)
+  const [anim, setAnim] = useState<{ phase: 'idle' | 'out' | 'in'; dir: number }>({ phase: 'idle', dir: 1 });
 
-  const handleNext = () => {
-    setCurrentIndex((prev) => (prev < totalPages - 1 ? prev + 1 : 0));
+  const navigate = (dir: 1 | -1) => {
+    if (anim.phase !== 'idle') return;
+    setAnim({ phase: 'out', dir });
+    setTimeout(() => {
+      setCurrentIndex((prev) => {
+        const next = prev + dir;
+        if (next < 0) return totalPages - 1;
+        if (next >= totalPages) return 0;
+        return next;
+      });
+      setAnim({ phase: 'in', dir });
+      requestAnimationFrame(() => requestAnimationFrame(() => setAnim({ phase: 'idle', dir })));
+    }, 220);
   };
 
   // Modal handlers
@@ -133,9 +348,20 @@ export default function TestimonialsCarousel() {
 
   const showNavigation = testimonials.length > testimonialsPerPage;
 
+  const gridStyle: React.CSSProperties = {
+    transition: 'transform 220ms ease, opacity 220ms ease',
+    transform:
+      anim.phase === 'out'
+        ? `translateX(${anim.dir > 0 ? '-' : ''}50px)`
+        : anim.phase === 'in'
+          ? `translateX(${anim.dir > 0 ? '' : '-'}50px)`
+          : 'translateX(0)',
+    opacity: anim.phase === 'idle' ? 1 : 0,
+  };
+
   return (
     <>
-      <div ref={sectionRef} className="relative">
+      <div ref={sectionRef} className="overflow-hidden">
         {/* Loading State - only show skeleton if we don't have any testimonials yet */}
         {isLoading && testimonials.length === 0 && (
           <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
@@ -161,53 +387,8 @@ export default function TestimonialsCarousel() {
         {/* Testimonials Display */}
         {!isLoading && testimonials.length > 0 && (
           <>
-            {/* Navigation Buttons */}
-            {showNavigation && (
-              <>
-                <button
-                  onClick={handlePrevious}
-                  className="absolute left-0 top-1/2 -translate-y-1/2 -translate-x-4 md:-translate-x-12 bg-white hover:bg-sage/20 text-primary p-3 rounded-full shadow-lg transition-colors z-10 border-2 border-primary"
-                  aria-label="Previous testimonials"
-                >
-                  <svg
-                    className="w-6 h-6"
-                    fill="none"
-                    stroke="currentColor"
-                    viewBox="0 0 24 24"
-                  >
-                    <path
-                      strokeLinecap="round"
-                      strokeLinejoin="round"
-                      strokeWidth={2}
-                      d="M15 19l-7-7 7-7"
-                    />
-                  </svg>
-                </button>
-
-                <button
-                  onClick={handleNext}
-                  className="absolute right-0 top-1/2 -translate-y-1/2 translate-x-4 md:translate-x-12 bg-white hover:bg-sage/20 text-primary p-3 rounded-full shadow-lg transition-colors z-10 border-2 border-primary"
-                  aria-label="Next testimonials"
-                >
-                  <svg
-                    className="w-6 h-6"
-                    fill="none"
-                    stroke="currentColor"
-                    viewBox="0 0 24 24"
-                  >
-                    <path
-                      strokeLinecap="round"
-                      strokeLinejoin="round"
-                      strokeWidth={2}
-                      d="M9 5l7 7-7 7"
-                    />
-                  </svg>
-                </button>
-              </>
-            )}
-
             {/* Testimonials Grid */}
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-8" style={gridStyle}>
               {currentTestimonials.map((testimonial, index) => (
                 <div
                   key={startIndex + index}
@@ -237,33 +418,65 @@ export default function TestimonialsCarousel() {
               ))}
             </div>
 
-            {/* Page Indicators */}
-            {showNavigation && (
-              <div className="flex justify-center gap-2 mt-8">
-                {Array.from({ length: totalPages }).map((_, index) => (
-                  <button
-                    key={index}
-                    onClick={() => setCurrentIndex(index)}
-                    className={`w-3 h-3 rounded-full transition-colors ${
-                      index === currentIndex
-                        ? 'bg-primary'
-                        : 'bg-taupe hover:bg-primary/50'
-                    }`}
-                    aria-label={`Go to page ${index + 1}`}
-                  />
-                ))}
-              </div>
-            )}
           </>
         )}
       </div>
 
-      {/* Modal */}
+      {/* Bottom controls: prev | buttons | next */}
+      <div className="flex items-center justify-center gap-4 mt-10">
+        {showNavigation && (
+          <button
+            onClick={() => navigate(-1)}
+            className="bg-white hover:bg-sage/20 text-primary p-3 rounded-full shadow-lg transition-colors border-2 border-primary flex-shrink-0"
+            aria-label="Previous testimonials"
+          >
+            <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
+            </svg>
+          </button>
+        )}
+
+        <button
+          onClick={() => setIsAllReviewsOpen(true)}
+          className="bg-white/20 text-white border-2 border-white/60 px-6 py-3 rounded-full font-medium hover:bg-white hover:text-primary transition-colors shadow-md"
+        >
+          See All Reviews
+        </button>
+
+        <button
+          onClick={() => setIsSubmitModalOpen(true)}
+          className="bg-white text-primary border-2 border-primary px-6 py-3 rounded-full font-medium hover:bg-primary hover:text-white transition-colors shadow-md"
+        >
+          Give a Testimonial
+        </button>
+
+        {showNavigation && (
+          <button
+            onClick={() => navigate(1)}
+            className="bg-white hover:bg-sage/20 text-primary p-3 rounded-full shadow-lg transition-colors border-2 border-primary flex-shrink-0"
+            aria-label="Next testimonials"
+          >
+            <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
+            </svg>
+          </button>
+        )}
+      </div>
+
+      {/* View Testimonial Modal */}
       <TestimonialModal
         isOpen={isModalOpen}
         onClose={closeModal}
         testimonial={selectedTestimonial}
       />
+
+      {/* All Reviews Modal */}
+      {isAllReviewsOpen && (
+        <AllReviewsModal testimonials={testimonials} onClose={() => setIsAllReviewsOpen(false)} />
+      )}
+
+      {/* Submit Testimonial Modal */}
+      {isSubmitModalOpen && <SubmitTestimonialModal onClose={() => setIsSubmitModalOpen(false)} />}
     </>
   );
 }
