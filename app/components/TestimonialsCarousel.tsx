@@ -423,11 +423,11 @@ export default function TestimonialsCarousel() {
       </div>
 
       {/* Bottom controls: prev | buttons | next */}
-      <div className="flex items-center justify-center gap-4 mt-10">
+      <div className="flex items-center justify-center gap-2 sm:gap-3 mt-10">
         {showNavigation && (
           <button
             onClick={() => navigate(-1)}
-            className="bg-white hover:bg-sage/20 text-primary p-3 rounded-full shadow-lg transition-colors border-2 border-primary flex-shrink-0"
+            className="bg-white hover:bg-sage/20 text-primary p-2.5 rounded-xl shadow-lg transition-colors border-2 border-primary flex-shrink-0"
             aria-label="Previous testimonials"
           >
             <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -438,22 +438,22 @@ export default function TestimonialsCarousel() {
 
         <button
           onClick={() => setIsAllReviewsOpen(true)}
-          className="bg-white/20 text-white border-2 border-white/60 px-6 py-3 rounded-full font-medium hover:bg-white hover:text-primary transition-colors shadow-md"
+          className="bg-white/20 text-white border-2 border-white/60 px-4 py-2.5 rounded-xl text-sm sm:text-base font-medium hover:bg-white hover:text-primary transition-colors shadow-md"
         >
           See All Reviews
         </button>
 
         <button
           onClick={() => setIsSubmitModalOpen(true)}
-          className="bg-white text-primary border-2 border-primary px-6 py-3 rounded-full font-medium hover:bg-primary hover:text-white transition-colors shadow-md"
+          className="bg-white text-primary border-2 border-primary px-4 py-2.5 rounded-xl text-sm sm:text-base font-medium hover:bg-primary hover:text-white transition-colors shadow-md"
         >
-          Give a Testimonial
+          Give a Review
         </button>
 
         {showNavigation && (
           <button
             onClick={() => navigate(1)}
-            className="bg-white hover:bg-sage/20 text-primary p-3 rounded-full shadow-lg transition-colors border-2 border-primary flex-shrink-0"
+            className="bg-white hover:bg-sage/20 text-primary p-2.5 rounded-xl shadow-lg transition-colors border-2 border-primary flex-shrink-0"
             aria-label="Next testimonials"
           >
             <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
