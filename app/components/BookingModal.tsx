@@ -626,18 +626,12 @@ export default function BookingModal({
     setFormError(null);
     setFieldError(null);
 
-    // Check if maintenance mode is enabled or booking data is unavailable
-    if (isMaintenanceMode || bookingDataUnavailable) {
-      setStep('maintenance');
-      return;
-    }
-
     if (!selectedDate || !selectedTimeSlot || !userTimezone || !selectedConsultant || !selectedServiceType) {
       setFormError('Please complete all booking selections');
       return;
     }
 
-    // Validate required fields
+    // Validate required fields — always runs, even in maintenance/fallback mode
     if (!firstName.trim()) {
       setFieldErrorAndScroll('firstName', 'Please enter your first name', firstNameRef);
       return;
@@ -676,6 +670,12 @@ export default function BookingModal({
     // Validate consent
     if (!consent) {
       setFieldErrorAndScroll('consent', 'Please agree to the privacy policy to continue', consentRef);
+      return;
+    }
+
+    // Redirect to maintenance after validation passes
+    if (isMaintenanceMode || bookingDataUnavailable) {
+      setStep('maintenance');
       return;
     }
 
