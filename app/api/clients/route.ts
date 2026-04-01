@@ -31,6 +31,20 @@ export async function POST(request: Request) {
       );
     }
 
+    // Length limits
+    if (body.firstName.length > 100 || body.lastName.length > 100) {
+      return NextResponse.json({ error: 'Name too long' }, { status: 400 });
+    }
+    if (body.phone && body.phone.length > 20) {
+      return NextResponse.json({ error: 'Phone number too long' }, { status: 400 });
+    }
+    const longFields = ['healthGoals', 'dietaryRestrictions', 'currentMedications', 'healthConditions'];
+    for (const field of longFields) {
+      if (body[field] && body[field].length > 2000) {
+        return NextResponse.json({ error: `${field} too long (max 2000 characters)` }, { status: 400 });
+      }
+    }
+
     const clientData: ClientFormData = {
       firstName: body.firstName,
       lastName: body.lastName,
@@ -42,7 +56,6 @@ export async function POST(request: Request) {
       healthConditions: body.healthConditions,
       preferredContactMethod: body.preferredContactMethod,
       consent: body.consent,
-      bookedRecordId: body.bookedRecordId,
     };
 
     const result = await createOrUpdateClient(clientData);

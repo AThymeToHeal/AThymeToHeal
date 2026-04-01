@@ -23,6 +23,20 @@ export async function POST(request: Request) {
       return NextResponse.json({ error: 'Invalid email address' }, { status: 400 });
     }
 
+    // Length limits
+    if (body.firstName.length > 100 || body.lastName.length > 100) {
+      return NextResponse.json({ error: 'Name too long' }, { status: 400 });
+    }
+    if (body.message.length > 5000) {
+      return NextResponse.json({ error: 'Message too long (max 5000 characters)' }, { status: 400 });
+    }
+    if (body.phone && body.phone.length > 20) {
+      return NextResponse.json({ error: 'Phone number too long' }, { status: 400 });
+    }
+    if (body.subject && body.subject.length > 200) {
+      return NextResponse.json({ error: 'Subject too long' }, { status: 400 });
+    }
+
     const contactData: ContactSubmission = {
       firstName: body.firstName,
       lastName: body.lastName,

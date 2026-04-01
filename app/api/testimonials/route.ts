@@ -58,6 +58,14 @@ export async function POST(request: Request) {
       );
     }
 
+    // Length limits
+    if (body.name.length > 100) {
+      return NextResponse.json({ error: 'Name too long (max 100 characters)' }, { status: 400 });
+    }
+    if (body.text.length > 2000) {
+      return NextResponse.json({ error: 'Testimonial too long (max 2000 characters)' }, { status: 400 });
+    }
+
     const testimonial: Testimonial = {
       name: body.name,
       text: body.text,

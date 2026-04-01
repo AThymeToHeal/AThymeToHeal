@@ -1,6 +1,6 @@
 'use client';
 
-import { useEffect, useState, useCallback, useMemo } from 'react';
+import { useEffect, useState, useCallback, useMemo, useRef } from 'react';
 import {
   detectUserTimezone,
   getTimezoneFriendlyName,
@@ -88,6 +88,21 @@ export default function BookingModal({
   const [consent, setConsent] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [formError, setFormError] = useState<string | null>(null);
+  const [fieldError, setFieldError] = useState<string | null>(null);
+
+  const firstNameRef = useRef<HTMLInputElement>(null);
+  const lastNameRef = useRef<HTMLInputElement>(null);
+  const emailRef = useRef<HTMLInputElement>(null);
+  const phoneRef = useRef<HTMLInputElement>(null);
+  const consentRef = useRef<HTMLInputElement>(null);
+
+  const setFieldErrorAndScroll = useCallback((field: string, message: string, ref: React.RefObject<HTMLInputElement | null>) => {
+    setFormError(message);
+    setFieldError(field);
+    setTimeout(() => {
+      ref.current?.scrollIntoView({ behavior: 'smooth', block: 'center' });
+    }, 50);
+  }, []);
 
   // Maintenance mode detection
   const [isMaintenanceMode, setIsMaintenanceMode] = useState(
@@ -609,6 +624,7 @@ export default function BookingModal({
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setFormError(null);
+    setFieldError(null);
 
     // Check if maintenance mode is enabled or booking data is unavailable
     if (isMaintenanceMode || bookingDataUnavailable) {
@@ -622,21 +638,29 @@ export default function BookingModal({
     }
 
     // Validate required fields
-    if (!firstName.trim() || !lastName.trim() || !email.trim()) {
-      setFormError('Please fill in all required fields (marked with *)');
+    if (!firstName.trim()) {
+      setFieldErrorAndScroll('firstName', 'Please enter your first name', firstNameRef);
+      return;
+    }
+    if (!lastName.trim()) {
+      setFieldErrorAndScroll('lastName', 'Please enter your last name', lastNameRef);
+      return;
+    }
+    if (!email.trim()) {
+      setFieldErrorAndScroll('email', 'Please enter your email address', emailRef);
       return;
     }
 
     // Validate email format
     const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
     if (!emailRegex.test(email)) {
-      setFormError('Please enter a valid email address');
+      setFieldErrorAndScroll('email', 'Please enter a valid email address', emailRef);
       return;
     }
 
     // Validate phone if contact method requires it
     if ((preferredContactMethod === 'Phone' || preferredContactMethod === 'Text') && !phone.trim()) {
-      setFormError('Please provide a phone number for your preferred contact method');
+      setFieldErrorAndScroll('phone', 'Please provide a phone number for your preferred contact method', phoneRef);
       return;
     }
 
@@ -644,14 +668,14 @@ export default function BookingModal({
     if ((preferredContactMethod === 'Phone' || preferredContactMethod === 'Text') && phone.trim()) {
       const phoneDigits = phone.replace(/\D/g, '');
       if (phoneDigits.length < 10) {
-        setFormError('Please enter a valid phone number with at least 10 digits');
+        setFieldErrorAndScroll('phone', 'Please enter a valid phone number with at least 10 digits', phoneRef);
         return;
       }
     }
 
     // Validate consent
     if (!consent) {
-      setFormError('Please agree to the privacy policy to continue');
+      setFieldErrorAndScroll('consent', 'Please agree to the privacy policy to continue', consentRef);
       return;
     }
 
@@ -733,7 +757,6 @@ export default function BookingModal({
         healthConditions: healthConditions.trim(),
         preferredContactMethod,
         consent: true,
-        bookedRecordId: bookingResult.id,
       };
 
       const clientResponse = await fetch('/api/clients', {
@@ -828,6 +851,7 @@ export default function BookingModal({
     setPreferredContactMethod('Email');
     setConsent(false);
     setFormError(null);
+    setFieldError(null);
   };
 
   // Handle back navigation
@@ -1256,11 +1280,12 @@ export default function BookingModal({
                       First Name *
                     </label>
                     <input
+                      ref={firstNameRef}
                       type="text"
                       required
                       value={firstName}
-                      onChange={(e) => setFirstName(e.target.value)}
-                      className="w-full px-4 py-2 border border-taupe rounded-md text-brown focus:outline-none focus:ring-2 focus:ring-accent"
+                      onChange={(e) => { setFirstName(e.target.value); if (fieldError === 'firstName') setFieldError(null); }}
+                      className={`w-full px-4 py-2 border rounded-md text-brown focus:outline-none focus:ring-2 focus:ring-accent transition-all ${fieldError === 'firstName' ? 'border-orange ring-2 ring-orange/40' : 'border-taupe'}`}
                     />
                   </div>
                   <div>
@@ -1268,11 +1293,12 @@ export default function BookingModal({
                       Last Name *
                     </label>
                     <input
+                      ref={lastNameRef}
                       type="text"
                       required
                       value={lastName}
-                      onChange={(e) => setLastName(e.target.value)}
-                      className="w-full px-4 py-2 border border-taupe rounded-md text-brown focus:outline-none focus:ring-2 focus:ring-accent"
+                      onChange={(e) => { setLastName(e.target.value); if (fieldError === 'lastName') setFieldError(null); }}
+                      className={`w-full px-4 py-2 border rounded-md text-brown focus:outline-none focus:ring-2 focus:ring-accent transition-all ${fieldError === 'lastName' ? 'border-orange ring-2 ring-orange/40' : 'border-taupe'}`}
                     />
                   </div>
                   <div>
@@ -1280,11 +1306,12 @@ export default function BookingModal({
                       Email Address *
                     </label>
                     <input
+                      ref={emailRef}
                       type="email"
                       required
                       value={email}
-                      onChange={(e) => setEmail(e.target.value)}
-                      className="w-full px-4 py-2 border border-taupe rounded-md text-brown focus:outline-none focus:ring-2 focus:ring-accent"
+                      onChange={(e) => { setEmail(e.target.value); if (fieldError === 'email') setFieldError(null); }}
+                      className={`w-full px-4 py-2 border rounded-md text-brown focus:outline-none focus:ring-2 focus:ring-accent transition-all ${fieldError === 'email' ? 'border-orange ring-2 ring-orange/40' : 'border-taupe'}`}
                     />
                   </div>
                   <div>
@@ -1292,10 +1319,11 @@ export default function BookingModal({
                       Phone Number (Optional)
                     </label>
                     <input
+                      ref={phoneRef}
                       type="tel"
                       value={phone}
-                      onChange={(e) => setPhone(e.target.value)}
-                      className="w-full px-4 py-2 border border-taupe rounded-md text-brown focus:outline-none focus:ring-2 focus:ring-accent"
+                      onChange={(e) => { setPhone(e.target.value); if (fieldError === 'phone') setFieldError(null); }}
+                      className={`w-full px-4 py-2 border rounded-md text-brown focus:outline-none focus:ring-2 focus:ring-accent transition-all ${fieldError === 'phone' ? 'border-orange ring-2 ring-orange/40' : 'border-taupe'}`}
                     />
                   </div>
                 </div>
@@ -1382,11 +1410,12 @@ export default function BookingModal({
               {/* Consent */}
               <div className="flex items-start gap-3">
                 <input
+                  ref={consentRef}
                   type="checkbox"
                   id="consent"
                   checked={consent}
-                  onChange={(e) => setConsent(e.target.checked)}
-                  className="mt-1 h-5 w-5 text-accent focus:ring-accent border-taupe rounded"
+                  onChange={(e) => { setConsent(e.target.checked); if (fieldError === 'consent') setFieldError(null); }}
+                  className={`mt-1 h-5 w-5 text-accent focus:ring-accent rounded transition-all ${fieldError === 'consent' ? 'border-orange ring-2 ring-orange/40' : 'border-taupe'}`}
                   required
                 />
                 <label htmlFor="consent" className="text-sm text-brown">
@@ -1466,7 +1495,7 @@ export default function BookingModal({
                 onClick={handleClose}
                 className="px-8 py-3 bg-primary text-secondary font-semibold rounded-md hover:bg-primary/90 transition-colors"
               >
-                Reset Booking
+                Close
               </button>
             </div>
           )}

@@ -16,6 +16,14 @@ export async function POST(request: Request) {
       return NextResponse.json({ error: 'Invalid email address' }, { status: 400 });
     }
 
+    // Length limits
+    if (body.email.length > 254) {
+      return NextResponse.json({ error: 'Email too long' }, { status: 400 });
+    }
+    if (body.name && body.name.length > 100) {
+      return NextResponse.json({ error: 'Name too long' }, { status: 400 });
+    }
+
     const result = await createNewsletterSignup(
       body.email,
       body.name,

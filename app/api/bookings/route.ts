@@ -2,6 +2,10 @@ import { NextResponse } from 'next/server';
 import { createConsultation, getBookingsForDate, getBlockedSlotsWithBuffer, SERVICES, BOOKING_LIMITS, type Consultation, type ConsultantType, type ServiceType } from '@/lib/airtable';
 import { invalidateServerCache } from '@/lib/serverCache';
 
+const VALID_CONSULTANTS: ConsultantType[] = ['Heidi Lynn', 'Illiana'];
+const VALID_SERVICE_TYPES = Object.keys(SERVICES) as ServiceType[];
+const VALID_BOOKING_TYPES = ['Initial Consultation', 'Client Consultation', 'Business Consultation'];
+
 export async function POST(request: Request) {
   try {
     const body = await request.json();
@@ -34,6 +38,25 @@ export async function POST(request: Request) {
     const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
     if (!emailRegex.test(body.email)) {
       return NextResponse.json({ error: 'Invalid email address' }, { status: 400 });
+    }
+
+    // Enum validation
+    if (!VALID_CONSULTANTS.includes(body.consultant)) {
+      return NextResponse.json({ error: 'Invalid consultant' }, { status: 400 });
+    }
+    if (!VALID_SERVICE_TYPES.includes(body.serviceType)) {
+      return NextResponse.json({ error: 'Invalid service type' }, { status: 400 });
+    }
+    if (!VALID_BOOKING_TYPES.includes(body.bookingType)) {
+      return NextResponse.json({ error: 'Invalid booking type' }, { status: 400 });
+    }
+
+    // Length limits
+    if (body.firstName.length > 100 || body.lastName.length > 100) {
+      return NextResponse.json({ error: 'Name too long' }, { status: 400 });
+    }
+    if (body.phone && body.phone.length > 20) {
+      return NextResponse.json({ error: 'Phone number too long' }, { status: 400 });
     }
 
     // CRITICAL: Double-booking prevention check

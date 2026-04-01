@@ -108,7 +108,6 @@ export interface ClientFormData {
   healthConditions?: string;
   preferredContactMethod?: string;
   consent: boolean;
-  bookedRecordId?: string;
 }
 
 export interface Testimonial {
@@ -544,12 +543,6 @@ export async function createOrUpdateClient(data: ClientFormData) {
         data.healthConditions
       );
 
-      // Append to BookedRecord array
-      const existingBookings = (existingClient.fields.BookedRecord as string[]) || [];
-      fields.BookedRecord = data.bookedRecordId
-        ? [...existingBookings, data.bookedRecordId].filter(Boolean)
-        : existingBookings;
-
       // Don't update DateCreated - preserve original
     } else {
       // New client - use provided values
@@ -557,7 +550,6 @@ export async function createOrUpdateClient(data: ClientFormData) {
       fields.DietaryRestrictions = data.dietaryRestrictions || '';
       fields.CurrentMedications = data.currentMedications || '';
       fields.HealthConditions = data.healthConditions || '';
-      fields.BookedRecord = data.bookedRecordId ? [data.bookedRecordId] : [];
       fields.DateCreated = new Date().toISOString();
     }
 
