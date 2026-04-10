@@ -956,7 +956,16 @@ export default function BookingModal({
                       return (
                         <button
                           key={consultant}
-                          onClick={() => setSelectedConsultant(consultant)}
+                          onClick={() => {
+                            setSelectedConsultant(consultant);
+                            // Clear any service that isn't available for this consultant
+                            if (selectedServiceType) {
+                              const serviceConfig = SERVICES[selectedServiceType];
+                              if (serviceConfig.availableConsultants && !serviceConfig.availableConsultants.includes(consultant)) {
+                                setSelectedServiceType(null);
+                              }
+                            }
+                          }}
                           className={`p-6 border-2 rounded-lg transition-all text-left ${
                             selectedConsultant === consultant
                               ? 'border-primary bg-primary/10'
@@ -976,7 +985,11 @@ export default function BookingModal({
               <div className="space-y-4">
                 <h3 className="text-xl font-semibold text-primary">Select Your Service</h3>
                 <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-                  {Object.values(SERVICES).map((service) => (
+                  {Object.values(SERVICES).filter((service) =>
+                    !service.availableConsultants ||
+                    !selectedConsultant ||
+                    service.availableConsultants.includes(selectedConsultant)
+                  ).map((service) => (
                     <button
                       key={service.name}
                       onClick={() => setSelectedServiceType(service.name)}
