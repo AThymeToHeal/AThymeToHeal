@@ -154,9 +154,11 @@ export interface AdvisorDaysOffResult {
 // Service Types
 export type ServiceType =
   | 'Health Consult'
+  | 'Health Scan'
   | 'Essential Emotions'
   | 'Symphony of Cells'
   | 'Business Consultation'
+  | '1:1 With a Thyme to Heal'
   | 'Tier 1 - Back to Basics'
   | 'Tier 2 - A Thyme to Heal'
   | 'Tier 3 - Deep Roots Healing';
@@ -178,17 +180,26 @@ export const SERVICES: Record<ServiceType, ServiceConfig> = {
     price: 30,
     description: 'A consultation to start you on your health journey',
   },
+  'Health Scan': {
+    name: 'Health Scan',
+    duration: 120,
+    price: 70,
+    description: 'A gentle non-invasive health scan that reads bio markers in the body',
+    availableConsultants: ['Heidi Lynn'],
+  },
   'Symphony of Cells': {
     name: 'Symphony of Cells',
     duration: 30,
     price: 45,
     description: 'Essential oils and therapeutic massage for detox and healing',
+    availableConsultants: ['Heidi Lynn'],
   },
   'Essential Emotions': {
     name: 'Essential Emotions',
     duration: 60,
     price: 60,
     description: 'Identify emotions and create new neuropathways',
+    availableConsultants: ['Illiana'],
   },
   'Business Consultation': {
     name: 'Business Consultation',
@@ -196,6 +207,12 @@ export const SERVICES: Record<ServiceType, ServiceConfig> = {
     price: 0,
     description: 'Turn your health journey into a thriving business',
     availableConsultants: ['Illiana'], // Only Illiana offers this service
+  },
+  '1:1 With a Thyme to Heal': {
+    name: '1:1 With a Thyme to Heal',
+    duration: 60,
+    price: 0,
+    description: 'A personal 1:1 call with one of our wellness guides',
   },
   'Tier 1 - Back to Basics': {
     name: 'Tier 1 - Back to Basics',
@@ -206,14 +223,14 @@ export const SERVICES: Record<ServiceType, ServiceConfig> = {
   'Tier 2 - A Thyme to Heal': {
     name: 'Tier 2 - A Thyme to Heal',
     duration: 60,
-    price: 699,
-    description: '8-week integrated program combining emotional work, body support, and lifestyle guidance',
+    price: 799,
+    description: '12-week integrated program combining emotional work, body support, and lifestyle guidance',
   },
   'Tier 3 - Deep Roots Healing': {
     name: 'Tier 3 - Deep Roots Healing',
     duration: 60,
-    price: 2000,
-    description: '10-week intensive program for complex or layered health challenges',
+    price: 4000,
+    description: '6-month intensive program for complex or layered health challenges',
   },
 };
 

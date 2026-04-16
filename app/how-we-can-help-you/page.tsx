@@ -10,6 +10,13 @@ export const metadata: Metadata = {
 export default function ServicesPage() {
   const services = [
     {
+      title: '1:1 With a Thyme to Heal',
+      description: 'A personal one-on-one call with one of our wellness guides. Whether you have questions, need direction, or want to explore how we can support you, this is your space.',
+      duration: '1 hr',
+      price: '0',
+      note: 'Available with both our wellness guides',
+    },
+    {
       title: 'Health Consult',
       description: 'A consultation with one of our wellness guides to start you on your health journey.',
       duration: '1 hr',
@@ -21,12 +28,21 @@ export default function ServicesPage() {
       description: 'A technique using essential oils applied on the spine and feet. It encompasses a variety of tailored oil applications that target different body systems and related conditions.',
       duration: '30 minutes',
       price: '45',
+      note: 'Provided by Heidi',
     },
     {
       title: 'Essential Emotions',
       description: 'Often our physical pain is a manifestation of emotional roots. Begin the journey of identifying emotions and creating new neuropathways in your brain with an Essential Emotions session.',
       duration: '1 hr',
       price: '60',
+      note: 'Provided by Illiana',
+    },
+    {
+      title: 'Health Scan',
+      description: 'A gentle non-invasive health scan that reads bio markers in the body to help you better understand where your body is lacking and needing support. This package includes an in-depth explanation as to what it all means and how you can support your body best.',
+      duration: '2 hrs',
+      price: '70',
+      note: 'Provided by Heidi',
     },
   ];
 
@@ -54,15 +70,15 @@ export default function ServicesPage() {
     {
       title: 'A Thyme to Heal Package',
       serviceType: 'Tier 2 - A Thyme to Heal' as ServiceType,
-      duration: '8 weeks',
-      price: '699',
+      duration: '12 weeks',
+      price: '799',
       paymentOptions: '',
       tagline: 'A fuller container of support combining emotional work, body-centered sessions, and lifestyle guidance to create real momentum. You\'ll build routines that feel nurturing rather than burdensome and create patterns that gently support a healthy lifestyle fit for you.',
       included: [
         'Intake + follow-up consults',
-        'A 90 day reset in the beginning to start off with clean slate',
-        '4 Essential Emotions sessions (2 per month)',
-        '4 Symphony of Cells sessions (bi-weekly)',
+        'A 90 day reset',
+        '6 Essential Emotions sessions (2 per month)',
+        '6 Symphony of Cells sessions (bi-weekly)',
         'Meal + movement guides',
         'Weekly text/email check-ins',
         'Personalized supplement guidance (purchased separately)',
@@ -77,17 +93,18 @@ export default function ServicesPage() {
     {
       title: 'Deep Roots Healing Package',
       serviceType: 'Tier 3 - Deep Roots Healing' as ServiceType,
-      duration: '10 weeks',
-      price: '2,000',
+      duration: '6 months',
+      price: '4,000',
       paymentOptions: '',
       tagline: 'Chronic illness can steal your hope and make you feel unheard. This container is for women who are tired, discouraged, and done doing it alone. We move at your pace and support your whole system through emotional work, nervous system support, and hands-on body care that aims at root patterns, not just symptoms. You don\'t have to carry this by yourself anymore.',
       included: [
-        'Intake + follow-up consults',
-        '5 Essential Emotions sessions (every 2 weeks)',
-        '10 Symphony of Cells sessions (weekly)',
-        'Weekly check-ins and priority messaging',
-        'Advanced lifestyle and health protocols',
-        'Personalized supplement guidance (purchased separately)',
+        'Initial intake + ongoing integrative consults',
+        '12 Essential Emotions sessions (biweekly)',
+        '20 Symphony of Cells sessions (weekly, with flexibility as needed)',
+        'Weekly check-ins + priority messaging support',
+        'Advanced, personalized lifestyle and health protocols',
+        'Customized supplement guidance (purchased separately)',
+        'Continuous care adjustments based on your body\'s response',
       ],
       whoFor: [
         'Chronic or complex health concerns',
@@ -175,7 +192,7 @@ export default function ServicesPage() {
                   {/* Price */}
                   <div className="mb-6">
                     <p className="text-4xl font-bold text-primary text-center">
-                      ${service.price}
+                      {service.price === '0' ? 'FREE' : `$${service.price}`}
                     </p>
                   </div>
 
@@ -291,7 +308,7 @@ export default function ServicesPage() {
             Ready to Begin Your Healing Journey?
           </h2>
           <p className="text-lg mb-8 text-brown">
-            Most services are offered by both our wellness guides and can be scheduled in-person or virtually to accommodate your needs.
+            Our services are available in-person or virtually to accommodate your needs. Each service listing notes which of our wellness guides offers it.
           </p>
           <Booking />
 
