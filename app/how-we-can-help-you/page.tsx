@@ -1,6 +1,21 @@
 import type { Metadata } from 'next';
 import Booking from '../components/Booking';
-import type { ServiceType } from '@/lib/airtable';
+import type { ServiceType, ConsultantType } from '@/lib/airtable';
+import { SERVICES } from '@/lib/airtable';
+
+function consultantProps(serviceType: ServiceType): {
+  defaultConsultant?: ConsultantType;
+  availableConsultants?: ConsultantType[];
+} {
+  const config = SERVICES[serviceType];
+  if (config?.availableConsultants?.length === 1) {
+    return {
+      defaultConsultant: config.availableConsultants[0],
+      availableConsultants: config.availableConsultants,
+    };
+  }
+  return {};
+}
 
 export const metadata: Metadata = {
   title: 'Services & Pricing - A Thyme To Heal',
@@ -43,6 +58,25 @@ export default function ServicesPage() {
       duration: '2 hrs',
       price: '70',
       note: 'Provided by Heidi',
+    },
+  ];
+
+  const series = [
+    {
+      title: 'Symphony of Healing Series',
+      serviceType: 'Symphony of Healing Series' as ServiceType,
+      price: '315',
+      note: 'Provided by Heidi',
+      tagline: '8 sessions for the price of 7',
+      description: 'Your body holds wisdom, and when given the space, it knows how to heal. The Symphony of Healing Series is a curated set of eight Symphony of Cells sessions designed to work in harmony with your body\'s systems, supporting detoxification, immune function, and deep restoration.\n\nEach session builds upon the last, creating a layered, intentional healing experience. When purchased as a series, you\'ll receive one session complimentary (8 for the price of 7), encouraging consistency and deeper results over time.',
+    },
+    {
+      title: 'The Emotional Renewal Series',
+      serviceType: 'Emotional Renewal Series' as ServiceType,
+      price: '420',
+      note: 'Provided by Illiana',
+      tagline: '8 sessions for the price of 7',
+      description: 'Your emotions are not obstacles, they are invitations to heal. The Emotional Renewal Series includes eight Essential Emotions sessions designed to help you safely explore, process, and release what your body has been holding.\n\nThrough guided emotional work and supportive tools, each session creates space for awareness, movement, and gentle transformation. As layers unfold over time, many clients experience greater clarity, emotional freedom, and a deeper connection to themselves.\n\nThis series includes one complimentary session (8 sessions for the price of 7), honoring your commitment to consistent, intentional healing.',
     },
   ];
 
@@ -198,7 +232,48 @@ export default function ServicesPage() {
 
                   {/* Book Button */}
                   <div className="text-center">
-                    <Booking buttonText="Book now" defaultServiceType={service.title as ServiceType} />
+                    <Booking buttonText="Book now" defaultServiceType={service.title as ServiceType} {...consultantProps(service.title as ServiceType)} />
+                  </div>
+                </div>
+              </div>
+            ))}
+          </div>
+        </div>
+      </section>
+
+      {/* Series Packages Section */}
+      <section className="py-16 px-4 bg-taupe/10">
+        <div className="mx-auto max-w-6xl">
+          <h2 className="text-3xl md:text-4xl font-serif font-bold mb-4 text-primary text-center">
+            Session Series
+          </h2>
+          <p className="text-lg text-brown text-center mb-12 max-w-3xl mx-auto">
+            Commit to your healing journey with a curated series. Each series offers one complimentary session — 8 for the price of 7 — designed to create layered, lasting results.
+          </p>
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-8 max-w-4xl mx-auto">
+            {series.map((item, index) => (
+              <div
+                key={index}
+                className="bg-white rounded-lg shadow-lg border border-taupe overflow-hidden flex flex-col"
+              >
+                <div className="bg-sage/20 p-6 border-b border-taupe">
+                  <h3 className="text-2xl font-serif font-bold text-primary text-center mb-1">
+                    {item.title}
+                  </h3>
+                  <p className="text-xs text-brown text-center italic">{item.note}</p>
+                </div>
+                <div className="p-6 flex-grow flex flex-col">
+                  <div className="text-center mb-4">
+                    <p className="text-4xl font-bold text-primary">${item.price}</p>
+                    <p className="text-sm text-accent font-semibold mt-1">{item.tagline}</p>
+                  </div>
+                  <div className="text-brown text-sm leading-relaxed mb-6 flex-grow space-y-3">
+                    {item.description.split('\n\n').map((para, i) => (
+                      <p key={i}>{para}</p>
+                    ))}
+                  </div>
+                  <div className="text-center mt-auto">
+                    <Booking buttonText="Book Series" defaultServiceType={item.serviceType} {...consultantProps(item.serviceType)} />
                   </div>
                 </div>
               </div>

@@ -1098,7 +1098,7 @@ export default function BookingModal({
                   const isToday = dateStr === getDateString(new Date());
                   const isSelected = selectedDate && dateStr === getDateString(selectedDate);
                   const isDisabled =
-                    isDayUnavailable(date) || isPast(date) || fullyBookedDates.has(dateStr);
+                    isDayUnavailable(date) || isPast(date) || isToday || fullyBookedDates.has(dateStr);
 
                   return (
                     <button
@@ -1135,17 +1135,10 @@ export default function BookingModal({
             <div className="space-y-6">
               {/* Info banner — always shown, softened tone */}
               <div className="bg-sage/10 border-l-4 border-sage p-4 rounded-md">
-                <div className="flex items-start space-x-3">
-                  <div className="text-2xl">📅</div>
-                  <div className="flex-1">
-                    <h4 className="font-semibold text-primary mb-1">
-                      Booking Request
-                    </h4>
-                    <p className="text-sm text-brown">
-                      We occasionally schedule appointments through other channels. Please standby for email confirmation — we&apos;ll reach out shortly to confirm your time.
-                    </p>
-                  </div>
-                </div>
+                <h4 className="font-semibold text-primary mb-1">Booking Request</h4>
+                <p className="text-sm text-brown">
+                  We occasionally schedule appointments through other channels. Please standby for email confirmation — we&apos;ll reach out shortly to confirm your time.
+                </p>
               </div>
 
               <div className="bg-sage/10 p-4 rounded-md">

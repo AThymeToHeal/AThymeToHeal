@@ -159,6 +159,8 @@ export type ServiceType =
   | 'Symphony of Cells'
   | 'Business Consultation'
   | '1:1 With a Thyme to Heal'
+  | 'Symphony of Healing Series'
+  | 'Emotional Renewal Series'
   | 'Tier 1 - Back to Basics'
   | 'Tier 2 - A Thyme to Heal'
   | 'Tier 3 - Deep Roots Healing';
@@ -213,6 +215,20 @@ export const SERVICES: Record<ServiceType, ServiceConfig> = {
     duration: 60,
     price: 0,
     description: 'A personal 1:1 call with one of our wellness guides',
+  },
+  'Symphony of Healing Series': {
+    name: 'Symphony of Healing Series',
+    duration: 30,
+    price: 315,
+    description: 'A curated set of eight Symphony of Cells sessions — 8 for the price of 7',
+    availableConsultants: ['Heidi Lynn'],
+  },
+  'Emotional Renewal Series': {
+    name: 'Emotional Renewal Series',
+    duration: 60,
+    price: 420,
+    description: 'Eight Essential Emotions sessions to explore, process, and release — 8 for the price of 7',
+    availableConsultants: ['Illiana'],
   },
   'Tier 1 - Back to Basics': {
     name: 'Tier 1 - Back to Basics',
