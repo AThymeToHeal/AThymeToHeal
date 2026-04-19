@@ -226,7 +226,7 @@ export default function ServicesPage() {
                   {/* Price */}
                   <div className="mb-6">
                     <p className="text-4xl font-bold text-primary text-center">
-                      {service.price === '0' ? 'FREE' : `$${service.price}`}
+                      {service.price === '0' ? 'Complimentary' : `$${service.price}`}
                     </p>
                   </div>
 

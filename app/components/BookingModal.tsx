@@ -1004,7 +1004,7 @@ export default function BookingModal({
                       <div className="text-sm text-brown space-y-1">
                         <p className="font-medium">{service.duration} minutes</p>
                         <p className="text-2xl font-bold text-primary">
-                          {service.price === 0 ? 'FREE' : `$${service.price}`}
+                          {service.price === 0 ? 'Complimentary' : `$${service.price}`}
                         </p>
                       </div>
                     </button>

@@ -54,7 +54,7 @@ BOOKING REQUEST
 
 Service: ${serviceType}
 Duration: ${serviceConfig.duration} minutes
-Price: ${serviceConfig.price === 0 ? 'FREE' : `$${serviceConfig.price}`}
+Price: ${serviceConfig.price === 0 ? 'Complimentary' : `$${serviceConfig.price}`}
 Consultant: ${consultant}
 
 Date: ${selectedDate}
@@ -145,7 +145,7 @@ Health Conditions: ${healthConditions || 'Not provided'}
             <div>
               <p className="text-brown/70">Price:</p>
               <p className="font-semibold text-brown">
-                {serviceConfig.price === 0 ? 'FREE' : `$${serviceConfig.price}`}
+                {serviceConfig.price === 0 ? 'Complimentary' : `$${serviceConfig.price}`}
               </p>
             </div>
           </div>
