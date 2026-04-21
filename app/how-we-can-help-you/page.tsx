@@ -25,13 +25,6 @@ export const metadata: Metadata = {
 export default function ServicesPage() {
   const services = [
     {
-      title: '1:1 With a Thyme to Heal',
-      description: 'A personal one-on-one call with one of our wellness guides. Whether you have questions, need direction, or want to explore how we can support you, this is your space.',
-      duration: '1 hr',
-      price: '0',
-      note: 'Available with both our wellness guides',
-    },
-    {
       title: 'Health Consult',
       description: 'A consultation with one of our wellness guides to start you on your health journey.',
       duration: '1 hr',
@@ -58,6 +51,13 @@ export default function ServicesPage() {
       duration: '2 hrs',
       price: '70',
       note: 'Provided by Heidi',
+    },
+    {
+      title: '1:1 With a Thyme to Heal',
+      description: 'A personal one-on-one call with one of our wellness guides. Whether you have questions, need direction, or want to explore how we can support you, this is your space. *For preexisting advocates or new business consults only.*',
+      duration: '1 hr',
+      price: '0',
+      note: 'Available with both our wellness guides',
     },
   ];
 
