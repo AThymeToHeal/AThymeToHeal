@@ -52,13 +52,6 @@ export default function ServicesPage() {
       price: '70',
       note: 'Provided by Heidi',
     },
-    {
-      title: '1:1 With a Thyme to Heal',
-      description: 'A personal one-on-one call with one of our wellness guides. Whether you have questions, need direction, or want to explore how we can support you, this is your space. *For preexisting advocates or new business consults only.*',
-      duration: '1 hr',
-      price: '0',
-      note: 'Available with both our wellness guides',
-    },
   ];
 
   const series = [
@@ -376,19 +369,40 @@ export default function ServicesPage() {
         </div>
       </section>
 
-      {/* Additional Info Section */}
+      {/* 1:1 Consultation Section */}
       <section className="py-16 px-4 bg-secondary">
-        <div className="mx-auto max-w-4xl text-center">
-          <h2 className="text-3xl md:text-4xl font-serif font-bold mb-6 text-primary">
-            Ready to Begin Your Healing Journey?
-          </h2>
-          <p className="text-lg mb-8 text-brown">
-            Our services are available in-person or virtually to accommodate your needs. Each service listing notes which of our wellness guides offers it.
-          </p>
-          <Booking />
+        <div className="mx-auto max-w-2xl">
+          <div className="bg-white rounded-lg shadow-lg border border-taupe overflow-hidden">
+            {/* Card Header */}
+            <div className="bg-sage/20 p-8 border-b border-taupe text-center">
+              <h2 className="text-3xl md:text-4xl font-serif font-bold text-primary mb-2">
+                1:1 With a Thyme to Heal
+              </h2>
+              <p className="text-xs text-brown italic">Available with both our wellness guides</p>
+            </div>
+
+            {/* Card Body */}
+            <div className="p-8 flex flex-col items-center text-center">
+              <p className="text-brown text-lg mb-6 max-w-lg">
+                A personal one-on-one call with one of our wellness guides. Whether you have questions, need direction, or want to explore how we can support you, this is your space.
+              </p>
+              <p className="text-sm text-brown/70 italic mb-6">
+                For preexisting advocates or new business consults only.
+              </p>
+
+              <div className="mb-2">
+                <p className="text-sm text-brown">1 hr</p>
+              </div>
+              <div className="mb-8">
+                <p className="text-4xl font-bold text-primary">Complimentary</p>
+              </div>
+
+              <Booking buttonText="Book Your Consultation" defaultServiceType={'1:1 With a Thyme to Heal' as ServiceType} />
+            </div>
+          </div>
 
           {/* Legal Disclaimer */}
-          <div className="mt-12 pt-8 border-t border-taupe">
+          <div className="mt-10 pt-8 border-t border-taupe">
             <p className="text-sm text-brown/70 italic text-center max-w-2xl mx-auto">
               Our services support wellbeing and education. They are not medical diagnoses or treatments. We encourage you to maintain ongoing care with your licensed providers.
             </p>

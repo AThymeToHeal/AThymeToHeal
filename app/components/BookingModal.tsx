@@ -986,10 +986,16 @@ export default function BookingModal({
                 <h3 className="text-xl font-semibold text-primary">Select Your Service</h3>
                 <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
                   {Object.values(SERVICES).filter((service) =>
-                    !service.availableConsultants ||
+                    service.name !== '1:1 With a Thyme to Heal' &&
+                    (!service.availableConsultants ||
                     !selectedConsultant ||
-                    service.availableConsultants.includes(selectedConsultant)
-                  ).map((service) => (
+                    service.availableConsultants.includes(selectedConsultant))
+                  ).sort((a, b) => {
+                    if (a.price === 0 && b.price === 0) return 0;
+                    if (a.price === 0) return 1;
+                    if (b.price === 0) return -1;
+                    return a.price - b.price;
+                  }).map((service) => (
                     <button
                       key={service.name}
                       onClick={() => setSelectedServiceType(service.name)}
