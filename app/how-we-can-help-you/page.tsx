@@ -398,6 +398,20 @@ export default function ServicesPage() {
               </div>
 
               <Booking buttonText="Book Your Consultation" defaultServiceType={'1:1 With a Thyme to Heal' as ServiceType} />
+
+              <div className="mt-4">
+                <a
+                  href="https://meet.google.com/ufo-twuc-rid"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="inline-flex items-center gap-2 px-6 py-3 rounded-full border-2 border-primary text-primary font-semibold hover:bg-primary hover:text-secondary transition-colors duration-200"
+                >
+                  <svg className="w-5 h-5" viewBox="0 0 24 24" fill="currentColor">
+                    <path d="M17 10.5V7c0-.55-.45-1-1-1H4c-.55 0-1 .45-1 1v10c0 .55.45 1 1 1h12c.55 0 1-.45 1-1v-3.5l4 4v-11l-4 4z"/>
+                  </svg>
+                  Join via Google Meet
+                </a>
+              </div>
             </div>
           </div>
 
