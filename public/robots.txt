@@ -2,5 +2,9 @@
 User-agent: *
 Allow: /
 
+# Block placeholder and internal routes from indexing
+Disallow: /coming-soon
+Disallow: /api/
+
 # Sitemap location
 Sitemap: https://athymetoheal.org/sitemap.xml
