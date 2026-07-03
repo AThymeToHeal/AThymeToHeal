@@ -11,7 +11,7 @@ export default function Header() {
     { name: 'How We Can Help You', href: '/how-we-can-help-you' },
     { name: 'About Us', href: '/about-us' },
     { name: 'Contact', href: '/contact' },
-    { name: 'Coming Soon', href: '/coming-soon' },
+    { name: 'Guides', href: '/guides' },
   ];
 
   const rightNavigation = { name: 'Business Consultation', href: '/business-consultation' };
