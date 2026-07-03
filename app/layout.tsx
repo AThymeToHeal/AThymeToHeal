@@ -5,6 +5,7 @@ import Header from "./components/Header";
 import Footer from "./components/Footer";
 import { SpeedInsights } from "@vercel/speed-insights/next";
 import { Analytics } from "@vercel/analytics/next";
+import ConsoleCapture from "../components/ConsoleCapture";
 
 // Optimize font loading with next/font
 const allura = Allura({
@@ -71,6 +72,7 @@ export default function RootLayout({
   return (
     <html lang="en" className={allura.variable}>
       <body className="antialiased flex flex-col min-h-screen">
+        <ConsoleCapture />
         <Header />
         <main className="flex-grow">
           {children}
