@@ -109,9 +109,6 @@ export default function BookingModal({
     process.env.NEXT_PUBLIC_BOOKING_MAINTENANCE_MODE === 'true'
   );
 
-  // Track if booking data verification failed (potential conflicts)
-  const [bookingDataUnavailable, setBookingDataUnavailable] = useState(false);
-
   // Helper function to check if a date's day of week has any advisor availability
   const isDayUnavailable = useCallback((date: Date): boolean => {
     const dayNames = ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday'];
@@ -501,7 +498,6 @@ export default function BookingModal({
         const { data, timestamp } = JSON.parse(cached);
         // Show cached data immediately (no loading spinner)
         setAvailableSlots(data.slots);
-        setBookingDataUnavailable(data.dataUnavailable || false);
         hasCachedData = true;
         // If cache is very fresh (<30s), skip refetch entirely
         cacheIsFresh = Date.now() - timestamp < 30 * 1000;
@@ -536,17 +532,13 @@ export default function BookingModal({
         return;
       }
 
-      // Check if booking data verification failed
-      const dataUnavailable = response.headers.get('X-Booking-Data-Unavailable') === 'true';
-      setBookingDataUnavailable(dataUnavailable);
-
       const slots: TimeSlot[] = await response.json();
       setAvailableSlots(slots);
 
       // Update cache with fresh data
       try {
         localStorage.setItem(cacheKey, JSON.stringify({
-          data: { slots, dataUnavailable },
+          data: { slots },
           timestamp: Date.now()
         }));
       } catch (storageError) {
@@ -577,8 +569,6 @@ export default function BookingModal({
   const invalidateBookingCaches = useCallback((date: Date, consultant: ConsultantType, serviceType: ServiceType) => {
     try {
       const dateString = getDateString(date);
-      const year = date.getFullYear();
-      const month = date.getMonth() + 1;
 
       // Clear all localStorage cache entries related to this booking
       const keysToRemove: string[] = [];
@@ -595,10 +585,6 @@ export default function BookingModal({
         keysToRemove.push(`availability_${dateString}_${service}_${consultant}`);
         keysToRemove.push(`availability_${dateString}_${service}_${otherConsultant}`);
       });
-
-      // 4. Clear booked dates cache for this month
-      // Note: We can't clear the cachedMonths state here, but we can clear localStorage
-      // The state will be refreshed on next mount or navigation
 
       // Remove all identified cache keys
       keysToRemove.forEach((key) => {
@@ -674,7 +660,7 @@ export default function BookingModal({
     }
 
     // Redirect to maintenance after validation passes
-    if (isMaintenanceMode || bookingDataUnavailable) {
+    if (isMaintenanceMode) {
       setStep('maintenance');
       return;
     }
@@ -1139,14 +1125,6 @@ export default function BookingModal({
           {/* Time Slots Step */}
           {step === 'timeSlots' && (
             <div className="space-y-6">
-              {/* Info banner — always shown, softened tone */}
-              <div className="bg-sage/10 border-l-4 border-sage p-4 rounded-md">
-                <h4 className="font-semibold text-primary mb-1">Booking Request</h4>
-                <p className="text-sm text-brown">
-                  We occasionally schedule appointments through other channels. Please standby for email confirmation — we&apos;ll reach out shortly to confirm your time.
-                </p>
-              </div>
-
               <div className="bg-sage/10 p-4 rounded-md">
                 <p className="text-brown font-medium">
                   {selectedDate && formatDateForDisplay(selectedDate)}
@@ -1533,16 +1511,8 @@ export default function BookingModal({
                 currentMedications={currentMedications}
                 healthConditions={healthConditions}
                 preferredContactMethod={preferredContactMethod}
-                warningTitle={
-                  bookingDataUnavailable
-                    ? 'Unable to Verify Booking Availability'
-                    : 'Booking System Under Maintenance'
-                }
-                warningMessage={
-                  bookingDataUnavailable
-                    ? "We're unable to verify existing bookings at this time, which means there may be a scheduling conflict. Please copy your booking details below and email them to us. We'll check for conflicts and confirm your appointment as soon as possible."
-                    : "Our online booking system is temporarily unavailable. Please copy your booking details below and send them to us via email. We'll confirm your appointment as soon as possible."
-                }
+                warningTitle="Booking System Under Maintenance"
+                warningMessage="Our online booking system is temporarily unavailable. Please copy your booking details below and send them to us via email. We'll confirm your appointment as soon as possible."
               />
 
               <div className="flex justify-center pt-4">
