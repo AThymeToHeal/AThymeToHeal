@@ -11,7 +11,7 @@ const securityHeaders = [
   },
   {
     key: "Content-Security-Policy",
-    value: "frame-ancestors 'self' https://www.weblaunchacademy.com",
+    value: "frame-ancestors 'self' https://www.weblaunchacademy.com http://localhost:*",
   },
 ];
 
