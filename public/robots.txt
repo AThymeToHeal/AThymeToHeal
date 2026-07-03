@@ -2,8 +2,7 @@
 User-agent: *
 Allow: /
 
-# Block placeholder and internal routes from indexing
-Disallow: /coming-soon
+# Block internal routes from indexing
 Disallow: /api/
 
 # Sitemap location
