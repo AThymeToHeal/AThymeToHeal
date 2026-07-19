@@ -14,7 +14,7 @@ export default function Header() {
     { name: 'Business Consultation', href: '/business-consultation' },
   ];
 
-  const rightNavigation = { name: 'Guides', href: '/guides' };
+  const rightNavigation = { name: 'Coming Soon', href: '/guides' };
 
   return (
     <header className="bg-primary text-white sticky top-0 z-50 shadow-md">
