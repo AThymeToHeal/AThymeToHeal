@@ -11,10 +11,10 @@ export default function Header() {
     { name: 'How We Can Help You', href: '/how-we-can-help-you' },
     { name: 'About Us', href: '/about-us' },
     { name: 'Contact', href: '/contact' },
-    { name: 'Business Consultation', href: '/business-consultation' },
+    { name: 'Coming Soon', href: '/guides' },
   ];
 
-  const rightNavigation = { name: 'Coming Soon', href: '/guides' };
+  const rightNavigation = { name: 'Business Consultation', href: '/business-consultation' };
 
   return (
     <header className="bg-primary text-white sticky top-0 z-50 shadow-md">
