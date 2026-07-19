@@ -5,6 +5,20 @@ import Booking from '../components/Booking';
 export const metadata: Metadata = {
   title: 'About Us - A Thyme To Heal',
   description: 'Meet Heidi Lynn and Illiana, a mom-daughter team dedicated to helping others heal in body, mind, and spirit through natural solutions.',
+  alternates: {
+    canonical: 'https://athymetoheal.org/about-us',
+  },
+  openGraph: {
+    title: 'About Us - A Thyme To Heal',
+    description: 'Meet Heidi Lynn and Illiana, a mom-daughter team dedicated to helping others heal in body, mind, and spirit through natural solutions.',
+    url: 'https://athymetoheal.org/about-us',
+    images: [{
+      url: 'https://athymetoheal.org/about-us/Illiana-and-Heidi.avif',
+      width: 800,
+      height: 600,
+      alt: 'Heidi Lynn and Illiana - A Thyme to Heal',
+    }],
+  },
 };
 
 export default function AboutPage() {
@@ -17,7 +31,7 @@ export default function AboutPage() {
             Who is <span className="font-script">A Thyme To Heal?</span>
           </h1>
           <p className="text-lg md:text-xl leading-relaxed text-secondary max-w-4xl mx-auto">
-            We&apos;re a mother-daughter team who have both walked long seasons of pain, confusion, and feeling like no one was listening. In those seasons, we discovered something that gave us hope again, a grounded way of healing that blends nature&apos;s rhythms with science‑informed support. Now our passion is helping women who feel unseen, exhausted, or overwhelmed find a steadier path back to themselves.
+            We&apos;re a mother-daughter team who have both walked long seasons of pain, confusion, and feeling like no one was listening. In those seasons, we discovered something that gave us hope again, a grounded way of healing that blends nature&apos;s rhythms with science&#8209;informed support. Now our passion is helping women who feel unseen, exhausted, or overwhelmed find a steadier path back to themselves.
           </p>
         </div>
       </section>
@@ -26,14 +40,15 @@ export default function AboutPage() {
       <section className="py-16 px-4">
         <div className="mx-auto max-w-3xl">
           <div className="relative rounded-lg overflow-hidden shadow-xl">
+            {/* aspect-video (16:9) reserves space before the video loads, preventing layout shift */}
             <video
               autoPlay
               muted
               loop
               playsInline
               controls
-              className="w-full"
-              poster="/home/essential-emotions.avif"
+              className="w-full aspect-video"
+              poster="/about-us/Illiana-and-Heidi.avif"
             >
               <source src="/about-us/Website About Us Video With Audio.mp4" type="video/mp4" />
               Your browser does not support the video tag.
@@ -56,6 +71,7 @@ export default function AboutPage() {
                   height={320}
                   className="w-full h-full object-cover object-top"
                   priority
+                  sizes="320px"
                 />
               </div>
             </div>
@@ -150,7 +166,7 @@ export default function AboutPage() {
               </div>
             </div>
 
-            {/* Photo */}
+            {/* Photo — lazy-loaded: below the fold, no need to block LCP */}
             <div className="flex justify-center order-1 lg:order-2">
               <div className="w-80 h-80 rounded-lg overflow-hidden border-4 border-primary shadow-lg">
                 <Image
@@ -159,7 +175,8 @@ export default function AboutPage() {
                   width={320}
                   height={320}
                   className="w-full h-full object-cover object-top"
-                  priority
+                  loading="lazy"
+                  sizes="320px"
                 />
               </div>
             </div>

@@ -11,21 +11,16 @@ const securityHeaders = [
   },
   {
     key: "Content-Security-Policy",
-    value: "frame-ancestors 'self' https://www.weblaunchacademy.com http://localhost:*",
+    value: "frame-ancestors 'self' https://www.weblaunchacademy.com https://*.weblaunchacademy.com;",
   },
 ];
 
 const nextConfig: NextConfig = {
-  images: {
-    unoptimized: true,
-  },
-  // Enable compression
+  // Image optimization enabled (removed unoptimized: true) — Next.js will
+  // now serve correctly-sized, compressed images via /_next/image
   compress: true,
-  // Optimize production builds
   productionBrowserSourceMaps: false,
-  // Enable React strict mode for better performance
   reactStrictMode: true,
-  // Note: swcMinify is enabled by default in Next.js 13+
   async headers() {
     return [{ source: "/(.*)", headers: securityHeaders }];
   },
