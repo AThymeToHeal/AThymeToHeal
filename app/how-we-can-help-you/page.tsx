@@ -28,29 +28,46 @@ export default function ServicesPage() {
       title: 'Health Consult',
       description: 'A consultation with one of our wellness guides to start you on your health journey.',
       duration: '1 hr',
-      price: '30',
+      price: '75',
       note: 'Services offered by both our wellness guides',
     },
     {
       title: 'Symphony of Cells',
       description: 'A technique using essential oils applied on the spine and feet. It encompasses a variety of tailored oil applications that target different body systems and related conditions.',
       duration: '30 minutes',
-      price: '45',
+      price: '75',
       note: 'Provided by Heidi',
     },
     {
       title: 'Essential Emotions',
       description: 'Often our physical pain is a manifestation of emotional roots. Begin the journey of identifying emotions and creating new neuropathways in your brain with an Essential Emotions session.',
       duration: '1 hr',
-      price: '60',
+      price: '100',
       note: 'Provided by Illiana',
     },
     {
       title: 'Health Scan',
       description: 'A gentle non-invasive health scan that reads bio markers in the body to help you better understand where your body is lacking and needing support. This package includes an in-depth explanation as to what it all means and how you can support your body best.',
       duration: '2 hrs',
-      price: '70',
+      price: '160',
       note: 'Provided by Heidi',
+    },
+  ];
+
+  const addOns = [
+    {
+      title: 'Written Wellness Protocol Report',
+      price: '$125',
+      priceNote: 'flat rate',
+      description: 'A personalized written wellness protocol prepared for you after your session, giving you a clear, tangible roadmap to follow at home.',
+      availability: 'Available as an add-on to a Health Scan or Health Consult',
+    },
+    {
+      title: 'Additional Calls',
+      price: '$30',
+      priceNote: 'per call',
+      description: 'Need extra support between sessions? Add a follow-up call with your wellness guide to check in, ask questions, and stay on track.',
+      availability: 'Available on Mondays only',
     },
   ];
 
@@ -58,7 +75,7 @@ export default function ServicesPage() {
     {
       title: 'Symphony of Healing Series',
       serviceType: 'Symphony of Healing Series' as ServiceType,
-      price: '315',
+      price: '525',
       note: 'Provided by Heidi',
       tagline: '8 sessions for the price of 7',
       description: 'Your body holds wisdom, and when given the space, it knows how to heal. The Symphony of Healing Series is a curated set of eight Symphony of Cells sessions designed to work in harmony with your body\'s systems, supporting detoxification, immune function, and deep restoration.\n\nEach session builds upon the last, creating a layered, intentional healing experience. When purchased as a series, you\'ll receive one session complimentary (8 for the price of 7), encouraging consistency and deeper results over time.',
@@ -66,7 +83,7 @@ export default function ServicesPage() {
     {
       title: 'The Emotional Renewal Series',
       serviceType: 'Emotional Renewal Series' as ServiceType,
-      price: '420',
+      price: '700',
       note: 'Provided by Illiana',
       tagline: '8 sessions for the price of 7',
       description: 'Your emotions are not obstacles, they are invitations to heal. The Emotional Renewal Series includes eight Essential Emotions sessions designed to help you safely explore, process, and release what your body has been holding.\n\nThrough guided emotional work and supportive tools, each session creates space for awareness, movement, and gentle transformation. As layers unfold over time, many clients experience greater clarity, emotional freedom, and a deeper connection to themselves.\n\nThis series includes one complimentary session (8 sessions for the price of 7), honoring your commitment to consistent, intentional healing.',
@@ -78,8 +95,8 @@ export default function ServicesPage() {
       title: 'Back to Basics Package',
       serviceType: 'Tier 1 - Back to Basics' as ServiceType,
       duration: '6 weeks',
-      price: '350',
-      paymentOptions: 'Optional split: $175 upfront + $175 halfway',
+      price: '635',
+      paymentOptions: 'Optional split: half upfront + half halfway',
       tagline: 'Your nourishing first step. If you\'re unsure where to begin or feel overwhelmed, this is for you. You\'ll receive consistent support so your body and mind start to feel grounded and balanced.',
       included: [
         'Intake + follow-up consults',
@@ -98,7 +115,7 @@ export default function ServicesPage() {
       title: 'A Thyme to Heal Package',
       serviceType: 'Tier 2 - A Thyme to Heal' as ServiceType,
       duration: '12 weeks',
-      price: '799',
+      price: '1,390',
       paymentOptions: '',
       tagline: 'A fuller container of support combining emotional work, body-centered sessions, and lifestyle guidance to create real momentum. You\'ll build routines that feel nurturing rather than burdensome and create patterns that gently support a healthy lifestyle fit for you.',
       included: [
@@ -121,7 +138,7 @@ export default function ServicesPage() {
       title: 'Deep Roots Healing Package',
       serviceType: 'Tier 3 - Deep Roots Healing' as ServiceType,
       duration: '6 months',
-      price: '4,000',
+      price: '7,000',
       paymentOptions: '',
       tagline: 'Chronic illness can steal your hope and make you feel unheard. This container is for women who are tired, discouraged, and done doing it alone. We move at your pace and support your whole system through emotional work, nervous system support, and hands-on body care that aims at root patterns, not just symptoms. You don\'t have to carry this by yourself anymore.',
       included: [
@@ -185,11 +202,11 @@ export default function ServicesPage() {
           <h2 className="text-3xl md:text-4xl font-serif font-bold mb-12 text-primary text-center">
             Individual Services
           </h2>
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
+          <div className="flex flex-wrap justify-center gap-8">
             {services.map((service, index) => (
               <div
                 key={index}
-                className="bg-white rounded-lg shadow-lg border border-taupe overflow-hidden flex flex-col"
+                className="w-full md:w-[calc(33.333%-22px)] bg-white rounded-lg shadow-lg border border-taupe overflow-hidden flex flex-col"
               >
                 {/* Service Header */}
                 <div className="bg-sage/20 p-6 border-b border-taupe">
@@ -226,6 +243,44 @@ export default function ServicesPage() {
                   {/* Book Button */}
                   <div className="text-center">
                     <Booking buttonText="Book now" defaultServiceType={service.title as ServiceType} {...consultantProps(service.title as ServiceType)} />
+                  </div>
+                </div>
+              </div>
+            ))}
+          </div>
+        </div>
+      </section>
+
+      {/* Add-On Services Section */}
+      <section className="py-16 px-4 bg-secondary">
+        <div className="mx-auto max-w-6xl">
+          <h2 className="text-3xl md:text-4xl font-serif font-bold mb-4 text-primary text-center">
+            Add-On Services
+          </h2>
+          <p className="text-lg text-brown text-center mb-12 max-w-3xl mx-auto">
+            Enhance your session with these optional add-ons. Simply mention them when booking or during your visit.
+          </p>
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-8 max-w-4xl mx-auto">
+            {addOns.map((addOn, index) => (
+              <div
+                key={index}
+                className="bg-white rounded-lg shadow-lg border border-taupe overflow-hidden flex flex-col"
+              >
+                <div className="bg-sage/20 p-6 border-b border-taupe">
+                  <h3 className="text-2xl font-serif font-bold text-primary text-center mb-1">
+                    {addOn.title}
+                  </h3>
+                  <p className="text-xs text-brown text-center italic">
+                    {addOn.availability}
+                  </p>
+                </div>
+                <div className="p-6 flex-grow flex flex-col justify-center items-center">
+                  <p className="text-brown mb-6 text-center">
+                    {addOn.description}
+                  </p>
+                  <div className="text-center">
+                    <p className="text-4xl font-bold text-primary">{addOn.price}</p>
+                    <p className="text-sm text-brown mt-1">{addOn.priceNote}</p>
                   </div>
                 </div>
               </div>
