@@ -56,18 +56,18 @@ export default function ServicesPage() {
 
   const addOns = [
     {
-      title: 'Written Wellness Protocol Report',
-      price: '$125',
-      priceNote: 'flat rate',
-      description: 'A personalized written wellness protocol prepared for you after your session, giving you a clear, tangible roadmap to follow at home.',
-      availability: 'Available as an add-on to a Health Scan or Health Consult',
-    },
-    {
       title: 'Additional Calls',
       price: '$30',
       priceNote: 'per call',
       description: 'Need extra support between sessions? Add a follow-up call with your wellness guide to check in, ask questions, and stay on track.',
       availability: 'Available on Mondays only',
+    },
+    {
+      title: 'Written Wellness Protocol Report',
+      price: '$125',
+      priceNote: 'flat rate',
+      description: 'A personalized written wellness protocol prepared for you after your session, giving you a clear, tangible roadmap to follow at home.',
+      availability: 'Available as an add-on to a Health Scan or Health Consult',
     },
   ];
 
