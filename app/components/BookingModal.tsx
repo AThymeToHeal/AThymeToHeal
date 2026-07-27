@@ -19,7 +19,6 @@ import type {
   ConsultantType,
 } from '@/lib/airtable';
 import { SERVICES } from '@/lib/airtable';
-import MaintenanceBooking from './MaintenanceBooking';
 
 interface BookingModalProps {
   isOpen: boolean;
@@ -29,7 +28,7 @@ interface BookingModalProps {
   availableConsultants?: ConsultantType[];
 }
 
-type BookingStep = 'selection' | 'calendar' | 'timeSlots' | 'contactInfo' | 'success' | 'maintenance';
+type BookingStep = 'selection' | 'calendar' | 'timeSlots' | 'contactInfo' | 'success';
 
 export default function BookingModal({
   isOpen,
@@ -103,14 +102,6 @@ export default function BookingModal({
       ref.current?.scrollIntoView({ behavior: 'smooth', block: 'center' });
     }, 50);
   }, []);
-
-  // Maintenance mode detection
-  const [isMaintenanceMode, setIsMaintenanceMode] = useState(
-    process.env.NEXT_PUBLIC_BOOKING_MAINTENANCE_MODE === 'true'
-  );
-
-  // Track if booking data verification failed (potential conflicts)
-  const [bookingDataUnavailable, setBookingDataUnavailable] = useState(false);
 
   // Helper function to check if a date's day of week has any advisor availability
   const isDayUnavailable = useCallback((date: Date): boolean => {
@@ -501,7 +492,6 @@ export default function BookingModal({
         const { data, timestamp } = JSON.parse(cached);
         // Show cached data immediately (no loading spinner)
         setAvailableSlots(data.slots);
-        setBookingDataUnavailable(data.dataUnavailable || false);
         hasCachedData = true;
         // If cache is very fresh (<30s), skip refetch entirely
         cacheIsFresh = Date.now() - timestamp < 30 * 1000;
@@ -536,17 +526,13 @@ export default function BookingModal({
         return;
       }
 
-      // Check if booking data verification failed
-      const dataUnavailable = response.headers.get('X-Booking-Data-Unavailable') === 'true';
-      setBookingDataUnavailable(dataUnavailable);
-
       const slots: TimeSlot[] = await response.json();
       setAvailableSlots(slots);
 
       // Update cache with fresh data
       try {
         localStorage.setItem(cacheKey, JSON.stringify({
-          data: { slots, dataUnavailable },
+          data: { slots },
           timestamp: Date.now()
         }));
       } catch (storageError) {
@@ -577,8 +563,6 @@ export default function BookingModal({
   const invalidateBookingCaches = useCallback((date: Date, consultant: ConsultantType, serviceType: ServiceType) => {
     try {
       const dateString = getDateString(date);
-      const year = date.getFullYear();
-      const month = date.getMonth() + 1;
 
       // Clear all localStorage cache entries related to this booking
       const keysToRemove: string[] = [];
@@ -595,10 +579,6 @@ export default function BookingModal({
         keysToRemove.push(`availability_${dateString}_${service}_${consultant}`);
         keysToRemove.push(`availability_${dateString}_${service}_${otherConsultant}`);
       });
-
-      // 4. Clear booked dates cache for this month
-      // Note: We can't clear the cachedMonths state here, but we can clear localStorage
-      // The state will be refreshed on next mount or navigation
 
       // Remove all identified cache keys
       keysToRemove.forEach((key) => {
@@ -631,7 +611,7 @@ export default function BookingModal({
       return;
     }
 
-    // Validate required fields — always runs, even in maintenance/fallback mode
+    // Validate required fields
     if (!firstName.trim()) {
       setFieldErrorAndScroll('firstName', 'Please enter your first name', firstNameRef);
       return;
@@ -670,12 +650,6 @@ export default function BookingModal({
     // Validate consent
     if (!consent) {
       setFieldErrorAndScroll('consent', 'Please agree to the privacy policy to continue', consentRef);
-      return;
-    }
-
-    // Redirect to maintenance after validation passes
-    if (isMaintenanceMode || bookingDataUnavailable) {
-      setStep('maintenance');
       return;
     }
 
@@ -727,19 +701,6 @@ export default function BookingModal({
           return;
         }
 
-        // Check for API rate limit or maintenance errors
-        if (
-          bookingResponse.status === 429 ||
-          bookingResponse.status === 503 ||
-          error.error?.includes('rate limit') ||
-          error.error?.includes('API') ||
-          error.error?.includes('Airtable')
-        ) {
-          // Switch to maintenance mode
-          setIsMaintenanceMode(true);
-          setStep('maintenance');
-          return;
-        }
         throw new Error(error.error || 'Failed to create booking');
       }
 
@@ -779,27 +740,11 @@ export default function BookingModal({
       localStorage.removeItem(cacheKey);
     } catch (error) {
       console.error('Error submitting booking:', error);
-
-      // Check if error is API-related (rate limits, network issues, etc.)
-      const errorMessage = error instanceof Error ? error.message : String(error);
-      const isAPIError =
-        errorMessage.includes('rate limit') ||
-        errorMessage.includes('API') ||
-        errorMessage.includes('Airtable') ||
-        errorMessage.includes('429') ||
-        errorMessage.includes('fetch');
-
-      if (isAPIError) {
-        // Switch to maintenance mode for API errors
-        setIsMaintenanceMode(true);
-        setStep('maintenance');
-      } else {
-        setFormError(
-          error instanceof Error
-            ? error.message
-            : 'Failed to complete booking. Please try again or contact us directly.'
-        );
-      }
+      setFormError(
+        error instanceof Error
+          ? error.message
+          : 'Failed to complete booking. Please try again or contact us directly.'
+      );
     } finally {
       setIsSubmitting(false);
     }
@@ -911,7 +856,6 @@ export default function BookingModal({
               {step === 'timeSlots' && 'Choose Your Time'}
               {step === 'contactInfo' && 'Your Information'}
               {step === 'success' && 'Booking Confirmed!'}
-              {step === 'maintenance' && 'Booking Temporarily Unavailable'}
             </h2>
           </div>
           <button
@@ -1139,14 +1083,6 @@ export default function BookingModal({
           {/* Time Slots Step */}
           {step === 'timeSlots' && (
             <div className="space-y-6">
-              {/* Info banner — always shown, softened tone */}
-              <div className="bg-sage/10 border-l-4 border-sage p-4 rounded-md">
-                <h4 className="font-semibold text-primary mb-1">Booking Request</h4>
-                <p className="text-sm text-brown">
-                  We occasionally schedule appointments through other channels. Please standby for email confirmation — we&apos;ll reach out shortly to confirm your time.
-                </p>
-              </div>
-
               <div className="bg-sage/10 p-4 rounded-md">
                 <p className="text-brown font-medium">
                   {selectedDate && formatDateForDisplay(selectedDate)}
@@ -1507,52 +1443,6 @@ export default function BookingModal({
               >
                 Close
               </button>
-            </div>
-          )}
-
-          {/* Maintenance Mode Step */}
-          {step === 'maintenance' && selectedDate && selectedTimeSlot && selectedConsultant && selectedServiceType && (
-            <div className="space-y-6">
-              <MaintenanceBooking
-                consultant={selectedConsultant}
-                serviceType={selectedServiceType}
-                selectedDate={formatDateForDisplay(selectedDate)}
-                timeSlot={selectedTimeSlot}
-                userLocalTime={`${formatTimeForDisplay(
-                  convertFromMST(getDateString(selectedDate), selectedTimeSlot.start, userTimezone)
-                )} - ${formatTimeForDisplay(
-                  convertFromMST(getDateString(selectedDate), selectedTimeSlot.end, userTimezone)
-                )}`}
-                userTimezone={getTimezoneFriendlyName(userTimezone)}
-                firstName={firstName}
-                lastName={lastName}
-                email={email}
-                phone={phone}
-                healthGoals={healthGoals}
-                dietaryRestrictions={dietaryRestrictions}
-                currentMedications={currentMedications}
-                healthConditions={healthConditions}
-                preferredContactMethod={preferredContactMethod}
-                warningTitle={
-                  bookingDataUnavailable
-                    ? 'Unable to Verify Booking Availability'
-                    : 'Booking System Under Maintenance'
-                }
-                warningMessage={
-                  bookingDataUnavailable
-                    ? "We're unable to verify existing bookings at this time, which means there may be a scheduling conflict. Please copy your booking details below and email them to us. We'll check for conflicts and confirm your appointment as soon as possible."
-                    : "Our online booking system is temporarily unavailable. Please copy your booking details below and send them to us via email. We'll confirm your appointment as soon as possible."
-                }
-              />
-
-              <div className="flex justify-center pt-4">
-                <button
-                  onClick={handleClose}
-                  className="px-6 py-2 text-brown hover:text-primary transition-colors underline"
-                >
-                  Close
-                </button>
-              </div>
             </div>
           )}
         </div>

@@ -10,7 +10,7 @@ interface ComingSoonFeature {
   eta: string;
 }
 
-export default function ComingSoonPage() {
+export default function GuidesPage() {
   const [email, setEmail] = useState('');
   const [status, setStatus] = useState<'idle' | 'submitting' | 'success' | 'error'>('idle');
 
@@ -46,7 +46,7 @@ export default function ComingSoonPage() {
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
           email,
-          source: 'Coming Soon Page',
+          source: 'Guides Page',
         }),
       });
 
