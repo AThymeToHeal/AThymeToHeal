@@ -23,7 +23,14 @@ export const metadata: Metadata = {
 };
 
 export default function ServicesPage() {
-  const services = [
+  const services: {
+    title: string;
+    description: string;
+    recommendation?: string;
+    duration: string;
+    price: string;
+    note: string;
+  }[] = [
     {
       title: 'Health Consult',
       description: 'A consultation with one of our wellness guides to start you on your health journey.',
@@ -33,9 +40,9 @@ export default function ServicesPage() {
     },
     {
       title: 'Symphony of Cells',
-      description: 'A technique using essential oils applied on the spine and feet. It encompasses a variety of tailored oil applications that target different body systems and related conditions.',
+      description: 'A technique using plant oils applied on the spine and feet. It encompasses a variety of tailored oil applications that target different body systems and related conditions.',
       duration: '30 minutes',
-      price: '75',
+      price: '85',
       note: 'Provided by Heidi',
     },
     {
@@ -48,6 +55,7 @@ export default function ServicesPage() {
     {
       title: 'Health Scan',
       description: 'A gentle non-invasive health scan that reads bio markers in the body to help you better understand where your body is lacking and needing support. This package includes an in-depth explanation as to what it all means and how you can support your body best.',
+      recommendation: '*We recommend clients add on the written wellness protocol for the best results',
       duration: '2 hrs',
       price: '160',
       note: 'Provided by Heidi',
@@ -167,32 +175,6 @@ export default function ServicesPage() {
           <h1 className="text-4xl md:text-5xl font-serif font-bold mb-4 text-accent">
             <span className="font-script">A Thyme to Heal: </span>Services & Pricing
           </h1>
-          <p className="text-lg md:text-xl max-w-3xl mx-auto">
-            We offer personalized holistic consultations tailored to your needs. Explore our services and choose the option that works best for you
-          </p>
-        </div>
-      </section>
-
-      {/* Hippocrates Quote */}
-      <section className="py-12 px-4 bg-sage/10">
-        <div className="mx-auto max-w-3xl">
-          <blockquote className="text-center">
-            <p className="text-lg md:text-xl text-brown italic mb-4">
-              &ldquo;If someone wishes for good health, one must first ask oneself if he or she is ready to do away with the reasons for their illness. Only then is it possible to help them.&rdquo;
-            </p>
-            <footer className="text-brown font-semibold">
-              — Hippocrates
-            </footer>
-          </blockquote>
-        </div>
-      </section>
-
-      {/* Intro Section */}
-      <section className="py-12 px-4">
-        <div className="mx-auto max-w-3xl text-center">
-          <p className="text-lg md:text-xl text-brown leading-relaxed">
-            If you&apos;ve ever felt stuck, exhausted, or unsure where to begin with your health, you&apos;re not alone. We meet you exactly where you are and walk with you step-by-step. Our approach blends nature&apos;s wisdom with what modern science understands about the human body, so you feel supported, seen, and empowered to make the changes that matter most.
-          </p>
         </div>
       </section>
 
@@ -225,6 +207,12 @@ export default function ServicesPage() {
                   <p className="text-brown mb-6 text-center">
                     {service.description}
                   </p>
+
+                  {service.recommendation && (
+                    <p className="text-sm text-brown italic mb-6 text-center">
+                      {service.recommendation}
+                    </p>
+                  )}
 
                   {/* Duration */}
                   <div className="mb-4">

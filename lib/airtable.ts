@@ -192,8 +192,8 @@ export const SERVICES: Record<ServiceType, ServiceConfig> = {
   'Symphony of Cells': {
     name: 'Symphony of Cells',
     duration: 30,
-    price: 75,
-    description: 'Essential oils and therapeutic massage for detox and healing',
+    price: 85,
+    description: 'Plant oils and therapeutic massage for detox and healing',
     availableConsultants: ['Heidi Lynn'],
   },
   'Essential Emotions': {
