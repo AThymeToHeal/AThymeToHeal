@@ -12,7 +12,7 @@ export default function Home() {
     },
     {
       title: 'Symphony of Cells',
-      description: 'A technique using essential oils applied on the spine and feet, targeting different body systems and related conditions',
+      description: 'A technique using plant oils applied on the spine and feet, targeting different body systems and related conditions',
       backgroundImage: '/home/natural-beauty-image.avif',
     },
     {
