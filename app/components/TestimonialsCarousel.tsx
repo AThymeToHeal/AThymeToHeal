@@ -157,7 +157,15 @@ const INITIAL_TESTIMONIALS: Testimonial[] = [
   },
 ];
 
-function AllReviewsModal({ testimonials, onClose }: { testimonials: Testimonial[]; onClose: () => void }) {
+function AllReviewsModal({
+  testimonials,
+  isLoading,
+  onClose,
+}: {
+  testimonials: Testimonial[];
+  isLoading: boolean;
+  onClose: () => void;
+}) {
   const rated = testimonials.filter((t) => t.rating && t.rating > 0);
   const avgRating = rated.length > 0
     ? rated.reduce((sum, t) => sum + (t.rating ?? 0), 0) / rated.length
@@ -179,7 +187,7 @@ function AllReviewsModal({ testimonials, onClose }: { testimonials: Testimonial[
         <div className="p-6 border-b border-taupe flex items-start justify-between flex-shrink-0">
           <div>
             <h3 className="text-2xl font-semibold text-primary mb-1">All Reviews</h3>
-            {avgRating !== null && (
+            {!isLoading && avgRating !== null && (
               <div className="flex items-center gap-2">
                 <span className="text-3xl font-bold text-primary">{avgRating.toFixed(1)}</span>
                 <div className="flex">
@@ -207,19 +215,31 @@ function AllReviewsModal({ testimonials, onClose }: { testimonials: Testimonial[
 
         {/* Scrollable list */}
         <div className="overflow-y-auto p-6 flex flex-col gap-5">
-          {testimonials.map((t, i) => (
-            <div key={i} className="border border-taupe rounded-lg p-5">
-              {t.rating && t.rating > 0 && (
-                <div className="flex mb-2">
-                  {[...Array(t.rating)].map((_, j) => (
-                    <span key={j} className="text-orange text-lg">★</span>
-                  ))}
-                </div>
-              )}
-              <p className="text-brown italic mb-3">&ldquo;{t.text}&rdquo;</p>
-              <p className="font-semibold text-primary text-sm">— {t.name}</p>
+          {isLoading ? (
+            // Loading state while fetching from Airtable
+            <div className="flex flex-col items-center justify-center py-12 gap-3">
+              <div className="w-8 h-8 border-4 border-primary/30 border-t-primary rounded-full animate-spin" />
+              <p className="text-brown/60 text-sm">Loading reviews…</p>
             </div>
-          ))}
+          ) : testimonials.length === 0 ? (
+            <p className="text-brown/60 text-center py-8">No reviews available yet.</p>
+          ) : (
+            testimonials
+              .filter((t) => t.name && t.text) // skip any records missing name or text
+              .map((t, i) => (
+                <div key={i} className="border border-taupe rounded-lg p-5">
+                  {t.rating && t.rating > 0 && (
+                    <div className="flex mb-2">
+                      {[...Array(t.rating)].map((_, j) => (
+                        <span key={j} className="text-orange text-lg">★</span>
+                      ))}
+                    </div>
+                  )}
+                  <p className="text-brown italic mb-3">&ldquo;{t.text}&rdquo;</p>
+                  <p className="font-semibold text-primary text-sm">— {t.name}</p>
+                </div>
+              ))
+          )}
         </div>
       </div>
     </div>
@@ -283,12 +303,7 @@ export default function TestimonialsCarousel() {
   const loadTestimonials = async () => {
     if (hasLoaded) return;
 
-    // Only show loading state if we don't have testimonials yet
-    // This prevents hardcoded testimonials from disappearing during fetch
-    const showLoadingState = testimonials.length === 0;
-    if (showLoadingState) {
-      setIsLoading(true);
-    }
+    setIsLoading(true);
     setHasLoaded(true);
 
     try {
@@ -296,19 +311,24 @@ export default function TestimonialsCarousel() {
       if (!response.ok) throw new Error('Failed to fetch testimonials');
       const data = await response.json();
 
-      // Only update if we got data
+      // Only update if we got data — keep hardcoded fallback if API returns empty
       if (data && data.length > 0) {
         setTestimonials(data);
       }
     } catch (error) {
       console.error('Error loading testimonials:', error);
-      // Keep hardcoded testimonials as fallback - don't clear them
-      // setTestimonials remains as INITIAL_TESTIMONIALS from useState initialization
+      // Keep hardcoded testimonials as fallback
     } finally {
-      if (showLoadingState) {
-        setIsLoading(false);
-      }
+      setIsLoading(false);
     }
+  };
+
+  // Open "See All Reviews" modal, triggering a fetch if one hasn't happened yet
+  const handleOpenAllReviews = () => {
+    if (!hasLoaded) {
+      loadTestimonials();
+    }
+    setIsAllReviewsOpen(true);
   };
 
   // Calculate carousel data
@@ -437,7 +457,7 @@ export default function TestimonialsCarousel() {
         )}
 
         <button
-          onClick={() => setIsAllReviewsOpen(true)}
+          onClick={handleOpenAllReviews}
           className="bg-white/20 text-white border-2 border-white/60 px-4 py-2.5 rounded-xl text-sm sm:text-base font-medium hover:bg-white hover:text-primary transition-colors shadow-md"
         >
           See All Reviews
@@ -472,7 +492,11 @@ export default function TestimonialsCarousel() {
 
       {/* All Reviews Modal */}
       {isAllReviewsOpen && (
-        <AllReviewsModal testimonials={testimonials} onClose={() => setIsAllReviewsOpen(false)} />
+        <AllReviewsModal
+          testimonials={testimonials}
+          isLoading={isLoading}
+          onClose={() => setIsAllReviewsOpen(false)}
+        />
       )}
 
       {/* Submit Testimonial Modal */}
