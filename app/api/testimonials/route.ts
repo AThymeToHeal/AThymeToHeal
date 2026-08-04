@@ -1,8 +1,8 @@
 import { NextResponse } from 'next/server';
 import { getTestimonials, createTestimonial, type Testimonial } from '@/lib/airtable';
 
-// Next.js will cache this route and revalidate every 24 hours
-export const revalidate = 86400;
+// Next.js will cache this route and revalidate every hour
+export const revalidate = 3600;
 
 // Fallback testimonials if Airtable is unreachable
 const FALLBACK_TESTIMONIALS: Testimonial[] = [
@@ -28,7 +28,7 @@ export async function GET() {
     {
       status: 200,
       headers: {
-        'Cache-Control': 'public, s-maxage=86400, stale-while-revalidate=43200',
+        'Cache-Control': 'public, s-maxage=3600, stale-while-revalidate=1800',
       },
     }
   );
