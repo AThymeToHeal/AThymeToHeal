@@ -418,16 +418,16 @@ export default function TestimonialsCarousel() {
                   }`}
                   style={{ transitionDelay: `${index * 100}ms` }}
                 >
-                  {testimonial.rating && testimonial.rating > 0 && (
-                    <div className="flex mb-4">
-                      {[...Array(testimonial.rating)].map((_, i) => (
+                  {/* Fixed-height stars row (empty when unrated) keeps all cards the same height */}
+                  <div className="flex mb-4 h-7" aria-hidden={!testimonial.rating}>
+                    {testimonial.rating && testimonial.rating > 0 &&
+                      [...Array(testimonial.rating)].map((_, i) => (
                         <span key={i} className="text-orange text-xl">
                           ★
                         </span>
                       ))}
-                    </div>
-                  )}
-                  <p className="text-brown mb-4 italic line-clamp-3">
+                  </div>
+                  <p className="text-brown mb-4 italic line-clamp-3 min-h-[4.5rem]">
                     &ldquo;{testimonial.text}&rdquo;
                   </p>
                   <p className="font-semibold text-primary mb-2">- {testimonial.name}</p>

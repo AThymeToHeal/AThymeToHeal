@@ -235,9 +235,9 @@ export default function BookingModal({
 
   // Initialize timezone detection and load saved data
   useEffect(() => {
+    // Times default to Mountain Time (MST/MDT); detection only feeds the "Detected:" hint
     const detected = detectUserTimezone();
     setDetectedTimezone(detected);
-    setUserTimezone(detected);
 
     // Load saved booking data from localStorage (service-type-specific)
     const cacheKey = getCacheKey();
@@ -263,7 +263,11 @@ export default function BookingModal({
         if (parsed.healthConditions) setHealthConditions(parsed.healthConditions);
         if (parsed.preferredContactMethod) setPreferredContactMethod(parsed.preferredContactMethod);
         if (parsed.consent !== undefined) setConsent(parsed.consent);
-        if (parsed.userTimezone) setUserTimezone(parsed.userTimezone);
+        // Only restore a timezone the visitor picked themselves; otherwise keep the MST/MDT default
+        if (parsed.userTimezone && parsed.manualTimezoneSelection) {
+          setUserTimezone(parsed.userTimezone);
+          setManualTimezoneSelection(true);
+        }
 
         // Restore step only if valid - check if required selections are made
         if (parsed.step) {
@@ -359,6 +363,7 @@ export default function BookingModal({
         preferredContactMethod,
         consent,
         userTimezone,
+        manualTimezoneSelection,
       };
       const cacheKey = getCacheKey();
       localStorage.setItem(cacheKey, JSON.stringify(bookingProgress));
@@ -380,6 +385,7 @@ export default function BookingModal({
     preferredContactMethod,
     consent,
     userTimezone,
+    manualTimezoneSelection,
     isOpen,
     getCacheKey,
   ]);
@@ -634,15 +640,27 @@ export default function BookingModal({
 
     // Validate phone if contact method requires it
     if ((preferredContactMethod === 'Phone' || preferredContactMethod === 'Text') && !phone.trim()) {
-      setFieldErrorAndScroll('phone', 'Please provide a phone number for your preferred contact method', phoneRef);
+      setFieldErrorAndScroll('phone', `Please provide a phone number so we can reach you by ${preferredContactMethod.toLowerCase()}. Format: (555) 123-4567`, phoneRef);
       return;
     }
 
-    // Validate phone format if provided
-    if ((preferredContactMethod === 'Phone' || preferredContactMethod === 'Text') && phone.trim()) {
+    // Validate phone format whenever one is entered, regardless of contact method
+    if (phone.trim()) {
       const phoneDigits = phone.replace(/\D/g, '');
+      if (/[a-zA-Z]/.test(phone)) {
+        setFieldErrorAndScroll('phone', 'Phone numbers can only contain digits and symbols like ( ) or dashes — no letters. Format: (555) 123-4567', phoneRef);
+        return;
+      }
+      if (phoneDigits.length === 0) {
+        setFieldErrorAndScroll('phone', "That doesn't look like a phone number — please enter a 10-digit number like (555) 123-4567", phoneRef);
+        return;
+      }
       if (phoneDigits.length < 10) {
-        setFieldErrorAndScroll('phone', 'Please enter a valid phone number with at least 10 digits', phoneRef);
+        setFieldErrorAndScroll('phone', `That phone number only has ${phoneDigits.length} digit${phoneDigits.length === 1 ? '' : 's'} — a full number needs 10 (area code + number), like (555) 123-4567`, phoneRef);
+        return;
+      }
+      if (phoneDigits.length > 11 || (phoneDigits.length === 11 && !phoneDigits.startsWith('1'))) {
+        setFieldErrorAndScroll('phone', 'That phone number has too many digits — please enter a 10-digit number like (555) 123-4567', phoneRef);
         return;
       }
     }
@@ -1268,9 +1286,15 @@ export default function BookingModal({
                       ref={phoneRef}
                       type="tel"
                       value={phone}
+                      placeholder="(555) 123-4567"
                       onChange={(e) => { setPhone(e.target.value); if (fieldError === 'phone') setFieldError(null); }}
                       className={`w-full px-4 py-2 border rounded-md text-brown focus:outline-none focus:ring-2 focus:ring-accent transition-all ${fieldError === 'phone' ? 'border-orange ring-2 ring-orange/40' : 'border-taupe'}`}
                     />
+                    {fieldError === 'phone' && formError ? (
+                      <p className="text-sm text-orange mt-1">{formError}</p>
+                    ) : (
+                      <p className="text-xs text-brown/60 mt-1">10-digit number, e.g. (555) 123-4567</p>
+                    )}
                   </div>
                 </div>
               </div>
