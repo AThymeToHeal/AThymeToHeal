@@ -209,6 +209,9 @@ export default function Home() {
               What Our Clients Say
             </h2>
             <TestimonialsCarousel />
+            <p className="text-xs text-white/60 italic text-center mt-6">
+              Results are individual and not guaranteed. Testimonials reflect personal experiences, not medical outcomes.
+            </p>
           </div>
         </div>
       </section>
