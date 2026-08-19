@@ -47,14 +47,14 @@ export default function ServicesPage() {
     },
     {
       title: 'Essential Emotions',
-      description: 'Often our physical pain is a manifestation of emotional roots. Begin the journey of identifying emotions and creating new neuropathways in your brain with an Essential Emotions session.',
+      description: 'Often our physical pain is a manifestation of emotional roots. Begin the journey of exploring emotional patterns and building new supportive habits with an Essential Emotions session.',
       duration: '1 hr',
       price: '100',
       note: 'Provided by Illiana',
     },
     {
       title: 'Health Scan',
-      description: 'A gentle non-invasive health scan that reads bio markers in the body to help you better understand where your body is lacking and needing support. This package includes an in-depth explanation as to what it all means and how you can support your body best.',
+      description: 'A gentle non-invasive health scan that reads bio markers in the body to help you better understand your body\'s current patterns so you can make informed wellness choices. This package includes an in-depth explanation as to what it all means and how you can support your body best.',
       recommendation: '*We recommend clients add on the written wellness protocol for the best results',
       duration: '2 hrs',
       price: '160',
