@@ -8,10 +8,9 @@ export default function Header() {
 
   const navigation = [
     { name: 'Home', href: '/' },
-    { name: 'How We Can Help You', href: '/how-we-can-help-you' },
+    { name: 'Services', href: '/how-we-can-help-you' },
     { name: 'About Us', href: '/about-us' },
     { name: 'Contact', href: '/contact' },
-    { name: 'Coming Soon', href: '/guides' },
   ];
 
   const rightNavigation = { name: 'Business Consultation', href: '/business-consultation' };

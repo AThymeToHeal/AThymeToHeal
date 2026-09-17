@@ -20,11 +20,6 @@ export default function Home() {
       description: 'For the weight your body is carrying. Stress, grief, and old emotional patterns don\'t stay in your mind, they show up in your body. This session combines guided coaching with aromatherapy to help you work through what you\'re holding and get your nervous system back to a place of rest so you can build a beautiful future for yourself. Come as you are. Nothing is too much here.',
       backgroundImage: '/home/essential-emotions.avif',
     },
-    {
-      title: 'Business Consults',
-      description: 'Turn your health journey into a thriving business with personalized guidance and mentorship',
-      backgroundImage: '/home/Tablets-image.webp',
-    },
   ];
 
 
@@ -38,16 +33,13 @@ export default function Home() {
           </h1>
           <div className="mb-8 max-w-3xl mx-auto space-y-4">
             <p className="text-xl md:text-2xl">
-              You want to feel better, and want to do it naturally.
+              We help you find out what your body and mind actually needs, then give you a natural plan to support it. No guessing, no generic advice.
             </p>
             <p className="text-lg md:text-xl">
-              You&apos;re tired of guessing, tired of generic advice, and ready for answers that actually fit your body. That&apos;s what we do: we scan, we listen, we explain what we&apos;re seeing, and we give you a personalized plan using nutrition, supplements, plant oils, services and herbs. Then we walk it out with you.
+              Headaches, gut issues and sleep? We can help you. Anxiety, depression or trying to recover from trauma? We can support you in that too.
             </p>
             <p className="text-lg md:text-xl">
-              You don&apos;t have to do this journey alone.
-            </p>
-            <p className="text-lg md:text-xl">
-              Book a health scan to begin. It&apos;s the simplest way to find out what your body needs.
+              You deserve a life that is not filled with pain. We are here to help you create that reality.
             </p>
           </div>
           <div className="flex flex-col sm:flex-row gap-4 justify-center">
@@ -91,10 +83,13 @@ export default function Home() {
             Who This Is For
           </h2>
           <p className="text-lg md:text-xl text-white/95 leading-relaxed mb-6">
-            For the woman who feels overwhelmed, exhausted, or unsure where to begin, A Thyme to Heal offers compassionate guidance rooted in nature and science to help you create the life of your dreams.
+            You want to feel better and want to do it naturally.
+          </p>
+          <p className="text-lg md:text-xl text-white/95 leading-relaxed mb-6">
+            You&apos;re tired of guessing, tired of generic advice, and ready for answers that actually fit your body. That&apos;s what we do: we scan, we listen, we explain what we&apos;re seeing, and we give you a personalized plan using nutrition, supplements, plant oils, and herbs. Then we walk it out with you.
           </p>
           <p className="text-lg md:text-xl text-white/95 leading-relaxed font-semibold">
-            Real support for your body and spirit, rooted in what&apos;s natural and proven. We guide you gently back to balance so you can feel more vibrant, grounded, and in control of your health journey.
+            Book a health scan to begin, it&apos;s the simplest way to find out what your body needs.
           </p>
         </div>
       </section>
@@ -147,9 +142,9 @@ export default function Home() {
       <section className="py-16 px-4 bg-background">
         <div className="mx-auto max-w-7xl">
           <h2 className="text-3xl md:text-4xl font-serif font-bold text-center mb-12 text-primary">
-            How We Can Help You
+            Services
           </h2>
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8">
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
             {services.map((service, index) => (
               <div
                 key={index}
