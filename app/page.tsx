@@ -6,18 +6,18 @@ import TestimonialsCarousel from './components/TestimonialsCarousel';
 export default function Home() {
   const services = [
     {
-      title: 'Health Consults',
-      description: 'A personalized consultation with one of our wellness guides to start you on your health journey',
+      title: 'Health Scan — $160',
+      description: 'Start here. A quick, non-invasive scan that reads your body\'s responses and shows us where things are out of balance. No needles, no bloodwork, you rest your hand on a sensor for about 7 minutes. Then we sit down together and walk you through exactly what came up and what we recommend, in plain language. You leave knowing what your body is asking for and what to do next.',
       backgroundImage: '/home/Bowl-of-greens-image.webp',
     },
     {
-      title: 'Symphony of Cells',
-      description: 'A technique using plant oils applied on the spine and feet, targeting different body systems and related conditions',
+      title: 'Symphony of Cells — $75',
+      description: 'Hands-on support for your body. A guided application of therapeutic-grade plant oils along the spine and feet, using a specific sequence chosen for what your body needs. Deeply relaxing, and a favorite for people dealing with stress, immune support, or feeling run-down. About an hour.',
       backgroundImage: '/home/natural-beauty-image.avif',
     },
     {
-      title: 'Essential Emotions Sessions',
-      description: 'Helping you identify and heal the roots of emotional pain',
+      title: 'Essential Emotions — $100',
+      description: 'For the weight your body is carrying. Stress, grief, and old emotional patterns don\'t stay in your mind, they show up in your body. This session combines guided coaching with aromatherapy to help you work through what you\'re holding and get your nervous system back to a place of rest so you can build a beautiful future for yourself. Come as you are. Nothing is too much here.',
       backgroundImage: '/home/essential-emotions.avif',
     },
     {
@@ -36,9 +36,20 @@ export default function Home() {
           <h1 className="text-5xl md:text-7xl font-script mb-6 text-accent">
             A Thyme To Heal
           </h1>
-          <p className="text-xl md:text-2xl mb-8 max-w-3xl mx-auto">
-            Combining kind holistic practices with science based guidance, to help you restore balance and long term health and happiness
-          </p>
+          <div className="mb-8 max-w-3xl mx-auto space-y-4">
+            <p className="text-xl md:text-2xl">
+              You want to feel better, and want to do it naturally.
+            </p>
+            <p className="text-lg md:text-xl">
+              You&apos;re tired of guessing, tired of generic advice, and ready for answers that actually fit your body. That&apos;s what we do: we scan, we listen, we explain what we&apos;re seeing, and we give you a personalized plan using nutrition, supplements, plant oils, services and herbs. Then we walk it out with you.
+            </p>
+            <p className="text-lg md:text-xl">
+              You don&apos;t have to do this journey alone.
+            </p>
+            <p className="text-lg md:text-xl">
+              Book a health scan to begin. It&apos;s the simplest way to find out what your body needs.
+            </p>
+          </div>
           <div className="flex flex-col sm:flex-row gap-4 justify-center">
             <Link
               href="/how-we-can-help-you"
@@ -100,10 +111,10 @@ export default function Home() {
                 <span className="text-3xl font-bold text-accent">1</span>
               </div>
               <h3 className="text-xl font-semibold text-primary mb-3">
-                Explore Support Options
+                Start with a Health Scan
               </h3>
               <p className="text-brown">
-                Discover the services and programs that resonate with your unique needs and wellness goals.
+                We start with a health scan to see what your body needs.
               </p>
             </div>
             <div className="text-center">
@@ -111,10 +122,10 @@ export default function Home() {
                 <span className="text-3xl font-bold text-accent">2</span>
               </div>
               <h3 className="text-xl font-semibold text-primary mb-3">
-                Choose What Fits Your Needs
+                Understand
               </h3>
               <p className="text-brown">
-                Select the path that feels right for you, whether it&apos;s a single session or a comprehensive program.
+                You get a written report and we explain our recommendations. You choose your path.
               </p>
             </div>
             <div className="text-center">
@@ -122,10 +133,10 @@ export default function Home() {
                 <span className="text-3xl font-bold text-accent">3</span>
               </div>
               <h3 className="text-xl font-semibold text-primary mb-3">
-                Start Feeling More Grounded
+                Pick Services &amp; Begin Your Journey
               </h3>
               <p className="text-brown">
-                Begin your journey with support, guidance, and a clear path forward to lasting wellness.
+                Pick your services and start healing, with support the whole way.
               </p>
             </div>
           </div>
@@ -142,7 +153,7 @@ export default function Home() {
             {services.map((service, index) => (
               <div
                 key={index}
-                className="relative rounded-lg shadow-md hover:shadow-lg transition-shadow border border-taupe overflow-hidden h-80"
+                className="relative rounded-lg shadow-md hover:shadow-lg transition-shadow border border-taupe overflow-hidden min-h-80"
                 style={{
                   backgroundImage: `url(${service.backgroundImage})`,
                   backgroundSize: 'cover',
@@ -158,7 +169,7 @@ export default function Home() {
                     {service.title}
                   </h3>
                   <div className="flex-grow flex items-center justify-center">
-                    <p className="text-white/90 text-center">{service.description}</p>
+                    <p className="text-white/90 text-center text-sm leading-relaxed">{service.description}</p>
                   </div>
                 </div>
               </div>
