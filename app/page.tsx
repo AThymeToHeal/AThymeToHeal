@@ -6,17 +6,17 @@ import TestimonialsCarousel from './components/TestimonialsCarousel';
 export default function Home() {
   const services = [
     {
-      title: 'Health Scan — $160',
+      title: 'Health Scan $160',
       description: 'Start here. A quick, non-invasive scan that reads your body\'s responses and shows us where things are out of balance. No needles, no bloodwork, you rest your hand on a sensor for about 7 minutes. Then we sit down together and walk you through exactly what came up and what we recommend, in plain language. You leave knowing what your body is asking for and what to do next.',
       backgroundImage: '/home/Bowl-of-greens-image.webp',
     },
     {
-      title: 'Symphony of Cells — $75',
+      title: 'Symphony of Cells $75',
       description: 'Hands-on support for your body. A guided application of therapeutic-grade plant oils along the spine and feet, using a specific sequence chosen for what your body needs. Deeply relaxing, and a favorite for people dealing with stress, immune support, or feeling run-down. About an hour.',
       backgroundImage: '/home/natural-beauty-image.avif',
     },
     {
-      title: 'Essential Emotions — $100',
+      title: 'Essential Emotions $100',
       description: 'For the weight your body is carrying. Stress, grief, and old emotional patterns don\'t stay in your mind, they show up in your body. This session combines guided coaching with aromatherapy to help you work through what you\'re holding and get your nervous system back to a place of rest so you can build a beautiful future for yourself. Come as you are. Nothing is too much here.',
       backgroundImage: '/home/essential-emotions.avif',
     },
@@ -33,7 +33,7 @@ export default function Home() {
           </h1>
           <div className="mb-8 max-w-3xl mx-auto space-y-4">
             <p className="text-xl md:text-2xl">
-              We help you find out what your body and mind actually needs, then give you a natural plan to support it. No guessing, no generic advice.
+              We help you find out what your body and mind actually needs, then give you a natural plan to support it.
             </p>
             <p className="text-lg md:text-xl">
               Headaches, gut issues and sleep? We can help you. Anxiety, depression or trying to recover from trauma? We can support you in that too.
