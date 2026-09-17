@@ -6,7 +6,7 @@ export default function Footer() {
   const footerLinks = {
     company: [
       { name: 'About Us', href: '/about-us' },
-      { name: 'How We Can Help You', href: '/how-we-can-help-you' },
+      { name: 'Services', href: '/how-we-can-help-you' },
       { name: 'Contact', href: '/contact' },
     ],
     legal: [
