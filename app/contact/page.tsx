@@ -115,7 +115,9 @@ export default function ContactPage() {
                     </svg>
                   </a>
                   <a
-                    href="#"
+                    href="https://www.instagram.com/thethymetoheal/"
+                    target="_blank"
+                    rel="noopener noreferrer"
                     className="w-10 h-10 bg-primary rounded-full flex items-center justify-center text-accent hover:bg-primary/90 transition-colors"
                     aria-label="Instagram"
                   >
