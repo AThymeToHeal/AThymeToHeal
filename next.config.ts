@@ -26,4 +26,11 @@ const nextConfig: NextConfig = {
   },
 };
 
+// Cloudflare Workers (v1): serve images unoptimized — no image loader on OpenNext yet.
+nextConfig.images = { ...(nextConfig.images || {}), unoptimized: true }
+
 export default nextConfig;
+
+// Cloudflare (OpenNext) local-dev bindings — appended by WLA provisioning.
+import { initOpenNextCloudflareForDev } from '@opennextjs/cloudflare'
+initOpenNextCloudflareForDev()

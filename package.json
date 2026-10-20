@@ -14,7 +14,10 @@
     "add-coming-soon-features": "node scripts/add-coming-soon-features.mjs",
     "create-advisor-tables": "node scripts/create-advisor-availability-tables.mjs",
     "populate-advisor-availability": "node scripts/populate-advisor-availability.mjs",
-    "verify-availability": "node scripts/verify-advisor-availability.mjs"
+    "verify-availability": "node scripts/verify-advisor-availability.mjs",
+    "cf:preview": "opennextjs-cloudflare build && opennextjs-cloudflare preview",
+    "cf:deploy": "opennextjs-cloudflare build && opennextjs-cloudflare deploy",
+    "cf:upload": "opennextjs-cloudflare build && wrangler versions upload"
   },
   "dependencies": {
     "@vercel/analytics": "^1.6.1",
@@ -23,7 +26,8 @@
     "dotenv": "^17.2.3",
     "next": "16.2.12",
     "react": "19.2.1",
-    "react-dom": "19.2.1"
+    "react-dom": "19.2.1",
+    "@opennextjs/cloudflare": "1.20.6"
   },
   "devDependencies": {
     "@types/node": "^20",
@@ -36,6 +40,7 @@
     "sharp": "^0.34.5",
     "tailwindcss": "^3.4.19",
     "tsx": "^4.21.0",
-    "typescript": "^5"
+    "typescript": "^5",
+    "wrangler": "4.137.0"
   }
 }
