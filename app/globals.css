@@ -41,3 +41,9 @@ a:hover,
   -webkit-box-orient: vertical;
   overflow: hidden;
 }
+
+/* Admin pages: cream behind everything, so an overscroll or a short screen never shows white */
+html:has(.admin-root),
+body:has(.admin-root) {
+  background: #faf7ee;
+}

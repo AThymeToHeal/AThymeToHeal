@@ -30,13 +30,14 @@ export default async function PanelLayout({ children }: { children: React.ReactN
   return (
     <div className="lg:flex">
       {/* Desktop sidebar */}
-      <aside className="sticky top-0 hidden h-screen w-64 shrink-0 flex-col bg-[#023020] px-4 py-6 lg:flex">
-        <Link href="/admin" className="mb-8 px-3">
+      {/* overflow-y-auto: on short screens the links scroll inside the sidebar instead of stretching the page */}
+      <aside className="sticky top-0 hidden h-screen w-64 shrink-0 flex-col overflow-y-auto bg-[#023020] px-4 py-5 lg:flex">
+        <Link href="/admin" className="mb-6 px-3">
           <span className="block whitespace-nowrap font-script text-[2.1rem] leading-tight text-[#d9a066]">A Thyme to Heal</span>
           <span className="mt-1 block text-xs uppercase tracking-[0.2em] text-[#f0e9d2]/60">Practice admin</span>
         </Link>
         <SideNav items={items} />
-        <div className="mt-auto space-y-1 px-1">
+        <div className="mt-auto space-y-1 px-1 pt-4">
           <p className="truncate px-3 pb-1 text-xs text-[#f0e9d2]/50">Signed in as {me.name}</p>
           <a href="/" target="_blank" rel="noopener noreferrer" className="block rounded-lg px-3 py-2 text-sm text-[#f0e9d2]/70 hover:bg-white/10 hover:text-[#f0e9d2]">
             View website
