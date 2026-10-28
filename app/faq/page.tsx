@@ -1,19 +1,23 @@
 import FAQAccordion from '../components/FAQAccordion';
 import Link from 'next/link';
 import type { Metadata } from 'next';
+import { getFAQs as getFAQsFromDb } from '@/lib/db';
 
 export const metadata: Metadata = {
   title: 'FAQ - Frequently Asked Questions | A Thyme to Heal',
   description: 'Find answers to common questions about our herbal remedies, consultations, products, and services.',
 };
 
-// Import FAQs directly - no API call needed during build
+// Edited in /admin/faqs; the admin refreshes this page on every save
+export const revalidate = 3600;
+
 async function getFAQs() {
-  // Return hardcoded FAQs directly (same data as API route)
-  return fallbackFAQs;
+  const fromDb = await getFAQsFromDb(); // [] on any database error
+  if (fromDb.length === 0) return fallbackFAQs;
+  return fromDb.map((f) => ({ question: f.question, answer: f.answer, category: f.category || 'General' }));
 }
 
-// Fallback FAQs (in case Airtable is not set up yet)
+// Fallback FAQs: shown only if the database can't be reached (same list the database was seeded with)
 const fallbackFAQs = [
     // Products & Remedies
     {

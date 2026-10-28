@@ -1,7 +1,7 @@
 import type { Metadata } from 'next';
 import Booking from '../components/Booking';
-import type { ServiceType, ConsultantType } from '@/lib/airtable';
-import { SERVICES } from '@/lib/airtable';
+import type { ServiceType, ConsultantType } from '@/lib/db';
+import { SERVICES } from '@/lib/db';
 
 function consultantProps(serviceType: ServiceType): {
   defaultConsultant?: ConsultantType;

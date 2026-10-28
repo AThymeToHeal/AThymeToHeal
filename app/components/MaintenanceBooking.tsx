@@ -1,8 +1,8 @@
 'use client';
 
 import { useState } from 'react';
-import type { ServiceType, ConsultantType } from '@/lib/airtable';
-import { SERVICES } from '@/lib/airtable';
+import type { ServiceType, ConsultantType } from '@/lib/db';
+import { SERVICES } from '@/lib/db';
 
 interface MaintenanceBookingProps {
   consultant: ConsultantType;

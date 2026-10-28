@@ -1,5 +1,5 @@
 import { NextResponse } from 'next/server';
-import { getFullyBookedDates, type ConsultantType, type ServiceType } from '@/lib/airtable';
+import { getFullyBookedDates, type ConsultantType, type ServiceType } from '@/lib/db';
 
 export async function GET(request: Request) {
   try {

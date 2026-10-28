@@ -1,5 +1,5 @@
 import { NextResponse } from 'next/server';
-import { createNewsletterSignup } from '@/lib/airtable';
+import { createNewsletterSignup } from '@/lib/db';
 
 export async function POST(request: Request) {
   try {

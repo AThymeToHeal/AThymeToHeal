@@ -2,7 +2,7 @@
 
 import { useState, useEffect } from 'react';
 import BookingModal from './BookingModal';
-import type { ServiceType, ConsultantType } from '@/lib/airtable';
+import type { ServiceType, ConsultantType } from '@/lib/db';
 
 interface BookingProps {
   buttonText?: string;

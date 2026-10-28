@@ -1,5 +1,6 @@
 import { NextResponse } from 'next/server';
-import { getTestimonials, createTestimonial, type Testimonial } from '@/lib/airtable';
+import { getTestimonials, createTestimonial, type Testimonial } from '@/lib/db';
+import { sendReviewAlert } from '@/lib/email';
 
 // Always fetch fresh testimonials — no edge/CDN caching
 export const revalidate = 0;
@@ -54,6 +55,7 @@ export async function POST(request: Request) {
     };
 
     const result = await createTestimonial(testimonial);
+    await sendReviewAlert({ id: result.id, name: testimonial.name, text: testimonial.text, rating: testimonial.rating });
 
     return NextResponse.json(
       {

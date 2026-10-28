@@ -1,5 +1,6 @@
 import { NextResponse } from 'next/server';
-import { createContact, type ContactSubmission } from '@/lib/airtable';
+import { createContact, type ContactSubmission } from '@/lib/db';
+import { sendContactAlert } from '@/lib/email';
 
 export async function POST(request: Request) {
   try {
@@ -48,6 +49,7 @@ export async function POST(request: Request) {
     };
 
     const result = await createContact(contactData);
+    await sendContactAlert({ id: result.id, ...contactData });
 
     return NextResponse.json(result, { status: 200 });
   } catch (error) {

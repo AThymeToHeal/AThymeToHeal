@@ -17,8 +17,8 @@ import type {
   ClientFormData,
   ServiceType,
   ConsultantType,
-} from '@/lib/airtable';
-import { SERVICES } from '@/lib/airtable';
+} from '@/lib/db';
+import { SERVICES } from '@/lib/db';
 
 interface BookingModalProps {
   isOpen: boolean;

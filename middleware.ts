@@ -1,4 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server';
+import { SESSION_COOKIE_NAME, verifySession } from '@/lib/auth';
 
 const requests = new Map<string, { count: number; resetAt: number }>();
 
@@ -9,15 +10,29 @@ const RATE_LIMITS: Record<string, number> = {
   '/api/contact':     10,
   '/api/newsletter':  15,
   '/api/testimonials': 15,
+  '/admin/login':        10, // password guesses and reset-link requests
+  '/admin/set-password': 10,
 };
 const DEFAULT_LIMIT = 60;
+// Client self-service pages (/booking/<token>): cancel, reschedule, slot lookups
+const BOOKING_MANAGE_LIMIT = 20;
+// Reachable without a session: sign-in and the set-password link from an invite/reset email
+const PUBLIC_ADMIN_PATHS = ['/admin/login', '/admin/set-password'];
 const WINDOW_MS = 60_000;
 
-export function middleware(request: NextRequest) {
-  if (request.method !== 'POST') return NextResponse.next();
-
+export async function middleware(request: NextRequest) {
   const pathname = request.nextUrl.pathname;
-  const limit = RATE_LIMITS[pathname] ?? DEFAULT_LIMIT;
+
+  // Everything under /admin except the login page needs a valid signed session.
+  // NOTE: this gates page ROUTES only. Server actions authorise themselves via
+  // requireSession() in lib/admin/actions.ts.
+  if (pathname.startsWith('/admin') && !PUBLIC_ADMIN_PATHS.includes(pathname)) {
+    const ok = await verifySession(request.cookies.get(SESSION_COOKIE_NAME)?.value);
+    if (!ok) return NextResponse.redirect(new URL('/admin/login', request.url));
+  }
+
+  if (request.method !== 'POST') return NextResponse.next();
+  const limit = RATE_LIMITS[pathname] ?? (pathname.startsWith('/booking/') ? BOOKING_MANAGE_LIMIT : DEFAULT_LIMIT);
 
   const ip =
     request.headers.get('x-forwarded-for')?.split(',')[0].trim() ??
@@ -51,5 +66,5 @@ export function middleware(request: NextRequest) {
 }
 
 export const config = {
-  matcher: ['/api/bookings', '/api/clients', '/api/contact', '/api/newsletter', '/api/testimonials'],
+  matcher: ['/api/bookings', '/api/clients', '/api/contact', '/api/newsletter', '/api/testimonials', '/admin/:path*', '/booking/:path*'],
 };

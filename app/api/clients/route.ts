@@ -1,5 +1,5 @@
 import { NextResponse } from 'next/server';
-import { createOrUpdateClient, type ClientFormData } from '@/lib/airtable';
+import { createOrUpdateClient, type ClientFormData } from '@/lib/db';
 
 export async function POST(request: Request) {
   try {

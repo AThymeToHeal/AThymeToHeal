@@ -1,5 +1,5 @@
 import { NextResponse } from 'next/server';
-import { trackFAQClick } from '@/lib/airtable';
+import { trackFAQClick } from '@/lib/db';
 
 export async function POST(request: Request) {
   try {

@@ -10,7 +10,7 @@
  * - Available Days: 24 hours TTL (rarely changes)
  */
 
-import type { ConsultantType, ServiceType } from './airtable';
+import type { ConsultantType, ServiceType } from './db';
 
 // Cache TTL constants (in milliseconds)
 export const CACHE_TTL = {

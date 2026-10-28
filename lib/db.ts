@@ -1,15 +1,15 @@
-import Airtable from 'airtable';
+import { createClient, type SupabaseClient } from '@supabase/supabase-js';
 import { serverCacheGet, serverCacheSet, SERVER_CACHE_TTL } from './serverCache';
 
-// Lazy initialization of Airtable - only runs when actually needed
-let _base: ReturnType<Airtable['base']> | null = null;
+// Lazy initialization of Supabase - only runs when actually needed
+let _db: SupabaseClient | null = null;
 
 // HARDCODED ADVISOR SCHEDULES - No API calls needed!
 // Schedule format: DayOfWeek -> { start: 'HH:MM', end: 'HH:MM' }
 // Available days: Tuesday, Wednesday, Thursday, Saturday
 // Heidi Lynn: 1 PM - 6 PM MT (weekdays), 10 AM - 4 PM MT (Saturday)
 // Illiana: 9 AM - 1 PM MT (weekdays), 10 AM - 4 PM MT (Saturday)
-const ADVISOR_SCHEDULES: Record<
+export const ADVISOR_SCHEDULES: Record<
   ConsultantType,
   Record<string, { start: string; end: string; isActive: boolean } | null>
 > = {
@@ -40,32 +40,35 @@ export const BOOKING_LIMITS = {
   BUFFER_MINUTES: 30, // 30-minute buffer between client appointments
 } as const;
 
-function getBase() {
-  if (_base) return _base;
+/**
+ * Server-only Supabase client using the SECRET key (service_role, bypasses RLS).
+ * Only import the data functions from route handlers and server components.
+ * Deliberately the plain supabase-js client with no cookies, so it never runs as a user.
+ */
+export function getDb(): SupabaseClient {
+  if (_db) return _db;
 
-  const AIRTABLE_API_KEY = process.env.AIRTABLE_API_KEY;
-  const AIRTABLE_BASE_ID = process.env.AIRTABLE_BASE_ID;
+  const url = process.env.NEXT_PUBLIC_SUPABASE_URL;
+  const key = process.env.SUPABASE_SECRET_KEY;
 
-  if (!AIRTABLE_API_KEY || !AIRTABLE_BASE_ID) {
-    throw new Error('Missing Airtable configuration. Check .env.local file.');
+  if (!url || !key) {
+    throw new Error('Missing Supabase configuration (NEXT_PUBLIC_SUPABASE_URL / SUPABASE_SECRET_KEY).');
   }
 
-  _base = new Airtable({ apiKey: AIRTABLE_API_KEY }).base(AIRTABLE_BASE_ID);
-  return _base;
+  _db = createClient(url, key, { auth: { persistSession: false, autoRefreshToken: false } });
+  return _db;
 }
 
 // Table names
 export const TABLES = {
-  CONTACT: 'contact',
-  BOOKED: 'Booked',
-  CLIENTS: 'Clients',
-  TESTIMONIALS: 'Testimonials',
-  FAQS: 'FAQs',
-  FAQ_CLICKS: 'FAQ Clicks',
-  NEWSLETTER: 'Newsletter Signups',
-  COMING_SOON: 'Coming Soon Features',
-  ADVISOR_AVAILABILITY: 'Advisor Schedules',  // NEW: Updated to use new table
-  ADVISOR_DAYS_OFF: 'Advisor Days Off',
+  CONTACT: 'contacts',
+  BOOKED: 'bookings',
+  CLIENTS: 'clients',
+  TESTIMONIALS: 'testimonials',
+  FAQS: 'faqs',
+  NEWSLETTER: 'newsletter_signups',
+  COMING_SOON: 'coming_soon_features',
+  ADVISOR_DAYS_OFF: 'advisor_days_off',
 };
 
 // ============================================================================
@@ -256,27 +259,27 @@ export const SERVICES: Record<ServiceType, ServiceConfig> = {
 
 export async function createContact(data: ContactSubmission) {
   try {
-    const record = await getBase()(TABLES.CONTACT).create([
-      {
-        fields: {
-          FirstName: data.firstName,
-          LastName: data.lastName,
-          Email: data.email,
-          Phone: data.phone || '',
-          Subject: data.subject || '',
-          Message: data.message,
-          Source: data.source || 'Contact Page',
-          DateCreated: new Date().toISOString(),
-        },
-      } as any,
-    ]);
+    const { data: row, error } = await getDb()
+      .from(TABLES.CONTACT)
+      .insert({
+        first_name: data.firstName,
+        last_name: data.lastName,
+        email: data.email,
+        phone: data.phone || '',
+        subject: data.subject || '',
+        message: data.message,
+        source: data.source || 'Contact Page',
+      })
+      .select('id')
+      .single();
+    if (error) throw error;
 
     return {
-      id: record[0].id,
+      id: row.id as string,
       success: true,
     };
   } catch (error) {
-    console.error('Error creating contact in Airtable:', error);
+    console.error('Error creating contact:', error);
     throw error;
   }
 }
@@ -287,24 +290,24 @@ export async function createContact(data: ContactSubmission) {
 
 export async function createNewsletterSignup(email: string, name?: string, source?: string) {
   try {
-    const record = await getBase()(TABLES.NEWSLETTER).create([
-      {
-        fields: {
-          Email: email,
-          Name: name || '',
-          Source: source || 'Homepage',
-          'Subscribed Date': new Date().toISOString(),
-          Status: 'Active',
-        },
-      } as any,
-    ]);
+    const { data: row, error } = await getDb()
+      .from(TABLES.NEWSLETTER)
+      .insert({
+        email,
+        name: name || '',
+        source: source || 'Homepage',
+        status: 'Active',
+      })
+      .select('id')
+      .single();
+    if (error) throw error;
 
     return {
-      id: record[0].id,
+      id: row.id as string,
       success: true,
     };
   } catch (error) {
-    console.error('Error creating newsletter signup in Airtable:', error);
+    console.error('Error creating newsletter signup:', error);
     throw error;
   }
 }
@@ -422,32 +425,34 @@ export async function createConsultation(consultation: Consultation) {
     const utcDateTime = mstToUtcIso(consultation.dateBooked, consultation.timeSlotStart);
     const serviceConfig = SERVICES[consultation.serviceType];
 
-    const record = await getBase()(TABLES.BOOKED).create([
-      {
-        fields: {
-          dateAndTime: utcDateTime,
-          FirstName: consultation.firstName,
-          LastName: consultation.lastName,
-          Email: consultation.email,
-          Phone: consultation.phone || '',
-          BookingType: consultation.bookingType,
-          ServiceType: consultation.serviceType,
-          Consultant: consultation.consultant,
-          Duration: serviceConfig.duration,
-          Price: serviceConfig.price,
-          UserTimezone: consultation.userTimezone,
-          UserLocalTime: consultation.userLocalTime,
-        },
-      } as any,
-    ]);
+    const { data: row, error } = await getDb()
+      .from(TABLES.BOOKED)
+      .insert({
+        date_and_time: utcDateTime,
+        first_name: consultation.firstName,
+        last_name: consultation.lastName,
+        email: consultation.email,
+        phone: consultation.phone || '',
+        booking_type: consultation.bookingType,
+        service_type: consultation.serviceType,
+        consultant: consultation.consultant,
+        duration: serviceConfig.duration,
+        price: serviceConfig.price,
+        user_timezone: consultation.userTimezone,
+        user_local_time: consultation.userLocalTime,
+      })
+      .select('id, manage_token')
+      .single();
+    if (error) throw error;
 
     return {
-      id: record[0].id,
+      id: row.id as string,
+      manageToken: row.manage_token as string,
       success: true,
       dateAndTime: utcDateTime,
     };
   } catch (error) {
-    console.error('Error creating consultation in Airtable:', error);
+    console.error('Error creating consultation:', error);
     throw error;
   }
 }
@@ -512,25 +517,28 @@ async function findExistingClient(
   phone?: string
 ): Promise<{ id: string; fields: Record<string, any> } | null> {
   try {
-    // Build filter formula with OR logic
-    let filterFormula: string;
-    if (phone && phone.trim()) {
-      filterFormula = `OR({Email}='${email}', {Phone}='${phone}')`;
-    } else {
-      filterFormula = `{Email}='${email}'`;
+    // Match on email first, then phone (two plain equality queries: no filter-string building)
+    const columns = 'id, phone, health_goals, dietary_restrictions, current_medications, health_conditions';
+    const byEmail = await getDb().from(TABLES.CLIENTS).select(columns).eq('email', email).limit(1);
+    if (byEmail.error) throw byEmail.error;
+    let row = byEmail.data[0];
+
+    if (!row && phone && phone.trim()) {
+      const byPhone = await getDb().from(TABLES.CLIENTS).select(columns).eq('phone', phone).limit(1);
+      if (byPhone.error) throw byPhone.error;
+      row = byPhone.data[0];
     }
 
-    const records = await getBase()(TABLES.CLIENTS)
-      .select({
-        filterByFormula: filterFormula,
-        maxRecords: 1,
-      })
-      .all();
-
-    if (records.length > 0) {
+    if (row) {
       return {
-        id: records[0].id,
-        fields: records[0].fields as Record<string, any>,
+        id: row.id,
+        fields: {
+          Phone: row.phone,
+          HealthGoals: row.health_goals,
+          DietaryRestrictions: row.dietary_restrictions,
+          CurrentMedications: row.current_medications,
+          HealthConditions: row.health_conditions,
+        },
       };
     }
 
@@ -549,52 +557,48 @@ export async function createOrUpdateClient(data: ClientFormData) {
     // Prepare fields with smart merging
     const fields: Record<string, unknown> = {
       // Always update with latest, properly formatted
-      FirstName: capitalizeFirstLetter(data.firstName),
-      LastName: capitalizeFirstLetter(data.lastName),
-      Email: data.email,
-      Phone: data.phone || existingClient?.fields.Phone || '',
-      PreferredContactMethod: data.preferredContactMethod || '',
-      Consent: data.consent,
+      first_name: capitalizeFirstLetter(data.firstName),
+      last_name: capitalizeFirstLetter(data.lastName),
+      email: data.email,
+      phone: data.phone || existingClient?.fields.Phone || '',
+      preferred_contact_method: data.preferredContactMethod || '',
+      consent: data.consent,
     };
 
     // Merge health fields if updating, otherwise use new values
     if (existingClient) {
-      fields.HealthGoals = mergeMultilineField(
+      fields.health_goals = mergeMultilineField(
         existingClient.fields.HealthGoals as string,
         data.healthGoals
       );
-      fields.DietaryRestrictions = mergeMultilineField(
+      fields.dietary_restrictions = mergeMultilineField(
         existingClient.fields.DietaryRestrictions as string,
         data.dietaryRestrictions
       );
-      fields.CurrentMedications = mergeMultilineField(
+      fields.current_medications = mergeMultilineField(
         existingClient.fields.CurrentMedications as string,
         data.currentMedications
       );
-      fields.HealthConditions = mergeMultilineField(
+      fields.health_conditions = mergeMultilineField(
         existingClient.fields.HealthConditions as string,
         data.healthConditions
       );
+      fields.updated_at = new Date().toISOString();
 
-      // Don't update DateCreated - preserve original
+      // Don't update created_at - preserve original
     } else {
       // New client - use provided values
-      fields.HealthGoals = data.healthGoals || '';
-      fields.DietaryRestrictions = data.dietaryRestrictions || '';
-      fields.CurrentMedications = data.currentMedications || '';
-      fields.HealthConditions = data.healthConditions || '';
-      fields.DateCreated = new Date().toISOString();
+      fields.health_goals = data.healthGoals || '';
+      fields.dietary_restrictions = data.dietaryRestrictions || '';
+      fields.current_medications = data.currentMedications || '';
+      fields.health_conditions = data.healthConditions || '';
     }
 
     // Execute database operation
     if (existingClient) {
       // Update existing client
-      await getBase()(TABLES.CLIENTS).update([
-        {
-          id: existingClient.id,
-          fields,
-        } as any,
-      ]);
+      const { error } = await getDb().from(TABLES.CLIENTS).update(fields).eq('id', existingClient.id);
+      if (error) throw error;
 
       return {
         id: existingClient.id,
@@ -603,16 +607,17 @@ export async function createOrUpdateClient(data: ClientFormData) {
       };
     } else {
       // Create new client
-      const record = await getBase()(TABLES.CLIENTS).create([{ fields } as any]);
+      const { data: row, error } = await getDb().from(TABLES.CLIENTS).insert(fields).select('id').single();
+      if (error) throw error;
 
       return {
-        id: record[0].id,
+        id: row.id as string,
         success: true,
         updated: false,
       };
     }
   } catch (error) {
-    console.error('Error creating/updating client in Airtable:', error);
+    console.error('Error creating/updating client:', error);
     throw error;
   }
 }
@@ -632,11 +637,12 @@ export async function createOrUpdateClient(data: ClientFormData) {
 export async function getBookingsForDate(
   date: string,
   consultant?: ConsultantType,
-  bypassCache?: boolean
+  bypassCache?: boolean,
+  excludeBookingId?: string // a client rescheduling: their own booking must not block them
 ): Promise<Array<{ timeSlot: string; consultant: ConsultantType; duration: number; serviceType: string }>> {
   // Check server cache first (unless bypassed for double-booking verification)
   const cacheKey = `bookings_${date}_${consultant || 'all'}`;
-  if (!bypassCache) {
+  if (!bypassCache && !excludeBookingId) {
     const cached = serverCacheGet<Array<{ timeSlot: string; consultant: ConsultantType; duration: number; serviceType: string }>>(cacheKey);
     if (cached) return cached;
   }
@@ -645,36 +651,30 @@ export async function getBookingsForDate(
     const startOfDay = mstToUtcIso(date, '00:00');
     const endOfDay = mstToUtcIso(date, '23:59');
 
-    let filterFormula = `AND(
-      IS_AFTER({dateAndTime}, '${startOfDay}'),
-      IS_BEFORE({dateAndTime}, '${endOfDay}')
-    )`;
+    let query = getDb()
+      .from(TABLES.BOOKED)
+      .select('date_and_time, consultant, duration, service_type')
+      .gte('date_and_time', startOfDay)
+      .lte('date_and_time', endOfDay);
+    if (excludeBookingId) query = query.neq('id', excludeBookingId);
 
     // Add consultant filter if specified
     // Also include bookings with no consultant (manual entries block everyone)
     if (consultant) {
-      filterFormula = `AND(
-        IS_AFTER({dateAndTime}, '${startOfDay}'),
-        IS_BEFORE({dateAndTime}, '${endOfDay}'),
-        OR({Consultant} = '${consultant}', {Consultant} = '')
-      )`;
+      query = query.or(`consultant.eq.${consultant},consultant.is.null`);
     }
 
-    const records = await getBase()(TABLES.BOOKED)
-      .select({
-        filterByFormula: filterFormula,
-        fields: ['dateAndTime', 'Consultant', 'Duration', 'ServiceType'],
-      })
-      .all();
+    const { data: records, error } = await query;
+    if (error) throw error;
 
     const result = records
       .filter((record) => {
-        // Skip records with no dateAndTime (incomplete manual entries)
-        const dateTime = record.get('dateAndTime') as string;
+        // Skip records with no date_and_time (incomplete manual entries)
+        const dateTime = record.date_and_time as string;
         return dateTime && !isNaN(new Date(dateTime).getTime());
       })
       .map((record) => {
-        const dateTime = record.get('dateAndTime') as string;
+        const dateTime = record.date_and_time as string;
         const utcDate = new Date(dateTime);
 
         // Convert UTC to Mountain Time using Intl (handles DST automatically)
@@ -690,14 +690,14 @@ export async function getBookingsForDate(
         const minutes = parts.find(p => p.type === 'minute')?.value || '00';
         const timeSlot = `${hours}:${minutes}`;
 
-        const consultantName = record.get('Consultant') as ConsultantType;
-        const duration = (record.get('Duration') as number) || 30;
-        const serviceType = (record.get('ServiceType') as string) || '';
+        const consultantName = record.consultant as ConsultantType;
+        const duration = (record.duration as number) || 30;
+        const serviceType = (record.service_type as string) || '';
 
         return { timeSlot, consultant: consultantName, duration, serviceType };
       });
 
-    serverCacheSet(cacheKey, result, SERVER_CACHE_TTL.BOOKINGS);
+    if (!excludeBookingId) serverCacheSet(cacheKey, result, SERVER_CACHE_TTL.BOOKINGS);
     return result;
   } catch (error) {
     console.error('Error fetching bookings for date:', error);
@@ -752,53 +752,37 @@ export async function getFullyBookedDates(
     const rangeEnd = mstToUtcIso(lastDayStr, '23:59');
 
     // Fetch bookings and days-off for the month in parallel
-    let bookingFilterFormula: string;
+    let bookingQuery = getDb()
+      .from(TABLES.BOOKED)
+      .select('date_and_time, consultant, service_type')
+      .gte('date_and_time', rangeStart)
+      .lte('date_and_time', rangeEnd);
     if (consultant) {
-      bookingFilterFormula = `AND(
-        IS_AFTER({dateAndTime}, '${rangeStart}'),
-        IS_BEFORE({dateAndTime}, '${rangeEnd}'),
-        OR({Consultant} = '${consultant}', {Consultant} = '')
-      )`;
-    } else {
-      bookingFilterFormula = `AND(
-        IS_AFTER({dateAndTime}, '${rangeStart}'),
-        IS_BEFORE({dateAndTime}, '${rangeEnd}')
-      )`;
+      bookingQuery = bookingQuery.or(`consultant.eq.${consultant},consultant.is.null`);
     }
 
-    // Build days-off filter: match all dates in the month (YYYY-MM-DD format)
-    const daysOffDateFilters: string[] = [];
-    for (let day = 1; day <= lastDay; day++) {
-      const dateStr = `${year}-${String(month).padStart(2, '0')}-${String(day).padStart(2, '0')}`;
-      daysOffDateFilters.push(`{Date} = '${dateStr}'`);
-    }
-    let daysOffFilter = `OR(${daysOffDateFilters.join(', ')})`;
+    let daysOffQuery = getDb()
+      .from(TABLES.ADVISOR_DAYS_OFF)
+      .select('date, consultant, all_day')
+      .gte('date', firstDayStr)
+      .lte('date', lastDayStr);
     if (consultant) {
-      daysOffFilter = `AND({Consultant} = '${consultant}', ${daysOffFilter})`;
+      daysOffQuery = daysOffQuery.eq('consultant', consultant);
     }
 
-    const [bookingRecords, daysOffRecords] = await Promise.all([
-      getBase()(TABLES.BOOKED)
-        .select({
-          filterByFormula: bookingFilterFormula,
-          fields: ['dateAndTime', 'Consultant', 'ServiceType'],
-        })
-        .all(),
-      getBase()(TABLES.ADVISOR_DAYS_OFF)
-        .select({
-          filterByFormula: daysOffFilter,
-          fields: ['Date', 'Consultant', 'AllDay'],
-        })
-        .all(),
-    ]);
+    const [bookingResult, daysOffResult] = await Promise.all([bookingQuery, daysOffQuery]);
+    if (bookingResult.error) throw bookingResult.error;
+    if (daysOffResult.error) throw daysOffResult.error;
+    const bookingRecords = bookingResult.data;
+    const daysOffRecords = daysOffResult.data;
 
     // Build set of dates where each consultant has a full day off
     // Key: "YYYY-MM-DD|ConsultantName" → true if full day off
     const fullDayOffSet = new Set<string>();
     daysOffRecords.forEach((record) => {
-      const date = record.get('Date') as string;
-      const offConsultant = record.get('Consultant') as string;
-      const isAllDay = record.get('AllDay') === true;
+      const date = record.date as string;
+      const offConsultant = record.consultant as string;
+      const isAllDay = record.all_day === true;
       if (isAllDay && date && offConsultant) {
         fullDayOffSet.add(`${date}|${offConsultant}`);
       }
@@ -813,9 +797,9 @@ export async function getFullyBookedDates(
     // Group bookings by date (Mountain Time)
     const dateBuckets: Record<string, { consultant: string; serviceType: string }[]> = {};
     bookingRecords.forEach((record) => {
-      const dateTime = record.get('dateAndTime') as string;
-      const bookingConsultant = (record.get('Consultant') as string) || '';
-      const bookingServiceType = (record.get('ServiceType') as string) || '';
+      const dateTime = record.date_and_time as string;
+      const bookingConsultant = (record.consultant as string) || '';
+      const bookingServiceType = (record.service_type as string) || '';
 
       // Convert UTC to Mountain Time for correct date grouping
       const utcDate = new Date(dateTime);
@@ -883,18 +867,18 @@ export async function getFullyBookedDates(
 
 export async function getTestimonials(): Promise<Testimonial[]> {
   try {
-    const records = await getBase()(TABLES.TESTIMONIALS)
-      .select({
-        filterByFormula: '{Approved}',
-        sort: [{ field: 'DateCreated', direction: 'desc' }],
-      })
-      .all();
+    const { data: records, error } = await getDb()
+      .from(TABLES.TESTIMONIALS)
+      .select('name, text, rating, approved')
+      .eq('approved', true)
+      .order('created_at', { ascending: false });
+    if (error) throw error;
 
     return records.map((record) => ({
-      name: record.get('Name') as string,
-      text: record.get('Text') as string,
-      rating: record.get('Rating') as number | undefined,
-      approved: record.get('Approved') as boolean,
+      name: record.name as string,
+      text: record.text as string,
+      rating: (record.rating as number | null) ?? undefined,
+      approved: record.approved as boolean,
     }));
   } catch (error) {
     console.error('Error fetching testimonials:', error);
@@ -904,20 +888,20 @@ export async function getTestimonials(): Promise<Testimonial[]> {
 
 export async function createTestimonial(data: Testimonial) {
   try {
-    const record = await getBase()(TABLES.TESTIMONIALS).create([
-      {
-        fields: {
-          Name: data.name,
-          Text: data.text,
-          Rating: data.rating,
-          Approved: false, // Requires manual approval
-          DateCreated: new Date().toISOString(),
-        },
-      } as any,
-    ]);
+    const { data: row, error } = await getDb()
+      .from(TABLES.TESTIMONIALS)
+      .insert({
+        name: data.name,
+        text: data.text,
+        rating: data.rating,
+        approved: false, // Requires manual approval
+      })
+      .select('id')
+      .single();
+    if (error) throw error;
 
     return {
-      id: record[0].id,
+      id: row.id as string,
       success: true,
     };
   } catch (error) {
@@ -932,19 +916,20 @@ export async function createTestimonial(data: Testimonial) {
 
 export async function getFAQs(): Promise<FAQ[]> {
   try {
-    const records = await getBase()(TABLES.FAQS)
-      .select({
-        sort: [{ field: 'Order', direction: 'asc' }],
-      })
-      .all();
+    const { data: records, error } = await getDb()
+      .from(TABLES.FAQS)
+      .select('id, question, answer, category, sort_order, click_count')
+      .eq('is_visible', true)
+      .order('sort_order', { ascending: true, nullsFirst: false });
+    if (error) throw error;
 
     return records.map((record) => ({
-      id: record.id,
-      question: record.get('Question') as string,
-      answer: record.get('Answer') as string,
-      category: record.get('Category') as string,
-      order: record.get('Order') as number,
-      clickCount: (record.get('ClickCount') as number) || 0,
+      id: record.id as string,
+      question: record.question as string,
+      answer: record.answer as string,
+      category: record.category as string,
+      order: record.sort_order as number,
+      clickCount: (record.click_count as number) || 0,
     }));
   } catch (error) {
     console.error('Error fetching FAQs:', error);
@@ -964,23 +949,23 @@ export async function trackFAQClick(faqId: string) {
 
 export async function getComingSoonFeatures(): Promise<ComingSoonFeature[]> {
   try {
-    const records = await getBase()(TABLES.COMING_SOON)
-      .select({
-        filterByFormula: '{IsVisible}',
-        sort: [{ field: 'DisplayOrder', direction: 'asc' }],
-      })
-      .all();
+    const { data: records, error } = await getDb()
+      .from(TABLES.COMING_SOON)
+      .select('id, title, description, icon, eta, status, priority, display_order, is_visible')
+      .eq('is_visible', true)
+      .order('display_order', { ascending: true, nullsFirst: false });
+    if (error) throw error;
 
     return records.map((record) => ({
-      id: record.id,
-      title: record.get('Title') as string,
-      description: record.get('Description') as string,
-      icon: record.get('Icon') as string,
-      eta: record.get('ETA') as string,
-      status: record.get('Status') as string,
-      priority: record.get('Priority') as string,
-      displayOrder: record.get('DisplayOrder') as number,
-      isVisible: record.get('IsVisible') as boolean,
+      id: record.id as string,
+      title: record.title as string,
+      description: record.description as string,
+      icon: record.icon as string,
+      eta: record.eta as string,
+      status: record.status as string,
+      priority: record.priority as string,
+      displayOrder: record.display_order as number,
+      isVisible: record.is_visible as boolean,
     }));
   } catch (error) {
     console.error('Error fetching coming soon features:', error);
@@ -1081,11 +1066,12 @@ export async function getAdvisorDaysOff(
   date: string
 ): Promise<AdvisorDaysOffResult> {
   try {
-    const records = await getBase()(TABLES.ADVISOR_DAYS_OFF)
-      .select({
-        filterByFormula: `AND({Consultant} = '${consultant}', {Date} = '${date}')`,
-      })
-      .all();
+    const { data: records, error } = await getDb()
+      .from(TABLES.ADVISOR_DAYS_OFF)
+      .select('all_day, start_time, end_time')
+      .eq('consultant', consultant)
+      .eq('date', date);
+    if (error) throw error;
 
     // No days off records for this date
     if (records.length === 0) {
@@ -1093,7 +1079,7 @@ export async function getAdvisorDaysOff(
     }
 
     // Check if any record is marked as all day
-    const hasFullDayOff = records.some((record) => record.get('AllDay') === true);
+    const hasFullDayOff = records.some((record) => record.all_day === true);
 
     if (hasFullDayOff) {
       return { isFullDayOff: true, partialTimeOffRanges: [] };
@@ -1101,10 +1087,10 @@ export async function getAdvisorDaysOff(
 
     // Collect partial time off ranges
     const partialTimeOffRanges = records
-      .filter((record) => !record.get('AllDay'))
+      .filter((record) => !record.all_day)
       .map((record) => ({
-        start: record.get('StartTime') as string,
-        end: record.get('EndTime') as string,
+        start: record.start_time as string,
+        end: record.end_time as string,
       }))
       .filter((range) => range.start && range.end);
 
@@ -1134,11 +1120,11 @@ export async function getDaysOffForDate(
   };
 
   try {
-    const records = await getBase()(TABLES.ADVISOR_DAYS_OFF)
-      .select({
-        filterByFormula: `{Date} = '${date}'`,
-      })
-      .all();
+    const { data: records, error } = await getDb()
+      .from(TABLES.ADVISOR_DAYS_OFF)
+      .select('consultant, all_day, start_time, end_time')
+      .eq('date', date);
+    if (error) throw error;
 
     if (records.length === 0) {
       serverCacheSet(cacheKey, defaultResult, SERVER_CACHE_TTL.DAYS_OFF);
@@ -1151,15 +1137,15 @@ export async function getDaysOffForDate(
     };
 
     for (const record of records) {
-      const consultant = record.get('Consultant') as ConsultantType;
+      const consultant = record.consultant as ConsultantType;
       if (!result[consultant]) continue;
 
-      if (record.get('AllDay') === true) {
+      if (record.all_day === true) {
         result[consultant].isFullDayOff = true;
         result[consultant].partialTimeOffRanges = [];
       } else if (!result[consultant].isFullDayOff) {
-        const start = record.get('StartTime') as string;
-        const end = record.get('EndTime') as string;
+        const start = record.start_time as string;
+        const end = record.end_time as string;
         if (start && end) {
           result[consultant].partialTimeOffRanges.push({ start, end });
         }
@@ -1305,7 +1291,8 @@ function hasConsecutiveBlocks(
 export async function getAvailabilityForBothAdvisors(
   date: string,
   selectedConsultant: ConsultantType,
-  serviceType: ServiceType
+  serviceType: ServiceType,
+  excludeBookingId?: string
 ): Promise<{
   selectedAdvisorSlots: TimeSlot[];
   otherAdvisorSlots: TimeSlot[];
@@ -1354,7 +1341,7 @@ export async function getAvailabilityForBothAdvisors(
     let bookingDataUnavailable = false;
 
     try {
-      bookings = await getBookingsForDate(date);
+      bookings = await getBookingsForDate(date, undefined, false, excludeBookingId);
     } catch (error) {
       const errorMessage = error instanceof Error ? error.message : String(error);
       if (errorMessage.includes('BOOKING_DATA_UNAVAILABLE')) {

@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { hasAnyAdvisorAvailability, hasConsultantAvailability, ConsultantType } from '@/lib/airtable';
+import { hasAnyAdvisorAvailability, hasConsultantAvailability, ConsultantType } from '@/lib/db';
 
 const DAYS_OF_WEEK = ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday'];
 

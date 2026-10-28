@@ -6,6 +6,7 @@ import Footer from "./components/Footer";
 import { SpeedInsights } from "@vercel/speed-insights/next";
 import { Analytics } from "@vercel/analytics/next";
 import ConsoleCapture from "../components/ConsoleCapture";
+import HideOnAdmin from "./components/HideOnAdmin";
 
 // Optimize font loading with next/font
 const allura = Allura({
@@ -73,11 +74,11 @@ export default function RootLayout({
     <html lang="en" className={allura.variable}>
       <body className="antialiased flex flex-col min-h-screen">
         <ConsoleCapture />
-        <Header />
+        <HideOnAdmin><Header /></HideOnAdmin>
         <main className="flex-grow">
           {children}
         </main>
-        <Footer />
+        <HideOnAdmin><Footer /></HideOnAdmin>
         <SpeedInsights />
         <Analytics />
         {/* Web Launch Academy analytics */}

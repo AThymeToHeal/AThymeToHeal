@@ -1,6 +1,7 @@
 import { NextResponse } from 'next/server';
-import { createConsultation, getBookingsForDate, getBlockedSlotsWithBuffer, SERVICES, BOOKING_LIMITS, type Consultation, type ConsultantType, type ServiceType } from '@/lib/airtable';
+import { createConsultation, getBookingsForDate, getBlockedSlotsWithBuffer, SERVICES, BOOKING_LIMITS, type Consultation, type ConsultantType, type ServiceType } from '@/lib/db';
 import { invalidateServerCache } from '@/lib/serverCache';
+import { sendNewBookingAlert, sendBookingConfirmation, type BookingEmailData } from '@/lib/email';
 
 const VALID_CONSULTANTS: ConsultantType[] = ['Heidi Lynn', 'Illiana'];
 const VALID_SERVICE_TYPES = Object.keys(SERVICES) as ServiceType[];
@@ -126,7 +127,25 @@ export async function POST(request: Request) {
     invalidateServerCache('bookings_');
     invalidateServerCache('fullybooked_');
 
-    return NextResponse.json(result, { status: 200 });
+    // Emails never fail the booking (errors are logged inside)
+    const emailData: BookingEmailData = {
+      id: result.id,
+      dateAndTime: result.dateAndTime,
+      firstName: consultation.firstName,
+      lastName: consultation.lastName,
+      email: consultation.email,
+      phone: consultation.phone,
+      serviceType: consultation.serviceType,
+      consultant: consultation.consultant,
+      userLocalTime: consultation.userLocalTime,
+      manageToken: result.manageToken,
+    };
+    await Promise.all([sendNewBookingAlert(emailData), sendBookingConfirmation(emailData)]);
+
+    // The manage token is the client's private link; it only travels by email
+    const { manageToken: _token, ...publicResult } = result;
+    void _token;
+    return NextResponse.json(publicResult, { status: 200 });
   } catch (error) {
     console.error('Error in bookings API:', error);
     return NextResponse.json(

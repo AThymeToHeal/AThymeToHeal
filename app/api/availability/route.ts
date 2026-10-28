@@ -5,7 +5,7 @@ import {
   SERVICES,
   type ServiceType,
   type ConsultantType,
-} from '@/lib/airtable';
+} from '@/lib/db';
 
 export async function GET(request: Request) {
   try {
