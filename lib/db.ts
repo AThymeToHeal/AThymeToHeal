@@ -222,7 +222,7 @@ export const SERVICES: Record<ServiceType, ServiceConfig> = {
   'Symphony of Healing Series': {
     name: 'Symphony of Healing Series',
     duration: 30,
-    price: 525,
+    price: 595,
     description: 'A curated set of eight Symphony of Cells sessions — 8 for the price of 7',
     availableConsultants: ['Heidi Lynn'],
   },
