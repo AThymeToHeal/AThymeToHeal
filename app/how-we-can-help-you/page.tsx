@@ -41,7 +41,7 @@ export default function ServicesPage() {
     {
       title: 'Symphony of Cells',
       description: 'A technique using plant oils applied on the spine and feet. It encompasses a variety of tailored oil applications that target different body systems and related conditions.',
-      duration: '30 minutes',
+      duration: '1 hr',
       price: '85',
       note: 'Provided by Heidi',
     },

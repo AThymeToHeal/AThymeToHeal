@@ -194,7 +194,7 @@ export const SERVICES: Record<ServiceType, ServiceConfig> = {
   },
   'Symphony of Cells': {
     name: 'Symphony of Cells',
-    duration: 30,
+    duration: 60,
     price: 85,
     description: 'Plant oils and therapeutic massage for detox and healing',
     availableConsultants: ['Heidi Lynn'],
