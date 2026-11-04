@@ -11,7 +11,7 @@ export default function Home() {
       backgroundImage: '/home/Bowl-of-greens-image.webp',
     },
     {
-      title: 'Symphony of Cells $75',
+      title: 'Symphony of Cells $85',
       description: 'Hands-on support for your body. A guided application of therapeutic-grade plant oils along the spine and feet, using a specific sequence chosen for what your body needs. Deeply relaxing, and a favorite for people dealing with stress, immune support, or feeling run-down. About an hour.',
       backgroundImage: '/home/natural-beauty-image.avif',
     },
