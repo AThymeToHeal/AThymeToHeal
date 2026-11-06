@@ -41,7 +41,7 @@ export default function ServicesPage() {
     {
       title: 'Symphony of Cells',
       description: 'A technique using plant oils applied on the spine and feet. It encompasses a variety of tailored oil applications that target different body systems and related conditions.',
-      duration: '30 minutes',
+      duration: '1 hr',
       price: '85',
       note: 'Provided by Heidi',
     },
@@ -83,7 +83,7 @@ export default function ServicesPage() {
     {
       title: 'Symphony of Healing Series',
       serviceType: 'Symphony of Healing Series' as ServiceType,
-      price: '525',
+      price: '595',
       note: 'Provided by Heidi',
       tagline: '8 sessions for the price of 7',
       description: 'Your body holds wisdom, and when given the space, it knows how to heal. The Symphony of Healing Series is a curated set of eight Symphony of Cells sessions designed to work in harmony with your body\'s systems, supporting detoxification, immune function, and deep restoration.\n\nEach session builds upon the last, creating a layered, intentional healing experience. When purchased as a series, you\'ll receive one session complimentary (8 for the price of 7), encouraging consistency and deeper results over time.',
